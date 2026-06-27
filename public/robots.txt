@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://obd.ma
+
+# Sitemaps
+Sitemap: https://obd.ma/sitemap.xml
