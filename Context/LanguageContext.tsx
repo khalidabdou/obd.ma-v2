@@ -53,15 +53,18 @@ const getInitialLanguage = (): Language => {
   return detectBrowserLanguage();
 };
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>('ar');
+export const LanguageProvider = ({ children, initialLanguage }: { children: ReactNode; initialLanguage?: Language }) => {
+  const [language, setLanguageState] = useState<Language>(initialLanguage || 'ar');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const initialLang = getInitialLanguage();
-    setLanguageState(initialLang);
-  }, []);
+    // Only auto-detect from localStorage/browser if the server did not provide a language
+    if (!initialLanguage) {
+      const initialLang = getInitialLanguage();
+      setLanguageState(initialLang);
+    }
+  }, [initialLanguage]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

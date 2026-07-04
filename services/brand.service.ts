@@ -1,5 +1,6 @@
 // Brand service using new API client
 import { apiClient } from '@/lib/apiClient';
+import { rewriteImageUrlForServer } from '@/lib/serverFetch';
 import type { ApiSuccess } from '@/types/api';
 
 /**
@@ -60,22 +61,22 @@ export const brandService = {
     // Remove /api suffix if present to get the base domain
     const imageBaseURL = apiBaseURL?.replace(/\/api$/, '');
     
-    // Map snake_case to camelCase for frontend compatibility
-    if (response.data?.brands_infos) {
-      response.data.brands_infos = response.data.brands_infos.map((item: any) => ({
-        brandId: item.brand_id || item.brandId,
-        brandName: item.brand_name || item.brandName,
-        brandTitle: item.brand_title || item.brandTitle,
-        brandImage: item.brandImage?.startsWith('http')
-          ? item.brandImage
-          : `${imageBaseURL}${item.brandImage}`, // Prepend base URL
-        brandImageDark: item.brandImageDark?.startsWith('http')
-          ? item.brandImageDark
-          : item.brandImageDark
-          ? `${imageBaseURL}${item.brandImageDark}`
-          : null, // Handle nullable dark image
-      }));
-    }
+    // Backend returns a plain array — normalize to { brands_infos: [...] }
+    const rawBrands = Array.isArray(response.data) ? response.data : response.data?.brands_infos || [];
+    const mapped = rawBrands.map((item: any) => ({
+      brandId: item.brand_id || item.brandId,
+      brandName: item.brand_name || item.brandName,
+      brandTitle: item.brand_title || item.brandTitle,
+      brandImage: item.brandImage?.startsWith('http')
+        ? item.brandImage
+        : `${imageBaseURL}${item.brandImage}`,
+      brandImageDark: item.brandImageDark?.startsWith('http')
+        ? item.brandImageDark
+        : item.brandImageDark
+        ? `${imageBaseURL}${item.brandImageDark}`
+        : null,
+    }));
+    response.data = { brands_infos: mapped };
     
     return response;
   },
@@ -140,9 +141,32 @@ export const brandService = {
 
       const responseData = await response.json();
       const data = responseData.data || responseData;
-      return {
-        brands_infos: data.brands_infos || []
-      };
+
+      // Construct image base URL
+      const apiBaseURL = process.env.NEXT_PUBLIC_API_URL;
+      const imageBaseURL = apiBaseURL?.replace(/\/api$/, '');
+
+      // Backend returns a plain array — normalize to { brands_infos: [...] }
+      const rawBrands = Array.isArray(data) ? data : data.brands_infos || [];
+      const mapped = rawBrands.map((item: any) => {
+        const brandImage = item.brandImage?.startsWith('http')
+          ? item.brandImage
+          : `${imageBaseURL}${item.brandImage}`;
+        const brandImageDark = item.brandImageDark?.startsWith('http')
+          ? item.brandImageDark
+          : item.brandImageDark
+          ? `${imageBaseURL}${item.brandImageDark}`
+          : null;
+        return {
+          brandId: item.brand_id || item.brandId,
+          brandName: item.brand_name || item.brandName,
+          brandTitle: item.brand_title || item.brandTitle,
+          brandImage: rewriteImageUrlForServer(brandImage),
+          brandImageDark: brandImageDark ? rewriteImageUrlForServer(brandImageDark) : null,
+        };
+      });
+
+      return { brands_infos: mapped };
     } catch (error) {
       console.error('Error fetching brands:', error);
       return { brands_infos: [] };
@@ -269,7 +293,8 @@ export const brandService = {
 
     try {
       const response = await apiClient.get<BrandsData>('/brands');
-      brandsInfo = response.data.brands_infos || [];
+      const raw = response.data;
+      brandsInfo = Array.isArray(raw) ? raw : raw?.brands_infos || [];
     } catch (error) {
       console.error('Error fetching brands:', error);
       brandsInfo = [];

@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import "@/app/globals.css";
 import NavBar from "@components/v2/layout/NavBar";
 import Footer from "@components/v2/layout/Footer";
 import Toaster from "@components/Toaster";
-import CustomerThemeWrapper from "@components/CustomerThemeWrapper";
 import CustomerRefreshTokenHandler from "@components/CustomerRefreshTokenHandler";
 import DirectionWrapper from "@components/DirectionWrapper";
 import { LanguageProvider } from "@/Context/LanguageContext";
@@ -23,24 +23,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CustomerV2Layout({ children }: { children: ReactNode }) {
+export default async function CustomerV2Layout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const langCookie = cookieStore.get('obd-language')?.value;
+  const initialLanguage = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'ar';
+
   return (
-    <CustomerThemeWrapper>
-      <LanguageProvider>
-        <QueryProvider>
-          <CartProvider>
-            <DirectionWrapper>
-              <Toaster>
-                <NavBar />
-                <main className="min-h-screen bg-background">{children}</main>
-                <Footer />
-                <CustomerRefreshTokenHandler />
-                <Script src="https://accounts.google.com/gsi/client" async defer />
-              </Toaster>
-            </DirectionWrapper>
-          </CartProvider>
-        </QueryProvider>
-      </LanguageProvider>
-    </CustomerThemeWrapper>
+    <LanguageProvider initialLanguage={initialLanguage as 'ar' | 'fr' | 'en'}>
+      <QueryProvider>
+        <CartProvider>
+          <DirectionWrapper>
+            <Toaster>
+              <NavBar />
+              <main className="min-h-screen bg-background">{children}</main>
+              <Footer />
+              <CustomerRefreshTokenHandler />
+              <Script src="https://accounts.google.com/gsi/client" async defer />
+            </Toaster>
+          </DirectionWrapper>
+        </CartProvider>
+      </QueryProvider>
+    </LanguageProvider>
   );
 }

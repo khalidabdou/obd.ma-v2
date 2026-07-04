@@ -24,7 +24,7 @@ export default function Error({
       </p>
       <div className="flex justify-center gap-4">
         <Button onClick={reset}>Try Again</Button>
-        <Link href="/v2">
+        <Link href="/">
           <Button variant="outline">Go Home</Button>
         </Link>
       </div>

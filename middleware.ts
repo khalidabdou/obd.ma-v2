@@ -14,23 +14,16 @@ const middleware = async (request: NextRequest) => {
   const customerRefreshToken = request.cookies.get("customer_refresh_token")?.value;
 
   const requiresCustomerAuth =
-    pathname.startsWith("/v2/account") ||
-    pathname.startsWith("/v2/favorite") ||
-    pathname.startsWith("/v2/track-orders");
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/favorite") ||
+    pathname.startsWith("/track-orders");
 
   if (requiresCustomerAuth) {
     if (!customerAccessToken && !customerRefreshToken) {
       const url = request.nextUrl.clone();
-      url.pathname = "/v2/login";
+      url.pathname = "/login";
       return NextResponse.redirect(url);
     }
-  }
-
-  // Redirect root to /v2
-  if (pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/v2";
-    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

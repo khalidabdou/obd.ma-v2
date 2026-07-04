@@ -44,19 +44,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         await addFavorite.mutateAsync(product.productCode);
       }
     } catch (err) {
-      router.push("/v2/login");
+      router.push("/login");
     }
   };
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
-      <Link href={`/v2/product/${product.productCode}`}>
+      <Link href={`/product/${product.productCode}`}>
         <div className="relative aspect-square bg-muted">
           <Image
             src={image}
             alt={product.title}
             fill
-            sizes="(max-width: 768px) 50vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw"
             className="object-cover"
           />
           <button
@@ -76,7 +76,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
       <CardContent className="p-4">
-        <Link href={`/v2/product/${product.productCode}`}>
+        <Link href={`/product/${product.productCode}`}>
           <h3 className="mb-2 line-clamp-2 font-medium hover:text-brand-blue">
             {product.title}
           </h3>

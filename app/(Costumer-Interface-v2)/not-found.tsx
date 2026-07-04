@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="mb-8 text-lg text-muted-foreground">
         This page does not exist.
       </p>
-      <Link href="/v2">
+      <Link href="/">
         <Button>Go Home</Button>
       </Link>
     </Container>

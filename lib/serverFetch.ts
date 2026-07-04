@@ -106,3 +106,94 @@ export async function serverFetch<T>(
 export function getServerApiUrl(): string {
   return config.serverApiBaseUrl || config.apiBaseUrl || '';
 }
+
+/**
+ * Rewrite image URLs for server-side Next.js Image optimization.
+ *
+ * The backend constructs image URLs using BASE_URL (e.g. http://localhost:4001),
+ * but inside Docker the Next.js server can't reach localhost:4001 — it needs
+ * the Docker internal hostname (e.g. http://backend:4001).
+ *
+ * This replaces the public API base with the server API base so the Image
+ * optimizer can fetch the image server-side.
+ */
+export function rewriteImageUrlForServer(url: string | null | undefined): string {
+  if (!url) return '';
+  if (!config.serverApiBaseUrl || !config.apiBaseUrl) return url;
+
+  const publicBase = config.apiBaseUrl.replace(/\/api$/, '');
+  const serverBase = config.serverApiBaseUrl.replace(/\/api$/, '');
+
+  if (publicBase && serverBase && publicBase !== serverBase) {
+    return url.replace(publicBase, serverBase);
+  }
+  return url;
+}
+
+/**
+ * Server-side fetch for **public** endpoints that don't need auth.
+ *
+ * Unlike `serverFetch`, this does NOT call `cookies()`, so it won't
+ * force the route into dynamic rendering. Use this for public content
+ * (carousels, brands, categories, product listings) to enable ISR.
+ *
+ * - Tries SERVER_API_URL first (Docker), falls back to NEXT_PUBLIC_API_URL.
+ * - Unwraps the backend's { success, data, ... } envelope and returns `data`.
+ * - Supports ISR via the `next` option: `{ next: { revalidate: 60 } }`.
+ */
+export async function publicServerFetch<T>(
+  endpoint: string,
+  options: ServerFetchOptions = {}
+): Promise<T> {
+  const { params, next, ...requestInit } = options;
+
+  const headers = new Headers(requestInit.headers);
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const serverUrl = config.serverApiBaseUrl || config.apiBaseUrl;
+  const publicUrl = config.serverApiBaseUrl ? config.apiBaseUrl : null;
+
+  let response: Response | null = null;
+  let lastError: Error | null = null;
+
+  const queryString = buildQueryString(params);
+  const fetchOptions: RequestInit & { next?: ServerFetchOptions['next'] } = {
+    ...requestInit,
+    headers,
+    credentials: 'include',
+    next,
+  };
+
+  if (serverUrl) {
+    try {
+      response = await fetch(`${serverUrl}${endpoint}${queryString}`, fetchOptions);
+    } catch (err) {
+      lastError = err as Error;
+    }
+  }
+
+  if (!response && publicUrl) {
+    try {
+      response = await fetch(`${publicUrl}${endpoint}${queryString}`, fetchOptions);
+    } catch (err) {
+      lastError = err as Error;
+    }
+  }
+
+  if (!response) {
+    throw lastError || new Error('No API URL configured');
+  }
+
+  const data = (await response.json()) as ApiResponse<T>;
+
+  if (!response.ok || data.success === false) {
+    const error = data as ApiError;
+    throw new Error(
+      error.data?.message || error.name || `HTTP ${response.status}`
+    );
+  }
+
+  return data.data;
+}

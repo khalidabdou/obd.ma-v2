@@ -32,8 +32,11 @@ export const categoryService = {
   getCategories: async (): Promise<ApiSuccess<CategoriesData>> => {
     const response = await apiClient.get<CategoriesData>('/categories');
 
-    // Backend already returns properly formatted camelCase data
-    // No transformation needed - just return the response as-is
+    // Backend returns a plain array — normalize to { categories_infos: [...] }
+    const raw = response.data;
+    response.data = {
+      categories_infos: Array.isArray(raw) ? raw : raw?.categories_infos || []
+    };
     return response;
   },
 
@@ -106,8 +109,9 @@ export const categoryService = {
     try {
       const response = await apiClient.get<CategoriesData>('/categories');
 
+      const raw = response.data;
       return {
-        categories_infos: response.data?.categories_infos || []
+        categories_infos: Array.isArray(raw) ? raw : raw?.categories_infos || []
       };
     } catch (error) {
       console.error('Error fetching categories:', error);

@@ -29,8 +29,8 @@ export const isCustomerTokenValid = async (): Promise<boolean> => {
   }
 
   try {
-    const { authService } = await import('@/services/auth.service');
-    await authService.checkCustomerToken();
+    const { customerAuthService } = await import('@/services/customer-auth.service');
+    await customerAuthService.checkCustomerToken();
     return true;
   } catch (error) {
     return false;
