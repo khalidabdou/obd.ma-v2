@@ -60,7 +60,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:staging
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:staging
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:staging,ignore-error=true
           cache-to: type=inline
 
       - name: Deploy to server
