@@ -160,3 +160,4 @@ jobs:
             docker logs --tail 20 $CONTAINER_NAME 2>&1 || true
 
             docker logout
+ 
