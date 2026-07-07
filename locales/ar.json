@@ -253,6 +253,31 @@
     "send_again": "أرسل مرة أخرى",
     "error_generic": "حدث خطأ. يرجى المحاولة مرة أخرى."
   },
+  "loginPage": {
+    "welcome": "مرحباً!",
+    "subtitle": "سجل الدخول إلى حسابك",
+    "brandSubtitle": "OBD.ma MOROCCO FOR AFRICA",
+    "tagline": "شريكك الموثوق لتشخيص دقيق",
+    "taglineHighlight1": "الموثوق",
+    "taglineHighlight2": "تشخيص دقيق",
+    "description": "الوصول إلى أفضل أدوات التشخيص والمعدات المهنية.",
+    "features": {
+      "authentic": { "title": "منتجات أصلية", "description": "ضمان رسمي" },
+      "quality": { "title": "جودة مضمونة", "description": "اختيار خبير" },
+      "support": { "title": "دعم سريع", "description": "في خدمتك" }
+    },
+    "trust": {
+      "fastDelivery": { "title": "توصيل سريع", "description": "في جميع أنحاء المغرب" },
+      "securePayment": { "title": "دفع آمن", "description": "آمن 100%" },
+      "officialProducts": { "title": "منتجات رسمية", "description": "ضمان الأصالة" },
+      "dedicatedSupport": { "title": "دعم مخصص", "description": "في خدمتك" }
+    },
+    "orContinueWith": "أو تابع باستخدام"
+  },
+  "registerPage": {
+    "welcome": "إنشاء حساب",
+    "subtitle": "سجل للبدء"
+  },
   "filter": {
     "filter": "تصفية",
     "customize": "تخصيص",

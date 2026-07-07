@@ -10,6 +10,12 @@ export function useLogin() {
   });
 }
 
+export function useGoogleLogin() {
+  return useMutation({
+    mutationFn: customerAuthService.googleAuth,
+  });
+}
+
 export function useRegister() {
   return useMutation({
     mutationFn: customerInfoService.createAccount,

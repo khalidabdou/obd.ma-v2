@@ -267,6 +267,31 @@
     "error_generic": "An error occurred. Please try again.",
     "send_again": "Send code again"
   },
+  "loginPage": {
+    "welcome": "Welcome!",
+    "subtitle": "Sign in to your account",
+    "brandSubtitle": "OBD.ma MOROCCO FOR AFRICA",
+    "tagline": "Your trusted partner for accurate diagnosis",
+    "taglineHighlight1": "trusted",
+    "taglineHighlight2": "accurate diagnosis",
+    "description": "Access the best diagnostic tools and professional equipment.",
+    "features": {
+      "authentic": { "title": "Authentic products", "description": "Official warranty" },
+      "quality": { "title": "Quality guaranteed", "description": "Expert selection" },
+      "support": { "title": "Responsive support", "description": "Here to help" }
+    },
+    "trust": {
+      "fastDelivery": { "title": "Fast delivery", "description": "All over Morocco" },
+      "securePayment": { "title": "Secure payment", "description": "100% secure" },
+      "officialProducts": { "title": "Official products", "description": "Authenticity guarantee" },
+      "dedicatedSupport": { "title": "Dedicated support", "description": "Here to help" }
+    },
+    "orContinueWith": "or continue with"
+  },
+  "registerPage": {
+    "welcome": "Create Account",
+    "subtitle": "Sign up to get started"
+  },
   "filter": {
     "filter": "Filter",
     "customize": "Customize",

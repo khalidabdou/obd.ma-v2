@@ -19,6 +19,22 @@ export interface CustomerLoginResponse {
 }
 
 /**
+ * Google OAuth request payload
+ */
+export interface GoogleAuthRequest {
+  code: string;
+}
+
+/**
+ * Google OAuth response data
+ */
+export interface GoogleAuthResponse {
+  message: string;
+  access_token?: string;
+  refresh_token?: string;
+}
+
+/**
  * Customer info response data
  */
 export interface CustomerInfo {
@@ -39,6 +55,15 @@ export const customerAuthService = {
    */
   customerLogin: async (credentials: CustomerLoginRequest): Promise<ApiSuccess<CustomerLoginResponse>> => {
     return await apiClient.post('/customer_login', credentials);
+  },
+
+  /**
+   * Google OAuth login
+   * @param payload - Google authorization code
+   * @returns Promise with login success data
+   */
+  googleAuth: async (payload: GoogleAuthRequest): Promise<ApiSuccess<GoogleAuthResponse>> => {
+    return await apiClient.post('/auth/google', payload);
   },
 
   /**

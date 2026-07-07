@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import "@/app/globals.css";
 import NavBar from "@components/v2/layout/NavBar";
-import Footer from "@components/v2/layout/Footer";
+import FooterWrapper from "@components/v2/layout/FooterWrapper";
 import Toaster from "@components/Toaster";
 import CustomerRefreshTokenHandler from "@components/CustomerRefreshTokenHandler";
 import DirectionWrapper from "@components/DirectionWrapper";
@@ -36,7 +36,7 @@ export default async function CustomerV2Layout({ children }: { children: ReactNo
             <Toaster>
               <NavBar />
               <main className="min-h-screen bg-background">{children}</main>
-              <Footer />
+              <FooterWrapper />
               <CustomerRefreshTokenHandler />
               <Script src="https://accounts.google.com/gsi/client" async defer />
             </Toaster>
