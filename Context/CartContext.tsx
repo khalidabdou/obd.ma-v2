@@ -8,12 +8,24 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cartService } from '@/services/cart.service';
-import { hasCustomerToken } from '@/lib/tokenUtils';
+import type { Product } from '@/services/product.service';
 
-interface CartItem {
+/** Rewrite public image URLs to Docker-internal hostnames so Next.js Image Optimizer can fetch them. */
+function fixImageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  const publicBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '') || '';
+  const serverBase = publicBase.replace(/localhost/, 'backend');
+  if (publicBase && serverBase && publicBase !== serverBase) {
+    return url.replace(publicBase, serverBase);
+  }
+  return url;
+}
+
+export interface CartItem {
   productCode: string;
   quantity: number;
   choice?: string;
+  productInfo?: Product;
 }
 
 
@@ -33,7 +45,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Calculate total cart count
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -47,11 +59,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await cartService.getCart();
       
       if (response.success && response.data.customer_cart_products) {
-        setCartItems(response.data.customer_cart_products.map(item => ({
-          productCode: item.productCode,
-          quantity: item.quantity,
-          choice: item.choice || undefined,
-        })));
+        setCartItems(response.data.customer_cart_products.map(item => {
+          // Normalize product images: backend returns imageUrl (top-level),
+          // but frontend expects images.mainImage (nested).
+          // Also rewrite URLs so Next.js Image Optimizer can reach Docker-internal hosts.
+          const info = item.productInfo
+            ? {
+                ...item.productInfo,
+                images: item.productInfo.images?.mainImage
+                  ? {
+                      mainImage: fixImageUrl(item.productInfo.images.mainImage),
+                      image1: fixImageUrl(item.productInfo.images.image1),
+                      image2: fixImageUrl(item.productInfo.images.image2),
+                    }
+                  : {
+                      mainImage: fixImageUrl((item.productInfo as any)?.imageUrl),
+                      image1: null,
+                      image2: null,
+                    },
+              }
+            : undefined;
+
+          return {
+            productCode: item.productCode,
+            quantity: item.quantity,
+            choice: item.choice || undefined,
+            productInfo: info,
+          };
+        }));
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -93,8 +128,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Sync with server
-      const response = await cartService.addToCart({ productCode, quantity, choice });
+      // Sync with server (backend expects `variant`, UI still calls it `choice`)
+      const response = await cartService.addToCart({ productCode, quantity, variant: choice });
       
       if (response.success) {
         // Dispatch event for other components (like NavBar)
@@ -110,8 +145,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await refreshCart();
         return false;
       }
-    } catch (error) {
-      console.error('Error adding to cart:', error);
+    } catch (error: any) {
+      console.error('Error adding to cart:', error?.response?.data || error?.message || error);
       // Revert optimistic update on error
       await refreshCart();
       return false;

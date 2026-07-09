@@ -9,6 +9,7 @@ import Toaster from "@components/Toaster";
 import CustomerRefreshTokenHandler from "@components/CustomerRefreshTokenHandler";
 import DirectionWrapper from "@components/DirectionWrapper";
 import { LanguageProvider } from "@/Context/LanguageContext";
+import { AuthProvider } from "@/Context/AuthContext";
 import { CartProvider } from "@/Context/CartContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 
@@ -31,17 +32,19 @@ export default async function CustomerV2Layout({ children }: { children: ReactNo
   return (
     <LanguageProvider initialLanguage={initialLanguage as 'ar' | 'fr' | 'en'}>
       <QueryProvider>
-        <CartProvider>
-          <DirectionWrapper>
-            <Toaster>
-              <NavBar />
-              <main className="min-h-screen bg-background">{children}</main>
-              <FooterWrapper />
-              <CustomerRefreshTokenHandler />
-              <Script src="https://accounts.google.com/gsi/client" async defer />
-            </Toaster>
-          </DirectionWrapper>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <DirectionWrapper>
+              <Toaster>
+                <NavBar />
+                <main className="min-h-screen bg-background">{children}</main>
+                <FooterWrapper />
+                <CustomerRefreshTokenHandler />
+                <Script src="https://accounts.google.com/gsi/client" async defer />
+              </Toaster>
+            </DirectionWrapper>
+          </CartProvider>
+        </AuthProvider>
       </QueryProvider>
     </LanguageProvider>
   );

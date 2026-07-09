@@ -36,9 +36,41 @@ export function normalizeError(error: unknown): ApiError {
   };
 }
 
-export function getErrorMessage(error: unknown): string {
+function toCamelCase(str: string): string {
+  return str
+    .replace(/[^\w\s]/g, '')
+    .split(/\s+/)
+    .map((word, index) =>
+      index === 0
+        ? word.toLowerCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join('');
+}
+
+export function getErrorMessage(
+  error: unknown,
+  t?: (key: string) => string
+): string {
   const normalized = normalizeError(error);
-  return normalized.data?.message || normalized.name || 'Something went wrong';
+
+  // Try to translate the backend error name first
+  if (normalized.name && t) {
+    const translationKey = `apiErrors.${toCamelCase(normalized.name)}`;
+    const translated = t(translationKey);
+    if (translated !== translationKey) {
+      return translated;
+    }
+  }
+
+  // Fall back to server-provided message / error / error name
+  const fallback =
+    normalized.data?.message ||
+    normalized.data?.error ||
+    normalized.name ||
+    (t ? t('messages.error_occurred') : 'Something went wrong');
+
+  return fallback;
 }
 
 export function isApiError(error: unknown): error is ApiError {

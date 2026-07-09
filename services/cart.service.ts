@@ -1,7 +1,7 @@
 // Cart service using new API client
 import { apiClient } from '@/lib/apiClient';
 import type { ApiSuccess } from '@/types/api';
-import { productService } from './product.service';
+import type { Product } from './product.service';
 
 /**
  * Add to cart request payload
@@ -9,7 +9,7 @@ import { productService } from './product.service';
 export interface AddToCartRequest {
   productCode: string;
   quantity: number;
-  choice?: string;
+  variant?: string;
 }
 
 /**
@@ -34,6 +34,7 @@ export interface CartItemResponse {
   productCode: string;
   quantity: number;
   choice: string | null;
+  productInfo?: Product | null;
 }
 
 /**

@@ -10,19 +10,19 @@ import { customerInfoService } from "@/services/customer-info.service";
 import { getErrorMessage } from "@/lib/apiError";
 import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerInfoResponse } from "@/services/customer-info.service";
-import { ShieldCheck, Award, Headset } from "lucide-react";
+import { ShieldCheck, Award, Headset, Package } from "lucide-react";
 
 export default function AccountPage() {
   const { t } = useTranslation();
   const [customer, setCustomer] = useState<CustomerInfoResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     customerInfoService
       .getCustomerInfo()
       .then((res) => setCustomer(res.data.customer_info))
-      .catch((err) => setError(getErrorMessage(err)))
+      .catch((err) => setError(err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -143,12 +143,19 @@ export default function AccountPage() {
                       </dd>
                     </div>
                   </dl>
+
+                  <Link href="/orders" className="mt-6 block">
+                    <Button variant="outline" className="w-full gap-2">
+                      <Package className="h-4 w-4" />
+                      {t("personal_info.order_history")}
+                    </Button>
+                  </Link>
                 </>
               )}
 
-              {error && !loading && !customer && (
+              {!!error && !loading && !customer && (
                 <p className="mt-4 rounded-md bg-danger/10 p-2 text-sm text-danger">
-                  {error}
+                  {getErrorMessage(error, t)}
                 </p>
               )}
             </div>

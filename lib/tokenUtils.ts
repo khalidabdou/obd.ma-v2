@@ -18,16 +18,12 @@ export const hasCustomerToken = (): boolean => {
 };
 
 /**
- * Check if customer token is valid by calling the API
- * Only makes the API call if a token exists
+ * Check if customer token is valid by calling the API.
+ * Always calls the backend because the auth cookie is HttpOnly and
+ * cannot be read from document.cookie in the browser.
  * @returns Promise<boolean> indicating if token is valid
  */
 export const isCustomerTokenValid = async (): Promise<boolean> => {
-  // First check if token exists to avoid unnecessary 401 errors
-  if (!hasCustomerToken()) {
-    return false;
-  }
-
   try {
     const { customerAuthService } = await import('@/services/customer-auth.service');
     await customerAuthService.checkCustomerToken();

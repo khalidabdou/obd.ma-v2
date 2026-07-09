@@ -13,6 +13,7 @@ import { useRegister } from "@/hooks/v2/mutations/useAuth";
 import { getErrorMessage } from "@/lib/apiError";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/Context/LanguageContext";
+import { useAuth } from "@/Context/AuthContext";
 import {
   Mail,
   Lock,
@@ -29,6 +30,7 @@ export default function RegisterPage() {
   const redirectTo = searchParams?.get("redirect") || "/account";
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { login: authLogin } = useAuth();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -50,13 +52,15 @@ export default function RegisterPage() {
 
     try {
       await register.mutateAsync(form);
+      authLogin();
       toast({
         title: t("common.success"),
         description: t("registerPage.welcome"),
       });
-      router.push("/login");
+      router.push(redirectTo);
+      router.refresh();
     } catch (err) {
-      const message = getErrorMessage(err);
+      const message = getErrorMessage(err, t);
       setError(message);
       toast({
         title: t("common.error"),

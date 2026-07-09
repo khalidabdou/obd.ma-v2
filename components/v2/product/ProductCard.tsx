@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/Context/CartContext";
 import { useFavorites } from "@/hooks/v2/queries/useFavorites";
 import { useAddFavorite, useRemoveFavorite } from "@/hooks/v2/mutations/useFavorite";
+import { useTranslation } from "@/Context/LanguageContext";
 import type { Product } from "@/services/product.service";
 import { ShoppingCart, Heart, Loader2 } from "lucide-react";
 
@@ -17,6 +18,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { addToCart } = useCart();
   const { data: favorites } = useFavorites();
   const addFavorite = useAddFavorite();
@@ -30,6 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   );
   const isFavorite = Boolean(favoriteItem);
   const isMutating = addFavorite.isPending || removeFavorite.isPending;
+  const isOutOfStock = !product.quantity || product.quantity <= 0;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -98,10 +101,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <Button
           className="w-full gap-2"
-          onClick={() => addToCart(product.productCode, 1)}
+          disabled={isOutOfStock}
+          onClick={() => !isOutOfStock && addToCart(product.productCode, 1)}
         >
           <ShoppingCart className="h-4 w-4" />
-          Add to Cart
+          {isOutOfStock ? t("product.out_of_stock") : t("product.add_to_cart")}
         </Button>
       </CardContent>
     </Card>

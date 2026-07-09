@@ -10,7 +10,7 @@ export default async function HomeProducts() {
 
   try {
     const productsData = await publicServerFetch<ProductsData>("/products", {
-      params: { products_limit: 4 },
+      params: { show_in_home: true, products_limit: 4 },
       next: { revalidate: 60 },
     });
     products = (productsData.products || []).map((p) => ({

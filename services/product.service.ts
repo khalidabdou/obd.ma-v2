@@ -18,6 +18,7 @@ export interface ProductQueryParams {
   number_of_products?: boolean;
   titles_only?: boolean;
   no_limit?: boolean;
+  show_in_home?: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export interface Product {
   productContent: string[];
   choices: string[];
   creationDate: string;
+  showInHome?: boolean | null;
   [key: string]: any;
 }
 

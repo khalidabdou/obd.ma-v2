@@ -71,6 +71,10 @@ export class ApiClient {
         return response;
       },
       (error) => {
+        const axiosError = error as any;
+        if (axiosError.response?.data) {
+          console.error('[ApiClient] Backend error response:', axiosError.response.status, axiosError.response.data);
+        }
         return Promise.reject(error);
       }
     );

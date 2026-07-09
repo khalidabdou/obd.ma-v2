@@ -3,14 +3,17 @@
 import { useRouter } from "next/navigation";
 import { ShoppingCart, Heart, Loader2 } from "lucide-react";
 import { useCart } from "@/Context/CartContext";
+import { useTranslation } from "@/Context/LanguageContext";
 import { useFavorites } from "@/hooks/v2/queries/useFavorites";
 import { useAddFavorite, useRemoveFavorite } from "@/hooks/v2/mutations/useFavorite";
 
 interface HomeProductActionsProps {
   productCode: string;
+  isOutOfStock?: boolean;
 }
 
-export default function HomeProductActions({ productCode }: HomeProductActionsProps) {
+export default function HomeProductActions({ productCode, isOutOfStock }: HomeProductActionsProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { addToCart } = useCart();
   const { data: favorites } = useFavorites();
@@ -41,21 +44,28 @@ export default function HomeProductActions({ productCode }: HomeProductActionsPr
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(productCode, 1);
+    if (!isOutOfStock) {
+      addToCart(productCode, 1);
+    }
   };
 
   return (
     <div className="flex items-center gap-2">
       <button
         onClick={handleAddToCart}
-        className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1f6fac]"
+        disabled={isOutOfStock}
+        className={`flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white transition-colors ${
+          isOutOfStock
+            ? "cursor-not-allowed bg-muted text-muted-foreground"
+            : "bg-brand-blue hover:bg-[#1f6fac]"
+        }`}
       >
         <ShoppingCart className="h-4 w-4" />
-        Ajouter au panier
+        {isOutOfStock ? t("product.out_of_stock") : t("product.add_to_cart")}
       </button>
       <button
         onClick={handleFavoriteClick}
-        aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+        aria-label={isFavorite ? t("product.remove_from_favorites") : t("product.add_to_favorites")}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand-blue hover:text-brand-blue dark:border-white/10 dark:text-neutral-400"
       >
         {isMutating ? (

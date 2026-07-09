@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useGoogleLogin } from "@/hooks/v2/mutations/useAuth";
 import { getErrorMessage } from "@/lib/apiError";
+import { useTranslation } from "@/Context/LanguageContext";
 import { Loader2 } from "lucide-react";
 
 interface GoogleSignInButtonProps {
@@ -11,6 +12,16 @@ interface GoogleSignInButtonProps {
 }
 
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const googleRedirectUri =
+  process.env.NEXT_PUBLIC_APP_URL &&
+  `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')}/auth/google`;
+
+if (typeof window !== "undefined") {
+  console.log("[Google Sign-In] Config", {
+    clientIdSet: !!googleClientId,
+    redirectUri: googleRedirectUri || "window.location.origin fallback",
+  });
+}
 
 declare global {
   interface Window {
@@ -19,6 +30,7 @@ declare global {
 }
 
 export function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProps) {
+  const { t } = useTranslation();
   const googleLogin = useGoogleLogin();
   const clientRef = useRef<any>(null);
   const onSuccessRef = useRef(onSuccess);
@@ -38,35 +50,41 @@ export function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProps) {
       client_id: googleClientId,
       scope: "openid email profile",
       ux_mode: "popup",
-      redirect_uri: `${window.location.origin}/auth/google`,
+      redirect_uri: googleRedirectUri || `${window.location.origin}/auth/google`,
       callback: async (tokenResponse: any) => {
+        console.log("[Google Sign-In] Token response", tokenResponse);
         setError(null);
         if (tokenResponse.error) {
+          console.error("[Google Sign-In] Popup error", tokenResponse);
           setError(
             tokenResponse.error_description ||
               tokenResponse.error ||
-              "Google sign-in failed"
+              t("apiErrors.googleAuthFailed")
           );
           return;
         }
 
         const code = tokenResponse.code;
         if (!code) {
-          setError("No authorization code received");
+          console.error("[Google Sign-In] No authorization code received");
+          setError(t("apiErrors.googleAuthFailed"));
           return;
         }
 
+        console.log("[Google Sign-In] Sending authorization code to backend");
         try {
           await googleLogin.mutateAsync({ code });
+          console.log("[Google Sign-In] Backend login succeeded");
           onSuccessRef.current?.();
         } catch (err) {
-          setError(getErrorMessage(err));
+          console.error("[Google Sign-In] Backend error", err);
+          setError(getErrorMessage(err, t));
         }
       },
     });
 
     setReady(true);
-  }, [googleLogin]);
+  }, [googleLogin, t]);
 
   useEffect(() => {
     if (window.google?.accounts?.oauth2) {
@@ -87,7 +105,7 @@ export function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProps) {
   const handleClick = () => {
     setError(null);
     if (!clientRef.current) {
-      setError("Google sign-in is not ready");
+      setError(t("apiErrors.googleAuthFailed"));
       return;
     }
     clientRef.current.requestCode();

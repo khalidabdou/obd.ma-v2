@@ -66,6 +66,34 @@ export interface CustomerOrder {
 }
 
 /**
+ * Customer order detail structure
+ */
+export interface CustomerOrderDetail extends CustomerOrder {
+  items: {
+    productCode: string;
+    productName: string;
+    productImage?: string | null;
+    variantName?: string | null;
+    quantity: number;
+    unitPrice: string;
+    price: string;
+    discount: string;
+  }[];
+  customerInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber?: string | null;
+    address?: string | null;
+    city?: string | null;
+  } | null;
+  payment: {
+    method: string;
+    amount: string;
+  } | null;
+}
+
+/**
  * Customer orders response data
  */
 export interface CustomerOrdersData {
@@ -88,6 +116,7 @@ export interface CreateOrderRequest {
  * Order creation response
  */
 export interface CreateOrderResponse {
+  orderId?: number;
   paypal_order_id?: string;
   card_order_id?: string;
   message?: string;
@@ -106,11 +135,11 @@ export const orderService = {
   },
 
   /**
-   * Get a single order by ID
+   * Get a single customer order by ID
    * @param orderId - The order ID
-   * @returns Promise with order data
+   * @returns Promise with order detail data
    */
-  getOrder: async (orderId: string): Promise<ApiSuccess<{ order: Order }>> => {
+  getOrder: async (orderId: string): Promise<ApiSuccess<{ order: CustomerOrderDetail }>> => {
     return await apiClient.get(`/customer_order/${orderId}`);
   },
 

@@ -16,7 +16,8 @@ const middleware = async (request: NextRequest) => {
   const requiresCustomerAuth =
     pathname.startsWith("/account") ||
     pathname.startsWith("/favorite") ||
-    pathname.startsWith("/track-orders");
+    pathname.startsWith("/track-orders") ||
+    pathname.startsWith("/orders");
 
   if (requiresCustomerAuth) {
     if (!customerAccessToken && !customerRefreshToken) {
