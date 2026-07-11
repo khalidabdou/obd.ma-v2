@@ -123,15 +123,41 @@ export default function CustomerInfoStep({
         {/* Phone */}
         <div className="space-y-2">
           <Label htmlFor="phone">{t("checkout.phone")}</Label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="phone"
-              className="pl-10"
-              placeholder="+212 6XX XXX XXX"
-              value={data.phoneNumber}
-              onChange={(e) => update("phoneNumber", e.target.value)}
-            />
+          <div className="flex gap-2">
+            <Select
+              value={data.countryCode || "+212"}
+              onValueChange={(value) => update("countryCode", value)}
+            >
+              <SelectTrigger className="w-[90px] flex-shrink-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="+212">🇲🇦 +212</SelectItem>
+                <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                <SelectItem value="+49">🇩🇪 +49</SelectItem>
+                <SelectItem value="+39">🇮🇹 +39</SelectItem>
+                <SelectItem value="+31">🇳🇱 +31</SelectItem>
+                <SelectItem value="+32">🇧🇪 +32</SelectItem>
+                <SelectItem value="+41">🇨🇭 +41</SelectItem>
+                <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                <SelectItem value="+966">🇸🇦 +966</SelectItem>
+                <SelectItem value="+971">🇦🇪 +971</SelectItem>
+                <SelectItem value="+216">🇹🇳 +216</SelectItem>
+                <SelectItem value="+213">🇩🇿 +213</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative flex-1">
+              <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="phone"
+                className="pl-10"
+                placeholder="6XX XXX XXX"
+                value={data.phoneNumber}
+                onChange={(e) => update("phoneNumber", e.target.value)}
+              />
+            </div>
           </div>
           {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
         </div>

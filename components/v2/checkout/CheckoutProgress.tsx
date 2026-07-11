@@ -13,7 +13,7 @@ const steps: { key: CheckoutStep; label: string; icon: React.ElementType }[] = [
   { key: "payment", label: "Paiement", icon: CreditCard },
 ];
 
-const stepOrder: CheckoutStep[] = ["info", "delivery", "payment"];
+const stepOrder: CheckoutStep[] = ["info", "delivery", "payment", "success", "failure"];
 
 export default function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
   const currentIdx = stepOrder.indexOf(currentStep);

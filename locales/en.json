@@ -584,6 +584,7 @@
     "no_delivery": "No delivery companies available",
     "payment_title": "Payment",
     "payment_desc": "Choose your payment method",
+    "processing_payment": "Processing your payment...",
     "cod": "Cash on Delivery",
     "card": "Credit Card",
     "pay_on_delivery": "Pay upon receipt",

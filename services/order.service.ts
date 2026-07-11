@@ -118,6 +118,7 @@ export interface CreateOrderRequest {
 export interface CreateOrderResponse {
   orderId?: number;
   paypal_order_id?: string;
+  approval_url?: string;
   card_order_id?: string;
   message?: string;
 }

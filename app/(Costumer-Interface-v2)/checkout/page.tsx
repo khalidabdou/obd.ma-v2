@@ -13,15 +13,17 @@ import CustomerInfoStep from "@components/v2/checkout/CustomerInfoStep";
 import DeliveryStep from "@components/v2/checkout/DeliveryStep";
 import PaymentStep from "@components/v2/checkout/PaymentStep";
 import OrderSuccess from "@components/v2/checkout/OrderSuccess";
+import OrderFailure from "@components/v2/checkout/OrderFailure";
 import { Loader2 } from "lucide-react";
 
-export type CheckoutStep = "info" | "delivery" | "payment" | "success";
+export type CheckoutStep = "info" | "delivery" | "payment" | "success" | "failure";
 
 export interface CustomerFormData {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
+  countryCode: string;
   address: string;
   city: string;
   cityId: number;
@@ -47,13 +49,14 @@ function generateOrderId(): string {
 export default function CheckoutPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { cartItems, cartCount, isLoading: cartLoading, refreshCart } = useCart();
+  const { cartItems, cartCount, isLoading: cartLoading, refreshCart, clearCart } = useCart();
 
   const [step, setStep] = useState<CheckoutStep>("info");
   const [orderId] = useState(() => generateOrderId());
   const [finalOrderId, setFinalOrderId] = useState(orderId);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingCustomer, setLoadingCustomer] = useState(true);
+  const [orderError, setOrderError] = useState("");
 
   // Customer info state
   const [customerData, setCustomerData] = useState<CustomerFormData>({
@@ -61,6 +64,7 @@ export default function CheckoutPage() {
     lastName: "",
     email: "",
     phoneNumber: "",
+    countryCode: "+212",
     address: "",
     city: "",
     cityId: 0,
@@ -74,6 +78,13 @@ export default function CheckoutPage() {
   // Check auth and sync cart on mount
   useEffect(() => {
     async function init() {
+      // If returning from PayPal approval, jump straight to payment step
+      const pendingPayPal = sessionStorage.getItem("obd_paypal_pending");
+      const pendingCard = sessionStorage.getItem("obd_card_pending");
+      if (pendingPayPal || pendingCard) {
+        setStep("payment");
+      }
+
       try {
         // Sync cart with backend first — ensures we have the latest state
         await refreshCart();
@@ -86,12 +97,25 @@ export default function CheckoutPage() {
             const infoRes = await customerInfoService.getCustomerInfo();
             if (infoRes.success && infoRes.data.customer_info) {
               const info: CustomerInfoResponse = infoRes.data.customer_info;
+              const phoneCode = info.phoneCode || "+212";
+              let phoneNum = info.phoneNumber || "";
+              // Strip country code from phoneNumber if it's prepended
+              if (phoneNum.startsWith(phoneCode)) {
+                phoneNum = phoneNum.substring(phoneCode.length);
+              } else if (phoneNum.startsWith("+")) {
+                // If phone starts with a different +prefix, try to extract the code
+                const match = phoneNum.match(/^(\+\d{1,4})(.*)$/);
+                if (match) {
+                  phoneNum = match[2];
+                }
+              }
               setCustomerData((prev) => ({
                 ...prev,
                 firstName: info.firstName || "",
                 lastName: info.lastName || "",
                 email: info.email || "",
-                phoneNumber: info.phoneNumber || "",
+                countryCode: phoneCode,
+                phoneNumber: phoneNum,
                 address: info.address || "",
                 city: info.city || "",
                 cityId: info.cityId ?? 0,
@@ -104,12 +128,24 @@ export default function CheckoutPage() {
             const saved = localStorage.getItem("obd_checkout_info");
             if (saved) {
               const parsed = JSON.parse(saved) as CustomerFormData;
+              const phoneCode = parsed.countryCode || "+212";
+              let phoneNum = parsed.phoneNumber || "";
+              // Strip country code from phoneNumber if it's prepended
+              if (phoneNum.startsWith(phoneCode)) {
+                phoneNum = phoneNum.substring(phoneCode.length);
+              } else if (phoneNum.startsWith("+")) {
+                const match = phoneNum.match(/^(\+\d{1,4})(.*)$/);
+                if (match) {
+                  phoneNum = match[2];
+                }
+              }
               setCustomerData((prev) => ({
                 ...prev,
                 firstName: parsed.firstName || "",
                 lastName: parsed.lastName || "",
                 email: parsed.email || "",
-                phoneNumber: parsed.phoneNumber || "",
+                countryCode: phoneCode,
+                phoneNumber: phoneNum,
                 address: parsed.address || "",
                 city: parsed.city || "",
                 cityId: parsed.cityId || 0,
@@ -147,7 +183,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (cartCount === 0 && step !== "success") {
+  if (cartCount === 0 && step !== "success" && step !== "failure") {
     return (
       <Container className="flex min-h-[60vh] flex-col items-center justify-center gap-4 py-16 text-center">
         <h1 className="text-2xl font-bold">{t("cart.empty")}</h1>
@@ -159,7 +195,9 @@ export default function CheckoutPage() {
   return (
     <Container className="py-8">
       {/* Progress bar */}
-      <CheckoutProgress currentStep={step} />
+      {step !== "success" && step !== "failure" && (
+        <CheckoutProgress currentStep={step} />
+      )}
 
       {/* Steps */}
       <div className="mt-8">
@@ -179,6 +217,7 @@ export default function CheckoutPage() {
                     address: customerData.address,
                     city: customerData.city,
                     cityId: customerData.cityId || undefined,
+                    phoneCode: customerData.countryCode,
                     phoneNumber: customerData.phoneNumber,
                   });
                 } catch (err) {
@@ -209,11 +248,28 @@ export default function CheckoutPage() {
             onSuccess={(finalOrderId) => {
               setFinalOrderId(finalOrderId);
               setStep("success");
+              clearCart();
+            }}
+            onFailure={(errorMessage) => {
+              setOrderError(errorMessage);
+              setStep("failure");
+            }}
+            onLoggedIn={() => {
+              setIsLoggedIn(true);
               refreshCart();
             }}
           />
         )}
         {step === "success" && <OrderSuccess orderId={finalOrderId} />}
+        {step === "failure" && (
+          <OrderFailure
+            errorMessage={orderError}
+            onRetry={() => {
+              setOrderError("");
+              setStep("payment");
+            }}
+          />
+        )}
       </div>
     </Container>
   );

@@ -39,6 +39,7 @@ interface CartContextType {
   removeFromCart: (productCode: string) => Promise<boolean>;
   getItemQuantity: (productCode: string) => number;
   refreshCart: () => Promise<void>;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -240,6 +241,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [refreshCart]);
 
   /**
+   * Clear cart locally (only call after confirmed order success)
+   */
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }
+  }, []);
+
+  /**
    * Load cart on mount and when authentication changes
    */
   useEffect(() => {
@@ -266,6 +277,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     removeFromCart,
     getItemQuantity,
     refreshCart,
+    clearCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

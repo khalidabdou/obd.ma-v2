@@ -584,6 +584,7 @@
     "no_delivery": "Aucune société de livraison disponible",
     "payment_title": "Paiement",
     "payment_desc": "Choisissez votre méthode de paiement",
+    "processing_payment": "Traitement de votre paiement...",
     "cod": "Paiement à la livraison",
     "card": "Carte bancaire",
     "pay_on_delivery": "Payer à la réception",

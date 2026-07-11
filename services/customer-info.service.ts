@@ -9,6 +9,7 @@ export interface CustomerInfoData {
   firstName: string;
   lastName: string;
   email: string;
+  phoneCode?: string;
   phoneNumber: string;
   address: string;
   city: string;
@@ -35,6 +36,7 @@ export interface UpdateCustomerInfoRequest {
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;
+  phoneCode?: string | null;
   phoneNumber?: string | null;
   address?: string | null;
   city?: string | null;
@@ -50,6 +52,7 @@ export interface CustomerInfoResponse {
   firstName: string;
   lastName: string;
   email: string;
+  phoneCode?: string;
   phoneNumber: string;
   address: string;
   city: string;
