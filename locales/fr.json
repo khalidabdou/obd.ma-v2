@@ -596,6 +596,7 @@
     "order_success": "Commande confirmée !",
     "order_success_desc": "Votre commande a été enregistrée avec succès.",
     "track_order": "Suivre ma commande",
+    "view_orders": "Mes commandes",
     "continue": "Continuer",
     "back": "Retour",
     "empty_cart_desc": "Ajoutez des produits au panier avant de commander"
