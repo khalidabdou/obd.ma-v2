@@ -11,6 +11,7 @@ export interface ProductQueryParams {
   search_query?: string;
   product_code_query?: string;
   category_id_filter?: string;
+  category_ids_filter?: string;
   brands_ids_filter?: string;
   min_price_filter?: number;
   max_price_filter?: number;
@@ -53,6 +54,7 @@ export interface Product {
  */
 export interface ProductsData {
   products?: Product[];
+  total?: number;
   totalCount?: number;
   number_of_product?: number;
   products_titles?: string[];
@@ -123,6 +125,7 @@ export const fetchProducts = async (params?: ProductQueryParams): Promise<Produc
   if (data.data) {
     return {
       products: data.data.products,
+      total: data.data.total,
       totalCount: data.data.total,
       number_of_product: data.data.number_of_product,
       products_titles: data.data.products_titles

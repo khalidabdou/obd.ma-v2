@@ -1,6 +1,7 @@
 {
   "nav": {
     "favorites": "Favoris",
+    "orders": "Mes commandes",
     "cart": "Panier",
     "account": "Mon compte",
     "login": "Connexion",
@@ -462,6 +463,11 @@
     "no_products": "Il semble que cette catégorie ne contient aucun produit ou qu'aucun produit n'y a encore été ajouté.",
     "categories": "Catégories"
   },
+  "catalog": {
+    "title": "Catalogue",
+    "products": "produits",
+    "no_products": "Aucun produit disponible."
+  },
   "search": {
     "title": "Résultats de recherche",
     "no_results": "Aucun résultat trouvé",
@@ -563,6 +569,7 @@
     "quantity_decrease_failed": "Échec de la suppression de la quantité"
   },
   "checkout": {
+    "title": "Commander",
     "customer_info_title": "Informations de livraison",
     "customer_info_desc": "Veuillez remplir vos coordonnées pour la livraison",
     "first_name": "Prénom",
@@ -575,6 +582,8 @@
     "address_placeholder": "Rue, quartier, etc.",
     "city": "Ville",
     "city_placeholder": "Votre ville",
+    "search_city": "Rechercher une ville...",
+    "no_city_found": "Aucune ville trouvée",
     "create_account_checkbox": "Créer un compte (optionnel)",
     "password": "Mot de passe",
     "required": "Ce champ est requis",
@@ -584,6 +593,9 @@
     "no_delivery": "Aucune société de livraison disponible",
     "payment_title": "Paiement",
     "payment_desc": "Choisissez votre méthode de paiement",
+    "payment_method": "Méthode de paiement",
+    "summary_title": "Récapitulatif",
+    "delivery_company": "Société de livraison",
     "processing_payment": "Traitement de votre paiement...",
     "cod": "Paiement à la livraison",
     "card": "Carte bancaire",
@@ -592,9 +604,26 @@
     "place_order": "Confirmer la commande",
     "pay_now": "Payer maintenant",
     "order_failed": "Échec de la création de commande",
+    "order_failed_title": "Échec du paiement",
+    "order_failed_desc": "Nous n'avons pas pu traiter votre commande. Vous pouvez réessayer ou consulter votre panier.",
+    "try_again": "Réessayer",
+    "back_to_cart": "Retour au panier",
+    "cart_preserved": "Les articles de votre panier ont été conservés.",
+    "need_help": "Besoin d'aide ? Contactez",
     "payment_failed": "Échec du paiement",
+    "payment_cancelled": "Vous avez annulé le paiement. Aucun montant n'a été débité.",
+    "card_number": "Numéro de carte",
+    "card_expiry": "Date d'expiration",
+    "card_cvv": "CVV",
+    "card_number_placeholder": "1234 5678 9012 3456",
+    "card_expiry_placeholder": "MM/AA",
+    "card_cvv_placeholder": "123",
+    "loading_card_form": "Chargement du formulaire de carte sécurisé...",
+    "card_load_failed": "Échec du chargement du formulaire de carte. Veuillez réessayer.",
     "order_success": "Commande confirmée !",
     "order_success_desc": "Votre commande a été enregistrée avec succès.",
+    "secure_info": "Vos informations sont sécurisées",
+    "secure_payment": "Paiement 100% sécurisé",
     "track_order": "Suivre ma commande",
     "view_orders": "Mes commandes",
     "continue": "Continuer",

@@ -1,6 +1,5 @@
 // Brand service using new API client
 import { apiClient } from '@/lib/apiClient';
-import { rewriteImageUrlForServer } from '@/lib/serverFetch';
 import type { ApiSuccess } from '@/types/api';
 
 /**
@@ -145,6 +144,9 @@ export const brandService = {
       // Construct image base URL
       const apiBaseURL = process.env.NEXT_PUBLIC_API_URL;
       const imageBaseURL = apiBaseURL?.replace(/\/api$/, '');
+
+      // Import server-only helper dynamically to avoid client bundle pulling in next/headers
+      const { rewriteImageUrlForServer } = await import('@/lib/serverFetch');
 
       // Backend returns a plain array — normalize to { brands_infos: [...] }
       const rawBrands = Array.isArray(data) ? data : data.brands_infos || [];

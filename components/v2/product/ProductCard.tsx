@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/Context/CartContext";
+import { useAuth } from "@/Context/AuthContext";
 import { useFavorites } from "@/hooks/v2/queries/useFavorites";
 import { useAddFavorite, useRemoveFavorite } from "@/hooks/v2/mutations/useFavorite";
 import { useTranslation } from "@/Context/LanguageContext";
+import { normalizeError } from "@/lib/apiError";
 import type { Product } from "@/services/product.service";
 import { ShoppingCart, Heart, Loader2 } from "lucide-react";
 
@@ -19,7 +21,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addToCart } = useCart();
+  const { addToCart, getItemQuantity } = useCart();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: favorites } = useFavorites();
   const addFavorite = useAddFavorite();
   const removeFavorite = useRemoveFavorite();
@@ -27,18 +30,27 @@ export default function ProductCard({ product }: ProductCardProps) {
   const image = product.images?.mainImage || "/placeholder.svg";
   const price = product.discountedPrice ?? product.price;
 
+  const stock = product.quantity ?? 0;
+  const cartQty = getItemQuantity(product.productCode);
+  const isOutOfStock = stock <= 0;
+  const maxReached = cartQty >= stock;
+
   const favoriteItem = favorites?.favorites?.find(
     (f) => f.productCode === product.productCode
   );
   const isFavorite = Boolean(favoriteItem);
   const isMutating = addFavorite.isPending || removeFavorite.isPending;
-  const isOutOfStock = !product.quantity || product.quantity <= 0;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isMutating) return;
+    if (isMutating || authLoading) return;
+
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
 
     try {
       if (isFavorite && favoriteItem) {
@@ -47,7 +59,23 @@ export default function ProductCard({ product }: ProductCardProps) {
         await addFavorite.mutateAsync(product.productCode);
       }
     } catch (err) {
-      router.push("/login");
+      const apiError = normalizeError(err);
+      if (apiError.statusCode === 401 || apiError.statusCode === 403) {
+        router.push("/login");
+        return;
+      }
+
+      // If backend says already favorited, remove it (toggle-off)
+      if (apiError.statusCode === 409) {
+        try {
+          await removeFavorite.mutateAsync(product.productCode);
+        } catch (removeErr) {
+          console.error("Failed to remove favorite after 409:", removeErr);
+        }
+        return;
+      }
+
+      console.error("Failed to toggle favorite:", apiError);
     }
   };
 
@@ -64,7 +92,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
           <button
             onClick={handleFavoriteClick}
-            className="absolute right-2 top-2 rounded-full bg-background/80 p-2 text-brand-red backdrop-blur transition-colors hover:bg-background"
+            className={`absolute right-2 top-2 rounded-full p-2 backdrop-blur transition-colors ${
+              isFavorite
+                ? "bg-red-100 text-red-600 hover:bg-red-200"
+                : "bg-background/80 text-brand-red hover:bg-background"
+            }`}
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             {isMutating ? (
@@ -101,11 +133,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <Button
           className="w-full gap-2"
-          disabled={isOutOfStock}
-          onClick={() => !isOutOfStock && addToCart(product.productCode, 1)}
+          disabled={isOutOfStock || maxReached}
+          onClick={() => !isOutOfStock && !maxReached && addToCart(product.productCode, 1)}
         >
           <ShoppingCart className="h-4 w-4" />
-          {isOutOfStock ? t("product.out_of_stock") : t("product.add_to_cart")}
+          {isOutOfStock
+            ? t("product.out_of_stock")
+            : cartQty > 0
+              ? `${t("product.add_to_cart")} (${cartQty})`
+              : t("product.add_to_cart")}
         </Button>
       </CardContent>
     </Card>

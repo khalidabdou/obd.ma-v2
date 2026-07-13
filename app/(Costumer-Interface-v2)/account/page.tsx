@@ -9,22 +9,30 @@ import { Loader2 } from "lucide-react";
 import { customerInfoService } from "@/services/customer-info.service";
 import { getErrorMessage } from "@/lib/apiError";
 import { useTranslation } from "@/Context/LanguageContext";
+import { useAuth } from "@/Context/AuthContext";
 import type { CustomerInfoResponse } from "@/services/customer-info.service";
 import { ShieldCheck, Award, Headset, Package } from "lucide-react";
 
 export default function AccountPage() {
   const { t } = useTranslation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [customer, setCustomer] = useState<CustomerInfoResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
+    // Wait for auth state to resolve before fetching customer info
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
     customerInfoService
       .getCustomerInfo()
       .then((res) => setCustomer(res.data.customer_info))
       .catch((err) => setError(err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   const tagline = t("loginPage.tagline");
   const taglineHighlight1 = t("loginPage.taglineHighlight1");

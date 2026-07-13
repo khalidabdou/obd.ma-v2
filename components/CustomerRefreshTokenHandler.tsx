@@ -5,10 +5,9 @@ import { ApiBase } from '@utils/variables'
 import { useEffect } from 'react'
 
 const TokenCheck = async () => {
-
     const response = await fetch(ApiBase + "/check_customer_token", {
-        method : "GET",
-        headers : {
+        method: "GET",
+        headers: {
             'Content-Type': 'application/json',
         },
         credentials: 'include',
@@ -16,27 +15,29 @@ const TokenCheck = async () => {
     return response
 }
 
-
 const CustomerRefreshTokenHandler = () => {
-
     const router = useRouter()
     const pathname = usePathname()
-    
-    useEffect(() => {
-        
 
+    useEffect(() => {
         TokenCheck().then(async (res) => {
-            if(!res.ok){
+            if (res.ok) {
+                // 200 = token valid OR guest user (authenticated:false)
+                // No action needed in either case
+                return
+            }
+            // 401 = token expired or invalid — try refresh
+            if (res.status === 401) {
                 const response = await RefreshTokenForClient("/refresh_customer_token")
-                if(response.ok){
+                if (response.ok) {
                     router.refresh()
                 }
             }
+        }).catch(() => {
+            // Network error — silently ignore
         })
-
     }, [router, pathname])
 
-    
     return null
 }
 

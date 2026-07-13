@@ -26,9 +26,11 @@ export const hasCustomerToken = (): boolean => {
 export const isCustomerTokenValid = async (): Promise<boolean> => {
   try {
     const { customerAuthService } = await import('@/services/customer-auth.service');
-    await customerAuthService.checkCustomerToken();
-    return true;
+    const res = await customerAuthService.checkCustomerToken();
+    // Backend now returns 200 with authenticated:false for guests
+    return res.data?.authenticated === true;
   } catch (error) {
+    // 401 means token is expired or invalid (not just absent)
     return false;
   }
 };

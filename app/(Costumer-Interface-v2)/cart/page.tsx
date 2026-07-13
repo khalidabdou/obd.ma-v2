@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/Context/CartContext";
 import { useTranslation } from "@/Context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/apiError";
 import {
   Loader2,
   Minus,
@@ -39,22 +40,26 @@ export default function CartPage() {
   );
 
   const handleIncrease = async (productCode: string) => {
-    const success = await updateQuantity(productCode, 1);
-    if (!success) {
+    const result = await updateQuantity(productCode, 1);
+    if (!result.success) {
       toast({
         title: t("common.error"),
-        description: t("toaster.quantity_increase_failed"),
+        description: result.error
+          ? getErrorMessage(result.error, t)
+          : t("toaster.quantity_increase_failed"),
         variant: "destructive",
       });
     }
   };
 
   const handleDecrease = async (productCode: string) => {
-    const success = await updateQuantity(productCode, -1);
-    if (!success) {
+    const result = await updateQuantity(productCode, -1);
+    if (!result.success) {
       toast({
         title: t("common.error"),
-        description: t("toaster.quantity_decrease_failed"),
+        description: result.error
+          ? getErrorMessage(result.error, t)
+          : t("toaster.quantity_decrease_failed"),
         variant: "destructive",
       });
     }

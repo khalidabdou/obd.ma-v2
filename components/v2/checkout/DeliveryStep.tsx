@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/Context/LanguageContext";
 import { orderService } from "@/services/order.service";
 import type { DeliveryCompany } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowRight, ArrowLeft, Truck, Loader2, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 
 interface DeliveryStepProps {
   selected: DeliveryCompany | null;
@@ -44,74 +45,96 @@ export default function DeliveryStep({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold">{t("checkout.delivery_title")}</h2>
-        <p className="mt-2 text-muted-foreground">
-          {t("checkout.delivery_desc")}
-        </p>
-      </div>
+      <div className="rounded-2xl border border-brand-blue/50 bg-card p-6 shadow-xl dark:border-brand-blue/40 sm:p-8">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
+            <Image
+              src="/assets/icons/box-icon.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="h-6 w-6 dark:invert"
+            />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">{t("checkout.delivery_title")}</h2>
+            <p className="text-sm text-muted-foreground">{t("checkout.delivery_desc")}</p>
+          </div>
+        </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>{t("common.loading")}</span>
-        </div>
-      ) : companies.length === 0 ? (
-        <div className="rounded-2xl border border-border p-8 text-center text-muted-foreground">
-          <Truck className="mx-auto mb-3 h-10 w-10" />
-          <p>{t("checkout.no_delivery")}</p>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {companies.map((company) => {
-            const isSelected = selected?.id === company.id;
-            return (
-              <button
-                key={company.id}
-                onClick={() => onSelect(company)}
-                className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all ${
-                  isSelected
-                    ? "border-brand-blue bg-brand-blue/5 shadow-md"
-                    : "border-border bg-card hover:border-brand-blue/30 dark:border-white/10 dark:bg-[#14161B]"
-                }`}
-              >
-                <div
-                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${
+        {loading ? (
+          <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>{t("common.loading")}</span>
+          </div>
+        ) : companies.length === 0 ? (
+          <div className="rounded-2xl border border-brand-blue/30 bg-muted/50 p-8 text-center text-muted-foreground dark:border-brand-blue/30">
+            <Image
+              src="/assets/icons/box-icon.svg"
+              alt=""
+              width={40}
+              height={40}
+              className="mx-auto mb-3 h-10 w-10 dark:invert"
+            />
+            <p>{t("checkout.no_delivery")}</p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {companies.map((company) => {
+              const isSelected = selected?.id === company.id;
+              const logoSrc =
+                company.name === "OZONE_EXPRESS"
+                  ? "/assets/icons/ozone_icon.png"
+                  : company.name === "TAWSIL"
+                    ? "/assets/icons/tawsil-logo.svg"
+                    : "/assets/icons/box-icon.svg";
+              return (
+                <button
+                  key={company.id}
+                  onClick={() => onSelect(company)}
+                  className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
                     isSelected
-                      ? "bg-brand-blue text-white"
-                      : "bg-muted text-muted-foreground"
+                      ? "border-brand-blue bg-brand-blue/5 shadow-md ring-1 ring-brand-blue/20"
+                      : "border-brand-blue/30 bg-card hover:border-brand-blue hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
                   }`}
                 >
-                  {isSelected ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <Truck className="h-5 w-5" />
-                  )}
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold">{company.displayName || company.name}</p>
-                  <p className="text-sm text-muted-foreground">{company.name}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                  <div
+                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
+                      isSelected ? "bg-white" : "bg-muted"
+                    }`}
+                  >
+                    <Image
+                      src={logoSrc}
+                      alt={company.displayName || company.name}
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-contain"
+                    />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground">{company.displayName || company.name}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-      <div className="mt-6 flex items-center justify-between">
-        <Button variant="outline" onClick={onBack} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t("checkout.back")}
-        </Button>
-        <Button
-          onClick={onNext}
-          size="lg"
-          disabled={!selected}
-          className="gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90"
-        >
-          {t("checkout.continue")}
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="mt-6 flex items-center justify-between">
+          <Button variant="outline" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t("checkout.back")}
+          </Button>
+          <Button
+            onClick={onNext}
+            size="lg"
+            disabled={!selected}
+            className="gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90"
+          >
+            {t("checkout.continue")}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

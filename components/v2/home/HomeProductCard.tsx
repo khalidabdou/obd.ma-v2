@@ -70,10 +70,7 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
         </div>
       </Link>
 
-      <HomeProductActions
-        productCode={product.productCode}
-        isOutOfStock={!product.quantity || product.quantity <= 0}
-      />
+      <HomeProductActions product={product} />
     </div>
   );
 }

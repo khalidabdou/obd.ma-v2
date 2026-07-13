@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Container from "@components/v2/layout/Container";
 import { Button } from "@/components/ui/button";
-import { serverFetch } from "@/lib/serverFetch";
+import { serverFetch, rewriteImageUrlForServer } from "@/lib/serverFetch";
 import type { CustomerOrdersData } from "@/services/order.service";
 import { Package, ArrowRight, Home, ShoppingBag } from "lucide-react";
 import Image from "next/image";
@@ -14,7 +14,10 @@ export default async function OrdersPage() {
     const data = await serverFetch<CustomerOrdersData>("/customer_order", {
       cache: "no-store",
     });
-    orders = data.customer_orders || [];
+    orders = (data.customer_orders || []).map((order) => ({
+      ...order,
+      firstProductImage: rewriteImageUrlForServer(order.firstProductImage),
+    }));
     isAuthenticated = true;
   } catch (error) {
     console.error("Failed to fetch orders:", error);

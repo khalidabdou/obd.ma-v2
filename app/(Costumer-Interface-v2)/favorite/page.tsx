@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Container from "@components/v2/layout/Container";
 import { Button } from "@/components/ui/button";
-import { serverFetch } from "@/lib/serverFetch";
+import { serverFetch, rewriteImageUrlForServer } from "@/lib/serverFetch";
 import type { CustomerFavoriteItem } from "@/services/favorite.service";
 
 export default async function FavoritesPage() {
@@ -40,13 +40,13 @@ export default async function FavoritesPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {favorites.map((item) => (
             <div
-              key={item.favorite_id}
+              key={item.favoriteId}
               className="overflow-hidden rounded-lg border border-border bg-card"
             >
-              <Link href={`/product/${item.product_code}`}>
+              <Link href={`/product/${item.productCode}`}>
                 <div className="relative aspect-square bg-muted">
                   <Image
-                    src={item.image || "/placeholder.svg"}
+                    src={rewriteImageUrlForServer(item.image) || "/placeholder.svg"}
                     alt={item.title}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw"
@@ -55,13 +55,13 @@ export default async function FavoritesPage() {
                 </div>
               </Link>
               <div className="p-4">
-                <Link href={`/product/${item.product_code}`}>
+                <Link href={`/product/${item.productCode}`}>
                   <h3 className="mb-2 font-medium hover:text-brand-blue line-clamp-2">
                     {item.title}
                   </h3>
                 </Link>
                 <p className="font-bold text-brand-blue">
-                  {(item.discounted_price ?? item.price)?.toFixed(2)} MAD
+                  {(item.discountedPrice ?? item.price)?.toFixed(2)} MAD
                 </p>
               </div>
             </div>

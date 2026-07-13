@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import Container from "@components/v2/layout/Container";
-import ProductCard from "@components/v2/product/ProductCard";
-import { serverFetch } from "@/lib/serverFetch";
+import ProductGrid from "@components/v2/catalog/ProductGrid";
 import { categoryService } from "@/services/category.service";
-import type { ProductsData } from "@/services/product.service";
+import type { CategoryInfo } from "@/services/category.service";
 
 export const revalidate = 60;
 
@@ -21,35 +20,20 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { id } = await params;
-  let products: ProductsData["products"] = [];
-  let category = null;
+  let category: CategoryInfo | null = null;
 
   try {
-    [products, category] = await Promise.all([
-      serverFetch<ProductsData>("/products", {
-        next: { revalidate: 60 },
-        params: { category_id_filter: id },
-      }).then((data) => data.products || []),
-      categoryService.findCategoryById(id),
-    ]);
+    category = await categoryService.findCategoryById(id);
   } catch (error) {
-    console.error("Failed to fetch category products:", error);
+    console.error("Failed to fetch category info:", error);
   }
 
   return (
     <Container className="py-8">
-      <h1 className="mb-6 text-2xl font-bold">
-        {category?.categoryTitle || "Category"}
-      </h1>
-      {products.length === 0 ? (
-        <p className="text-muted-foreground">No products in this category.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {products.map((product) => (
-            <ProductCard key={product.productCode} product={product} />
-          ))}
-        </div>
-      )}
+      <ProductGrid
+        baseFilters={{ category_ids_filter: id }}
+        title={category?.categoryTitle || "Category"}
+      />
     </Container>
   );
 }

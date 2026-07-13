@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Container from "./Container";
+import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
 import { useAuth } from "@/Context/AuthContext";
 import ThemeToggle from "@components/v2/ui/ThemeToggle";
-import { Menu, Search, ShoppingCart, User, Heart, LogIn, UserPlus, LogOut, Globe } from "lucide-react";
+import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -53,15 +53,12 @@ export default function NavBar() {
           </Link>
 
           <div className="hidden max-w-md flex-1 md:block lg:max-w-lg xl:max-w-xl">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder={t("nav.search")} className="pl-9" />
-            </div>
+            <SearchBox />
           </div>
 
           <nav className="flex items-center gap-2">
             <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
-              <Link href="/favorite">
+              <Link href="/myfavorites">
                 <Heart className="h-5 w-5" />
                 <span className="text-sm">{t("nav.favorites")}</span>
               </Link>
@@ -93,6 +90,24 @@ export default function NavBar() {
                       <Link href="/account" className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         {t("nav.account")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/myfavorites" className="flex items-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        {t("nav.favorites")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/orders" className="flex items-center gap-2">
+                        <ShoppingBag className="h-4 w-4" />
+                        {t("nav.orders")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/downloads" className="flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        {t("account.downloads")}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -166,8 +181,11 @@ export default function NavBar() {
                   <Link href="/cart" className="text-lg font-medium">
                     {t("nav.cart")}
                   </Link>
-                  <Link href="/favorite" className="text-lg font-medium">
+                  <Link href="/myfavorites" className="text-lg font-medium">
                     {t("nav.favorites")}
+                  </Link>
+                  <Link href="/downloads" className="text-lg font-medium">
+                    {t("account.downloads")}
                   </Link>
                   {isAuthenticated ? (
                     <>

@@ -16,16 +16,16 @@ export interface FavoriteItem {
  * Customer favorite with product details (for favorites page)
  */
 export interface CustomerFavoriteItem {
-  favorite_id: string;
-  product_code: string;
+  favoriteId: string;
+  productCode: string;
   image: string;
   title: string;
   price: number;
   discount: number | null;
-  discounted_price: number | null;
+  discountedPrice: number | null;
   quantity: number;
-  brand_id: string;
-  category_id: string;
+  brandId: string;
+  categoryId: string;
   date: string;
 }
 
@@ -73,7 +73,7 @@ export const favoriteService = {
    * @returns Promise with success message
    */
   removeFromFavorites: async (productCode: string): Promise<ApiSuccess<{ message: string }>> => {
-    const response = await apiClient.delete<{ message: string }>('/customer_favorite', { product_code: productCode });
+    const response = await apiClient.delete<{ message: string }>('/customer_favorite', { productCode });
     // Dispatch custom event to update favorites count in NavBar
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('favoritesUpdated'))
@@ -87,9 +87,9 @@ export const favoriteService = {
    * @param favoriteId - The favorite ID if already favorited
    * @returns Promise with success message
    */
-  toggleFavorite: async (productCode: string, favoriteId?: string): Promise<ApiSuccess<{ message: string }>> => {
-    if (favoriteId) {
-      return await favoriteService.removeFromFavorites(favoriteId);
+  toggleFavorite: async (productCode: string, isFavorited?: boolean): Promise<ApiSuccess<{ message: string }>> => {
+    if (isFavorited) {
+      return await favoriteService.removeFromFavorites(productCode);
     } else {
       return await favoriteService.addToFavorites(productCode);
     }
@@ -104,7 +104,7 @@ export const favoriteService = {
     try {
       const response = await apiClient.get<FavoritesData>('/customer_favorite', { productCode });
       const data = response.data as any;
-      return data?.favorite_id || null;
+      return data?.favoriteId || null;
     } catch (error) {
       console.log('Error fetching favorite status:', error);
       return null;
@@ -200,7 +200,7 @@ export const favoriteService = {
 
       if (response && response.ok) {
         const data = await response.json();
-        return data?.favorite_id || null;
+        return data?.favoriteId || null;
       }
       return null;
     } catch (error) {

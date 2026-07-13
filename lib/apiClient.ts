@@ -57,7 +57,11 @@ export class ApiClient {
     // Request interceptor - credentials are sent automatically via HTTP-only cookies.
     // Do NOT read tokens from localStorage; rely on the secure cookie set by the backend.
     this.api.interceptors.request.use(
-      (config) => config,
+      (config) => {
+        const fullUrl = `${config.baseURL || ''}${config.url || ''}`;
+        console.log('[ApiClient] Request:', config.method?.toUpperCase(), fullUrl);
+        return config;
+      },
       (error) => {
         console.log('[ApiClient] Request interceptor error:', error);
         return Promise.reject(error);
@@ -70,10 +74,58 @@ export class ApiClient {
         // Return the full response object (Axios requirement)
         return response;
       },
-      (error) => {
+      async (error) => {
         const axiosError = error as any;
-        if (axiosError.response?.data) {
-          console.error('[ApiClient] Backend error response:', axiosError.response.status, axiosError.response.data);
+        const status = axiosError.response?.status;
+        const responseData = axiosError.response?.data;
+        const originalRequest = axiosError.config;
+
+        // Auto-refresh once on expired token, then retry the original request.
+        // '/check_customer_token' and '/refresh_customer_token' are excluded to avoid loops.
+        const isAuthEndpoint =
+          originalRequest?.url?.includes('/check_customer_token') ||
+          originalRequest?.url?.includes('/refresh_customer_token');
+
+        if (
+          status === 401 &&
+          responseData?.name === 'TokenExpired' &&
+          originalRequest &&
+          !originalRequest._retry &&
+          !isAuthEndpoint
+        ) {
+          originalRequest._retry = true;
+          try {
+            await this.api.get('/refresh_customer_token');
+            return this.api(originalRequest);
+          } catch {
+            // Refresh failed — fall through to normal error handling
+          }
+        }
+
+        // Suppress logging for expected auth signals (401/403) — these are
+        // handled by calling code (AuthContext, tokenUtils, guest fallbacks, etc.)
+        // Log all other errors, including empty-bodied 400s that usually indicate
+        // a malformed request (e.g. an invalid localhost cookie).
+        if (status !== 401 && status !== 403) {
+          const isEmpty400 = status === 400 && (!responseData || Object.keys(responseData).length === 0);
+          console.error(
+            '[ApiClient] Backend error response:',
+            status,
+            responseData,
+            {
+              url: originalRequest?.url,
+              method: originalRequest?.method,
+              baseURL: originalRequest?.baseURL,
+              ...(typeof document !== 'undefined' && {
+                cookieNames: document.cookie.split(';').map((c) => c.split('=')[0].trim()),
+              }),
+            }
+          );
+          if (isEmpty400) {
+            console.error(
+              '[ApiClient] Empty 400 detected — this is usually caused by a stale/malformed localhost cookie. Try clearing cookies for this site or test in an incognito window.'
+            );
+          }
         }
         return Promise.reject(error);
       }
@@ -86,7 +138,7 @@ export class ApiClient {
       const response = await this.api.get<ApiSuccess<T>>(url, { ...config, params });
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] GET request failed:', { url, params, error });
+      console.debug('[ApiClient] GET failed:', url);
       throw error;
     }
   }
@@ -97,7 +149,7 @@ export class ApiClient {
       const response = await this.api.post<ApiSuccess<T>>(url, data, config);
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] POST request failed:', { url, data, error });
+      console.debug('[ApiClient] POST failed:', url);
       throw error;
     }
   }
@@ -108,7 +160,7 @@ export class ApiClient {
       const response = await this.api.put<ApiSuccess<T>>(url, data, config);
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] PUT request failed:', { url, data, error });
+      console.debug('[ApiClient] PUT failed:', url);
       throw error;
     }
   }
@@ -119,7 +171,7 @@ export class ApiClient {
       const response = await this.api.patch<ApiSuccess<T>>(url, data, config);
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] PATCH request failed:', { url, data, error });
+      console.debug('[ApiClient] PATCH failed:', url);
       throw error;
     }
   }
@@ -130,7 +182,7 @@ export class ApiClient {
       const response = await this.api.delete<ApiSuccess<T>>(url, { data });
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] DELETE request failed:', { url, data, error });
+      console.debug('[ApiClient] DELETE failed:', url);
       throw error;
     }
   }
@@ -145,7 +197,7 @@ export class ApiClient {
       });
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] POST FormData failed:', { url, error });
+      console.debug('[ApiClient] POST FormData failed:', url);
       throw error;
     }
   }
@@ -159,7 +211,7 @@ export class ApiClient {
       });
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] PUT FormData failed:', { url, error });
+      console.debug('[ApiClient] PUT FormData failed:', url);
       throw error;
     }
   }
@@ -173,7 +225,7 @@ export class ApiClient {
       });
       return response.data;
     } catch (error) {
-      console.log('[ApiClient] PATCH FormData failed:', { url, error });
+      console.debug('[ApiClient] PATCH FormData failed:', url);
       throw error;
     }
   }

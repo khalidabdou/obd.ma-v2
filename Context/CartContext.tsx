@@ -9,6 +9,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cartService } from '@/services/cart.service';
 import type { Product } from '@/services/product.service';
+import { normalizeError } from '@/lib/apiError';
+import type { ApiError } from '@/types/api';
 
 /** Rewrite public image URLs to Docker-internal hostnames so Next.js Image Optimizer can fetch them. */
 function fixImageUrl(url: string | null | undefined): string {
@@ -30,12 +32,17 @@ export interface CartItem {
 
 
 
+interface UpdateQuantityResult {
+  success: boolean;
+  error?: ApiError;
+}
+
 interface CartContextType {
   cartItems: CartItem[];
   cartCount: number;
   isLoading: boolean;
   addToCart: (productCode: string, quantity: number, choice?: string) => Promise<boolean>;
-  updateQuantity: (productCode: string, quantityChange: number) => Promise<boolean>;
+  updateQuantity: (productCode: string, quantityChange: number) => Promise<UpdateQuantityResult>;
   removeFromCart: (productCode: string) => Promise<boolean>;
   getItemQuantity: (productCode: string) => number;
   refreshCart: () => Promise<void>;
@@ -160,11 +167,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateQuantity = useCallback(async (
     productCode: string,
     quantityChange: number
-  ): Promise<boolean> => {
+  ): Promise<UpdateQuantityResult> => {
     const existingItem = cartItems.find(i => i.productCode === productCode);
-    
+
     if (!existingItem) {
-      return false;
+      return { success: false };
     }
 
     const newQuantity = existingItem.quantity + quantityChange;
@@ -184,26 +191,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Sync with server
       const response = await cartService.updateCartItem({ productCode, quantity: quantityChange });
-      
+
       if (response.success) {
         // Dispatch event for other components
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event('cartUpdated'));
         }
-        
+
         // Refresh to get accurate server state
         await refreshCart();
-        return true;
+        return { success: true };
       } else {
         // Revert optimistic update on failure
         await refreshCart();
-        return false;
+        return { success: false };
       }
     } catch (error) {
       console.error('Error updating cart quantity:', error);
       // Revert optimistic update on error
       await refreshCart();
-      return false;
+      return { success: false, error: normalizeError(error) };
     }
   }, [cartItems, refreshCart]);
 

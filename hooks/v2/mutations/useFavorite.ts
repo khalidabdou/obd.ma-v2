@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoriteService } from '@/services/favorite.service';
 import { productKeys } from '../queries/useProducts';
+import { favoriteKeys } from '../queries/useFavorites';
 
 export function useAddFavorite() {
   const queryClient = useQueryClient();
@@ -11,6 +12,7 @@ export function useAddFavorite() {
     mutationFn: favoriteService.addToFavorites,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
     },
   });
 }
@@ -22,6 +24,7 @@ export function useRemoveFavorite() {
     mutationFn: favoriteService.removeFromFavorites,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
     },
   });
 }

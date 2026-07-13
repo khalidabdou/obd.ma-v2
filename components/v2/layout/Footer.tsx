@@ -167,7 +167,7 @@ export default function Footer() {
                 <ul className="space-y-3">
                   <FooterLink href="/account">Mon compte</FooterLink>
                   <FooterLink href="/cart">Panier</FooterLink>
-                  <FooterLink href="/favorites">Favoris</FooterLink>
+                  <FooterLink href="/myfavorites">Favoris</FooterLink>
                 </ul>
               </div>
             </div>

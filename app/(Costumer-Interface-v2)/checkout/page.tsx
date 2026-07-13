@@ -79,10 +79,25 @@ export default function CheckoutPage() {
   useEffect(() => {
     async function init() {
       // If returning from PayPal approval, jump straight to payment step
+      // Card payments now use Hosted Fields (no redirect), so only check PayPal
       const pendingPayPal = sessionStorage.getItem("obd_paypal_pending");
-      const pendingCard = sessionStorage.getItem("obd_card_pending");
-      if (pendingPayPal || pendingCard) {
-        setStep("payment");
+      if (pendingPayPal) {
+        // Check if PayPal actually approved (token + PayerID in URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasToken = urlParams.has("token") || urlParams.has("PayerID");
+        // Clean up URL query params so refresh doesn't re-trigger
+        if (urlParams.toString()) {
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+        if (hasToken) {
+          // User approved payment — proceed to capture
+          setStep("payment");
+        } else {
+          // User cancelled on PayPal — clean up and show failure
+          sessionStorage.removeItem("obd_paypal_pending");
+          setOrderError(t("checkout.payment_cancelled"));
+          setStep("failure");
+        }
       }
 
       try {
@@ -194,6 +209,13 @@ export default function CheckoutPage() {
 
   return (
     <Container className="py-8">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold sm:text-3xl">{t("checkout.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {cartCount > 0 ? `${cartCount} ${t("cart.quantity")}` : ""}
+        </p>
+      </div>
+
       {/* Progress bar */}
       {step !== "success" && step !== "failure" && (
         <CheckoutProgress currentStep={step} />

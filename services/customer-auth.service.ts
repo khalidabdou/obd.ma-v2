@@ -78,7 +78,7 @@ export const customerAuthService = {
    * Check if customer token is valid
    * @returns Promise with token validation result
    */
-  checkCustomerToken: async (): Promise<ApiSuccess<{ message: string }>> => {
+  checkCustomerToken: async (): Promise<ApiSuccess<{ message: string; authenticated?: boolean }>> => {
     return await apiClient.get('/check_customer_token');
   },
 

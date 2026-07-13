@@ -1,6 +1,7 @@
 {
   "nav": {
     "favorites": "Favorites",
+    "orders": "My Orders",
     "cart": "Shopping Cart",
     "account": "My Account",
     "login": "Login",
@@ -462,6 +463,11 @@
     "no_products": "It seems that this category has no products or no products have been added to it yet.",
     "categories": "Categories"
   },
+  "catalog": {
+    "title": "Catalog",
+    "products": "products",
+    "no_products": "No products available."
+  },
   "search": {
     "title": "Search Results",
     "no_results": "No results found",
@@ -563,6 +569,7 @@
     "quantity_decrease_failed": "Failed to remove quantity"
   },
   "checkout": {
+    "title": "Checkout",
     "customer_info_title": "Shipping Information",
     "customer_info_desc": "Please fill in your delivery details",
     "first_name": "First Name",
@@ -575,6 +582,8 @@
     "address_placeholder": "Street, neighborhood, etc.",
     "city": "City",
     "city_placeholder": "Your city",
+    "search_city": "Search city...",
+    "no_city_found": "No city found",
     "create_account_checkbox": "Create an account (optional)",
     "password": "Password",
     "required": "This field is required",
@@ -584,6 +593,9 @@
     "no_delivery": "No delivery companies available",
     "payment_title": "Payment",
     "payment_desc": "Choose your payment method",
+    "payment_method": "Payment Method",
+    "summary_title": "Order Summary",
+    "delivery_company": "Delivery Company",
     "processing_payment": "Processing your payment...",
     "cod": "Cash on Delivery",
     "card": "Credit Card",
@@ -592,9 +604,26 @@
     "place_order": "Place Order",
     "pay_now": "Pay Now",
     "order_failed": "Order creation failed",
+    "order_failed_title": "Payment Failed",
+    "order_failed_desc": "We couldn't process your order. You can try again or review your cart.",
+    "try_again": "Try Again",
+    "back_to_cart": "Back to Cart",
+    "cart_preserved": "Your cart items have been saved.",
+    "need_help": "Need help? Contact",
     "payment_failed": "Payment failed",
+    "payment_cancelled": "You cancelled the payment. No charge was made.",
+    "card_number": "Card Number",
+    "card_expiry": "Expiry Date",
+    "card_cvv": "CVV",
+    "card_number_placeholder": "1234 5678 9012 3456",
+    "card_expiry_placeholder": "MM/YY",
+    "card_cvv_placeholder": "123",
+    "loading_card_form": "Loading secure card form...",
+    "card_load_failed": "Failed to load card form. Please try again.",
     "order_success": "Order Confirmed!",
     "order_success_desc": "Your order has been successfully placed.",
+    "secure_info": "Your information is secure",
+    "secure_payment": "100% secure payment",
     "track_order": "Track My Order",
     "view_orders": "My Orders",
     "continue": "Continue",

@@ -1,6 +1,7 @@
 {
   "nav": {
     "favorites": "المفضلات",
+    "orders": "طلباتي",
     "cart": "سلة التسوق",
     "account": "حسابي",
     "login": "تسجيل الدخول",
@@ -367,6 +368,11 @@
     "no_products": "يبدو ان هذه الفئة لا تتوفر على منتجات أو لم يتم إضافة منتجات إليها بعد.",
     "categories": "الفئات"
   },
+  "catalog": {
+    "title": "المنتجات",
+    "products": "منتجات",
+    "no_products": "لا توجد منتجات متاحة."
+  },
   "search": {
     "title": "نتائج البحث",
     "no_results": "لا توجد أي نتائج",
@@ -565,6 +571,7 @@
     "quantity_decrease_failed": "فشل في حذف الكمية"
   },
   "checkout": {
+    "title": "إتمام الطلب",
     "customer_info_title": "معلومات التوصيل",
     "customer_info_desc": "يرجى ملء معلومات التوصيل الخاصة بك",
     "first_name": "الاسم الشخصي",
@@ -577,6 +584,8 @@
     "address_placeholder": "الشارع، الحي، إلخ.",
     "city": "المدينة",
     "city_placeholder": "مدينتك",
+    "search_city": "البحث عن مدينة...",
+    "no_city_found": "لم يتم العثور على مدينة",
     "create_account_checkbox": "إنشاء حساب (اختياري)",
     "password": "كلمة المرور",
     "required": "هذا الحقل مطلوب",
@@ -586,6 +595,9 @@
     "no_delivery": "لا توجد شركات توصيل متاحة",
     "payment_title": "الدفع",
     "payment_desc": "اختر طريقة الدفع",
+    "payment_method": "طريقة الدفع",
+    "summary_title": "ملخص الطلب",
+    "delivery_company": "شركة التوصيل",
     "processing_payment": "جاري معالجة الدفع...",
     "cod": "الدفع عند الاستلام",
     "card": "البطاقة البنكية",
@@ -594,14 +606,30 @@
     "place_order": "تأكيد الطلب",
     "pay_now": "الدفع الآن",
     "order_failed": "فشل في إنشاء الطلب",
+    "order_failed_title": "فشل الدفع",
+    "order_failed_desc": "لم نتمكن من معالجة طلبك. يمكنك المحاولة مرة أخرى أو مراجعة السلة.",
+    "try_again": "إعادة المحاولة",
+    "back_to_cart": "العودة إلى السلة",
+    "cart_preserved": "تم الاحتفاظ بمنتجات سلتك.",
+    "need_help": "تحتاج مساعدة؟ تواصل مع",
     "payment_failed": "فشل في الدفع",
+    "payment_cancelled": "لقد قمت بإلغاء الدفع. لم يتم خصم أي مبلغ.",
+    "card_number": "رقم البطاقة",
+    "card_expiry": "تاريخ الانتهاء",
+    "card_cvv": "رمز الأمان",
+    "card_number_placeholder": "1234 5678 9012 3456",
+    "card_expiry_placeholder": "MM/YY",
+    "card_cvv_placeholder": "123",
+    "loading_card_form": "جاري تحميل نموذج البطاقة الآمن...",
+    "card_load_failed": "فشل تحميل نموذج البطاقة. يرجى المحاولة مرة أخرى.",
     "order_success": "تم تأكيد الطلب!",
     "order_success_desc": "تم تسجيل طلبك بنجاح.",
+    "secure_info": "معلوماتك آمنة",
+    "secure_payment": "دفع 100% آمن",
     "track_order": "تتبع الطلب",
     "view_orders": "طلباتي",
     "continue": "متابعة",
     "back": "رجوع",
     "empty_cart_desc": "أضف منتجات إلى السلة قبل الطلب"
-    
   }
 }

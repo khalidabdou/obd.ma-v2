@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Container from "@components/v2/layout/Container";
 import { Button } from "@/components/ui/button";
-import { serverFetch } from "@/lib/serverFetch";
+import { serverFetch, rewriteImageUrlForServer } from "@/lib/serverFetch";
 import type { CustomerOrderDetail } from "@/services/order.service";
 import { ArrowLeft, Package, Truck, User, Receipt } from "lucide-react";
 import Image from "next/image";
@@ -20,7 +20,14 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     const data = await serverFetch<{ order: CustomerOrderDetail }>(`/customer_order/${id}`, {
       cache: "no-store",
     });
-    order = data.order;
+    order = {
+      ...data.order,
+      firstProductImage: rewriteImageUrlForServer(data.order.firstProductImage),
+      items: data.order.items.map((item) => ({
+        ...item,
+        productImage: rewriteImageUrlForServer(item.productImage),
+      })),
+    };
   } catch (err) {
     console.error("Failed to fetch order:", err);
     error = "Order not found or you do not have access.";
