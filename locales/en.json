@@ -431,6 +431,13 @@
   "footer": {
     "about_us": "About Us",
     "contact_us": "Contact Us",
+    "contact_subtitle": "Our team is here to support you.",
+    "call_us_on_whatsapp": "Call us on WhatsApp",
+    "send_us_email": "Send us an email",
+    "fast_delivery": "Fast delivery",
+    "everywhere_in_morocco": "Throughout Morocco",
+    "about": "About",
+    "useful_links": "Useful Links",
     "terms": "Terms & Conditions",
     "privacy": "Privacy Policy",
     "faq": "FAQ",
@@ -440,9 +447,20 @@
     "copyright": "© 2025 OBD.ma. All rights reserved.",
     "important_links": "Important Links",
     "about_store": "About Store",
-    "about_obd": "About OBD.ma Store",
+    "about_obd": "About OBD.ma",
     "about_suppliers": "About Our Suppliers",
-    "all_rights_reserved": "All rights reserved for"
+    "all_rights_reserved": "All rights reserved for",
+    "trust": {
+      "authentic": "Authentic",
+      "products": "Products",
+      "guaranteed": "Guaranteed",
+      "quality": "Quality",
+      "performance": "Performance",
+      "diagnostics": "Diagnostics",
+      "responsive": "Responsive",
+      "support": "Support"
+    },
+    "secure_payment": "Secure Payment"
   },
   "messages": {
     "added_to_cart": "Added to cart",

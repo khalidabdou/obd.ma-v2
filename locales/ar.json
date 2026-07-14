@@ -336,6 +336,13 @@
   "footer": {
     "about_us": "من نحن",
     "contact_us": "اتصل بنا",
+    "contact_subtitle": "فريقنا في خدمتكم لمساعدتكم.",
+    "call_us_on_whatsapp": "اتصل بنا عبر واتساب",
+    "send_us_email": "أرسل لنا بريدا إلكترونيا",
+    "fast_delivery": "توصيل سريع",
+    "everywhere_in_morocco": "في جميع أنحاء المغرب",
+    "about": "عن المتجر",
+    "useful_links": "روابط مفيدة",
     "terms": "الشروط والأحكام",
     "privacy": "سياسة الخصوصية",
     "faq": "الأسئلة الشائعة",
@@ -347,7 +354,18 @@
     "about_store": "عن المتجر",
     "about_obd": "عن متجر OBD.ma",
     "about_suppliers": "عن موردينا",
-    "all_rights_reserved": "كل الحقوق محفوظة لمتجر"
+    "all_rights_reserved": "كل الحقوق محفوظة لمتجر",
+    "trust": {
+      "authentic": "أصلية",
+      "products": "منتجات",
+      "guaranteed": "مضمونة",
+      "quality": "جودة",
+      "performance": "عالية الأداء",
+      "diagnostics": "تشخيص",
+      "responsive": "سريع",
+      "support": "الدعم"
+    },
+    "secure_payment": "دفع آمن"
   },
   "messages": {
     "added_to_cart": "تمت الإضافة إلى السلة",

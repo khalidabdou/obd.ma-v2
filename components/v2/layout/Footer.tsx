@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,6 +16,7 @@ import {
   Link2,
 } from "lucide-react";
 import Container from "./Container";
+import { useTranslation } from "@/Context/LanguageContext";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg
@@ -71,6 +74,8 @@ const FooterLink = ({ href, children }: { href: string; children: React.ReactNod
 );
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="relative overflow-hidden bg-background text-foreground dark:bg-[#05070a] dark:text-white">
       <div className="pointer-events-none absolute inset-0">
@@ -89,11 +94,11 @@ export default function Footer() {
         <div className="grid gap-10 py-12 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-3">
             <h3 className="text-lg font-bold uppercase tracking-wide text-brand-red">
-              CONTACTEZ-NOUS
+              {t("footer.contact_us")}
             </h3>
             <div className="mt-2 h-1 w-14 bg-brand-blue" />
             <p className="mt-4 text-sm text-muted-foreground dark:text-gray-400">
-              Notre équipe est à votre écoute pour vous accompagner.
+              {t("footer.contact_subtitle")}
             </p>
 
             <div className="mt-6 space-y-4">
@@ -103,7 +108,7 @@ export default function Footer() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-base font-bold">06.50.36.99.21</p>
-                  <p className="text-xs text-muted-foreground dark:text-gray-400">Appelez-nous sur WhatsApp</p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-400">{t("footer.call_us_on_whatsapp")}</p>
                 </div>
                 <a
                   href="https://wa.me/212650369921"
@@ -122,7 +127,7 @@ export default function Footer() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold">sales@obd.ma</p>
-                  <p className="text-xs text-muted-foreground dark:text-gray-400">Envoyez-nous un email</p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-400">{t("footer.send_us_email")}</p>
                 </div>
                 <a
                   href="mailto:sales@obd.ma"
@@ -139,8 +144,8 @@ export default function Footer() {
                 <Truck className="h-8 w-8" />
               </div>
               <div>
-                <p className="text-sm font-bold">Livraison rapide</p>
-                <p className="text-xs text-muted-foreground dark:text-gray-400">Partout au Maroc</p>
+                <p className="text-sm font-bold">{t("footer.fast_delivery")}</p>
+                <p className="text-xs text-muted-foreground dark:text-gray-400">{t("footer.everywhere_in_morocco")}</p>
               </div>
             </div>
           </div>
@@ -150,24 +155,24 @@ export default function Footer() {
               <div>
                 <div className="mb-4 flex items-center gap-2 text-brand-blue">
                   <Link2 className="h-5 w-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-wide">À PROPOS</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.about")}</h3>
                 </div>
                 <ul className="space-y-3">
-                  <FooterLink href="/about">À propos du magasin</FooterLink>
-                  <FooterLink href="/about">À propos de OBD.ma</FooterLink>
-                  <FooterLink href="/about">À propos de nos fournisseurs</FooterLink>
+                  <FooterLink href="/about">{t("footer.about_store")}</FooterLink>
+                  <FooterLink href="/about">{t("footer.about_obd")}</FooterLink>
+                  <FooterLink href="/about">{t("footer.about_suppliers")}</FooterLink>
                 </ul>
               </div>
 
               <div>
                 <div className="mb-4 flex items-center gap-2 text-brand-blue">
                   <Link2 className="h-5 w-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-wide">LIENS UTILES</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.useful_links")}</h3>
                 </div>
                 <ul className="space-y-3">
-                  <FooterLink href="/account">Mon compte</FooterLink>
-                  <FooterLink href="/cart">Panier</FooterLink>
-                  <FooterLink href="/myfavorites">Favoris</FooterLink>
+                  <FooterLink href="/account">{t("nav.account")}</FooterLink>
+                  <FooterLink href="/cart">{t("nav.cart")}</FooterLink>
+                  <FooterLink href="/myfavorites">{t("nav.favorites")}</FooterLink>
                 </ul>
               </div>
             </div>
@@ -195,23 +200,23 @@ export default function Footer() {
             <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               <TrustBadge
                 icon={Shield}
-                label="Produits"
-                sublabel="authentiques"
+                label={t("footer.trust.products")}
+                sublabel={t("footer.trust.authentic")}
               />
               <TrustBadge
                 icon={Award}
-                label="Qualité"
-                sublabel="garantie"
+                label={t("footer.trust.quality")}
+                sublabel={t("footer.trust.guaranteed")}
               />
               <TrustBadge
                 icon={Zap}
-                label="Diagnostics"
-                sublabel="performants"
+                label={t("footer.trust.diagnostics")}
+                sublabel={t("footer.trust.performance")}
               />
               <TrustBadge
                 icon={Headphones}
-                label="Support"
-                sublabel="reactif"
+                label={t("footer.trust.support")}
+                sublabel={t("footer.trust.responsive")}
               />
             </div>
           </div>
@@ -226,7 +231,7 @@ export default function Footer() {
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
                 <Lock className="h-4 w-4 text-brand-red" />
-                <span>PAIEMENT SÉCURISÉ</span>
+                <span>{t("footer.secure_payment")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Image
@@ -253,7 +258,7 @@ export default function Footer() {
             </div>
 
             <p className="text-xs text-muted-foreground dark:text-gray-400">
-              © 2026 Tous droits réservés pour{" "}
+              © {new Date().getFullYear()} {t("footer.all_rights_reserved")}{" "}
               <span className="font-bold text-brand-red">OBD.ma</span>
             </p>
           </div>

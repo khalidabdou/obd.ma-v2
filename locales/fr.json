@@ -431,6 +431,13 @@
   "footer": {
     "about_us": "À propos",
     "contact_us": "Contactez-nous",
+    "contact_subtitle": "Notre équipe est à votre écoute pour vous accompagner.",
+    "call_us_on_whatsapp": "Appelez-nous sur WhatsApp",
+    "send_us_email": "Envoyez-nous un email",
+    "fast_delivery": "Livraison rapide",
+    "everywhere_in_morocco": "Partout au Maroc",
+    "about": "À propos",
+    "useful_links": "Liens utiles",
     "terms": "Termes et conditions",
     "privacy": "Politique de confidentialité",
     "faq": "FAQ",
@@ -442,7 +449,18 @@
     "about_store": "À propos du magasin",
     "about_obd": "À propos de OBD.ma",
     "about_suppliers": "À propos de nos fournisseurs",
-    "all_rights_reserved": "Tous droits réservés pour"
+    "all_rights_reserved": "Tous droits réservés pour",
+    "trust": {
+      "authentic": "authentiques",
+      "products": "Produits",
+      "guaranteed": "garantie",
+      "quality": "Qualité",
+      "performance": "performants",
+      "diagnostics": "Diagnostics",
+      "responsive": "réactif",
+      "support": "Support"
+    },
+    "secure_payment": "Paiement Sécurisé"
   },
   "messages": {
     "added_to_cart": "Ajouté au panier",
