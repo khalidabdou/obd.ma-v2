@@ -254,12 +254,24 @@
     "account_info": "Account Information",
     "address": "Address",
     "account_management": "Account Management",
+    "login_method": "Login Method",
+    "login_method_normal": "Email / Phone",
+    "login_method_google": "Google",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "new_password": "New Password",
+    "confirm_password": "Confirm New Password",
+    "passwords_mismatch": "Passwords do not match",
+    "name_updated": "Name updated successfully.",
+    "password_changed": "Password changed successfully.",
     "email_changed": "Email has been changed.",
     "cannot_change_email": "Cannot change email for account",
     "email_already_used": "This email is already in use. Please enter a new email",
     "invalid_email": "Invalid email.",
     "confirm_email_change": "Do you really want to change the email for this account?",
     "change": "Change"
+
   },
   "auth": {
     "login": "Login",
@@ -417,7 +429,8 @@
     "none": "None",
     "yes": "Yes",
     "no": "No",
-    "default": "Default"
+    "default": "Default",
+    "not_available": "Not available"
   },
   "theme": {
     "title": "Theme",

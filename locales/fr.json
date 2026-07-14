@@ -254,6 +254,17 @@
     "account_info": "Informations du compte",
     "address": "Adresse",
     "account_management": "Gestion du compte",
+    "login_method": "Méthode de connexion",
+    "login_method_normal": "Email / Téléphone",
+    "login_method_google": "Google",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le nouveau mot de passe",
+    "passwords_mismatch": "Les mots de passe ne correspondent pas",
+    "name_updated": "Nom mis à jour avec succès.",
+    "password_changed": "Mot de passe changé avec succès.",
     "email_changed": "L'email a été modifié.",
     "cannot_change_email": "Impossible de modifier l'email pour le compte",
     "email_already_used": "Cet email est déjà utilisé. Veuillez entrer un nouvel email",
@@ -417,7 +428,8 @@
     "none": "Aucun",
     "yes": "Oui",
     "no": "Non",
-    "default": "Par défaut"
+    "default": "Par défaut",
+    "not_available": "Non disponible"
   },
   "theme": {
     "title": "Thème",

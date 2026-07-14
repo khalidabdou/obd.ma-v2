@@ -159,6 +159,17 @@
     "account_info": "معلومات الحساب",
     "address": "العنوان",
     "account_management": "إدارة الحساب",
+    "login_method": "طريقة تسجيل الدخول",
+    "login_method_normal": "البريد الإلكتروني / الهاتف",
+    "login_method_google": "Google",
+    "edit": "تعديل",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور الجديدة",
+    "passwords_mismatch": "كلمتا المرور غير متطابقتين",
+    "name_updated": "تم تحديث الاسم بنجاح.",
+    "password_changed": "تم تغيير كلمة المرور بنجاح.",
     "email_changed": "تم تغير البريد الإلكتروني.",
     "cannot_change_email": "لا يمكن تغير البريد لحساب",
     "email_already_used": "لقد تم إستعمال هذا البريد من قبل. أدخل بريدا إلكترونيا جديدا",
@@ -322,7 +333,8 @@
     "none": "لا شيء",
     "yes": "نعم",
     "no": "لا",
-    "default": "الافتراضي"
+    "default": "الافتراضي",
+    "not_available": "غير متوفر"
   },
   "theme": {
     "title": "المظهر",
