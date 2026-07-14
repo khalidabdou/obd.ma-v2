@@ -1,5 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Heart, Loader2 } from "lucide-react";
+import { useAuth } from "@/Context/AuthContext";
+import { useTranslation } from "@/Context/LanguageContext";
+import { useFavorites } from "@/hooks/v2/queries/useFavorites";
+import { useAddFavorite, useRemoveFavorite } from "@/hooks/v2/mutations/useFavorite";
+import { normalizeError } from "@/lib/apiError";
 import type { Product } from "@/services/product.service";
 import HomeProductActions from "./HomeProductActions";
 
@@ -16,6 +25,13 @@ interface HomeProductCardProps {
 }
 
 export default function HomeProductCard({ product }: HomeProductCardProps) {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { data: favorites } = useFavorites();
+  const addFavorite = useAddFavorite();
+  const removeFavorite = useRemoveFavorite();
+
   const price = product.discountedPrice ?? product.price;
   const hasDiscount =
     product.discountedPrice !== null &&
@@ -24,6 +40,49 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
     product.price !== undefined &&
     product.discountedPrice < product.price;
 
+  const favoriteItem = favorites?.favorites?.find(
+    (f) => f.productCode === product.productCode
+  );
+  const isFavorite = Boolean(favoriteItem);
+  const isMutating = addFavorite.isPending || removeFavorite.isPending;
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isMutating || authLoading) return;
+
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isFavorite && favoriteItem) {
+        await removeFavorite.mutateAsync(favoriteItem.productCode);
+      } else {
+        await addFavorite.mutateAsync(product.productCode);
+      }
+    } catch (err) {
+      const apiError = normalizeError(err);
+      if (apiError.statusCode === 401 || apiError.statusCode === 403) {
+        router.push("/login");
+        return;
+      }
+
+      if (apiError.statusCode === 409) {
+        try {
+          await removeFavorite.mutateAsync(product.productCode);
+        } catch (removeErr) {
+          console.error("Failed to remove favorite after 409:", removeErr);
+        }
+        return;
+      }
+
+      console.error("Failed to toggle favorite:", apiError);
+    }
+  };
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/50 dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]">
       {isNewProduct(product.creationDate) && (
@@ -31,6 +90,22 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
           NOUVEAU
         </span>
       )}
+
+      <button
+        onClick={handleFavoriteClick}
+        aria-label={isFavorite ? t("product.remove_from_favorites") : t("product.add_to_favorites")}
+        className={`absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur transition-colors ${
+          isFavorite
+            ? "border-red-200 bg-red-50 text-red-500 hover:border-red-300 dark:border-red-900/30 dark:bg-red-950/20"
+            : "border-border bg-background/80 text-muted-foreground hover:border-brand-blue hover:text-brand-blue dark:border-white/10 dark:bg-black/30 dark:text-neutral-400"
+        }`}
+      >
+        {isMutating ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Heart className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
+        )}
+      </button>
 
       <Link href={`/product/${product.productCode}`} className="block">
         <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-muted dark:bg-[#0B0D10]">
