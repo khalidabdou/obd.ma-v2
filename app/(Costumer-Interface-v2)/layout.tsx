@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default async function CustomerV2Layout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const langCookie = cookieStore.get('obd-language')?.value;
-  const initialLanguage = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'ar';
+  const initialLanguage = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'fr';
 
   return (
     <LanguageProvider initialLanguage={initialLanguage as 'ar' | 'fr' | 'en'}>

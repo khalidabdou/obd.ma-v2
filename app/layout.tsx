@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 
 const themeInitScript = `(function(){try{var p=localStorage.getItem('theme-preference');var t=(p==='light'||p==='dark')?p:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var r=document.documentElement;if(t==='dark'){r.classList.add('dark');}else{r.classList.remove('dark');}r.setAttribute('data-theme',t);r.style.colorScheme=t;}catch(e){}})();`;
 
-const langInitScript = `(function(){try{var c=document.cookie.split(';').find(function(r){return r.trim().startsWith('obd-language=');});var l=c?c.split('=')[1].trim():'ar';if(l!=='ar'&&l!=='fr'&&l!=='en')l='ar';var r=document.documentElement;r.setAttribute('lang',l);r.setAttribute('dir',l==='ar'?'rtl':'ltr');}catch(e){}})();`;
+const langInitScript = `(function(){try{var c=document.cookie.split(';').find(function(r){return r.trim().startsWith('obd-language=');});var l=c?c.split('=')[1].trim():'fr';if(l!=='ar'&&l!=='fr'&&l!=='en')l='fr';var r=document.documentElement;r.setAttribute('lang',l);r.setAttribute('dir',l==='ar'?'rtl':'ltr');}catch(e){}})();`;
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   const cookieStore = await cookies()
   const langCookie = cookieStore.get('obd-language')?.value
-  const language = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'ar'
+  const language = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'fr'
   const dir = language === 'ar' ? 'rtl' : 'ltr'
 
   return (

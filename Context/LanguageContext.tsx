@@ -28,22 +28,22 @@ const translations: Record<Language, Translations> = {
 
 // Detect browser language
 const detectBrowserLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'ar'; // Default for SSR
+  if (typeof window === 'undefined') return 'fr'; // Default for SSR
   
   const browserLang = navigator.language.toLowerCase();
   
   // Check for exact matches or language prefixes
-  if (browserLang.startsWith('ar')) return 'ar';
   if (browserLang.startsWith('fr')) return 'fr';
+  if (browserLang.startsWith('ar')) return 'ar';
   if (browserLang.startsWith('en')) return 'en';
   
-  // Default to Arabic
-  return 'ar';
+  // Default to French
+  return 'fr';
 };
 
 // Get stored language or detect browser language
 const getInitialLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'ar';
+  if (typeof window === 'undefined') return 'fr';
   
   const stored = localStorage.getItem('obd-language') as Language;
   if (stored && ['ar', 'fr', 'en'].includes(stored)) {
@@ -54,7 +54,7 @@ const getInitialLanguage = (): Language => {
 };
 
 export const LanguageProvider = ({ children, initialLanguage }: { children: ReactNode; initialLanguage?: Language }) => {
-  const [language, setLanguageState] = useState<Language>(initialLanguage || 'ar');
+  const [language, setLanguageState] = useState<Language>(initialLanguage || 'fr');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
