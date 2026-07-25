@@ -29,6 +29,8 @@ export interface CustomerFormData {
   cityId: number;
   password?: string;
   createAccount?: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface DeliveryCompany {
@@ -105,7 +107,9 @@ export default function CheckoutPage() {
         await refreshCart();
 
         const res = await customerAuthService.checkCustomerToken();
-        if (res.success) {
+        // The API returns success:true even for guest users (with authenticated:false).
+        // Only treat the user as logged-in when authenticated is explicitly true.
+        if (res.success && res.data?.authenticated === true) {
           setIsLoggedIn(true);
           // Pre-fill from customer info
           try {
@@ -138,7 +142,9 @@ export default function CheckoutPage() {
             }
           } catch {}
         } else {
-          // Pre-fill guest info from localStorage
+          // Guest user — do NOT pre-fill name/email (backend generates fake placeholders
+          // like "Guest User" / "GUEST…@guest.local"). Only restore phone/address/city
+          // from the last saved checkout if available.
           try {
             const saved = localStorage.getItem("obd_checkout_info");
             if (saved) {
@@ -156,9 +162,10 @@ export default function CheckoutPage() {
               }
               setCustomerData((prev) => ({
                 ...prev,
-                firstName: parsed.firstName || "",
-                lastName: parsed.lastName || "",
-                email: parsed.email || "",
+                // Name & email intentionally left blank — guest must enter real details
+                firstName: "",
+                lastName: "",
+                email: "",
                 countryCode: phoneCode,
                 phoneNumber: phoneNum,
                 address: parsed.address || "",

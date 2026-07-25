@@ -110,6 +110,8 @@ export interface CreateOrderRequest {
   deliveryCompanyId?: string;
   paypalOrderId?: string;
   cardOrderId?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 /**
@@ -158,18 +160,24 @@ export const orderService = {
    * @param orderId - Order ID
    * @param creationDate - Creation date
    * @param deliveryCompanyId - Optional delivery company ID
+   * @param latitude - Optional latitude GPS coordinate
+   * @param longitude - Optional longitude GPS coordinate
    * @returns Promise with success response
    */
   createCODOrder: async (
     orderId: string,
     creationDate: string,
-    deliveryCompanyId?: string
+    deliveryCompanyId?: string,
+    latitude?: number,
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
       paymentMethod: 'COD',
       creationDate,
       deliveryCompanyId,
+      latitude,
+      longitude,
     });
   },
 
@@ -191,13 +199,17 @@ export const orderService = {
    * @param creationDate - Creation date
    * @param paypalOrderId - PayPal order ID
    * @param deliveryCompanyId - Optional delivery company ID
+   * @param latitude - Optional latitude GPS coordinate
+   * @param longitude - Optional longitude GPS coordinate
    * @returns Promise with success response
    */
   capturePayPalPayment: async (
     orderId: string,
     creationDate: string,
     paypalOrderId: string,
-    deliveryCompanyId?: string
+    deliveryCompanyId?: string,
+    latitude?: number,
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -205,6 +217,8 @@ export const orderService = {
       creationDate,
       paypalOrderId,
       deliveryCompanyId,
+      latitude,
+      longitude,
     });
   },
 
@@ -226,13 +240,17 @@ export const orderService = {
    * @param creationDate - Creation date
    * @param cardOrderId - Card order ID
    * @param deliveryCompanyId - Optional delivery company ID
+   * @param latitude - Optional latitude GPS coordinate
+   * @param longitude - Optional longitude GPS coordinate
    * @returns Promise with success response
    */
   captureCardPayment: async (
     orderId: string,
     creationDate: string,
     cardOrderId: string,
-    deliveryCompanyId?: string
+    deliveryCompanyId?: string,
+    latitude?: number,
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -240,6 +258,8 @@ export const orderService = {
       creationDate,
       cardOrderId,
       deliveryCompanyId,
+      latitude,
+      longitude,
     });
   },
 

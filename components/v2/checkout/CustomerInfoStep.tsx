@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerFormData } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2 } from "lucide-react";
 import citiesData from "@/locales/cities.json";
 
 interface CustomerInfoStepProps {
@@ -41,8 +41,49 @@ export default function CustomerInfoStep({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [cityOpen, setCityOpen] = useState(false);
   const [citySearch, setCitySearch] = useState("");
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const cityRef = useRef<HTMLDivElement>(null);
   const cityInputRef = useRef<HTMLInputElement>(null);
+
+  const requestGpsLocation = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLocating(true);
+    setLocationError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        onChange({
+          ...data,
+          latitude,
+          longitude,
+        });
+        setLocating(false);
+      },
+      (err) => {
+        setLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocationError("Location permission denied. Please allow access in your browser.");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setLocationError("Location unavailable.");
+        } else if (err.code === err.TIMEOUT) {
+          setLocationError("Location request timed out.");
+        } else {
+          setLocationError("Failed to get location.");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   // Auto-fill cityId when city name is provided but id is missing
   useEffect(() => {
@@ -90,6 +131,16 @@ export default function CustomerInfoStep({
     if (!data.address.trim()) errs.address = t("checkout.required");
     if (!data.city.trim()) errs.city = t("checkout.required");
     if (data.createAccount && !data.password?.trim()) errs.password = t("checkout.required");
+
+    if (data.latitude == null || data.longitude == null) {
+      const msg = "GPS location permission is required to complete your order. Please allow location access.";
+      errs.location = msg;
+      setLocationError(msg);
+      requestGpsLocation();
+    } else {
+      setLocationError("");
+    }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -126,7 +177,6 @@ export default function CustomerInfoStep({
                 placeholder={t("checkout.first_name_placeholder")}
                 value={data.firstName}
                 onChange={(e) => update("firstName", e.target.value)}
-                disabled={isLoggedIn}
               />
             </div>
             {errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
@@ -139,7 +189,6 @@ export default function CustomerInfoStep({
               placeholder={t("checkout.last_name_placeholder")}
               value={data.lastName}
               onChange={(e) => update("lastName", e.target.value)}
-              disabled={isLoggedIn}
             />
             {errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
           </div>
@@ -157,7 +206,6 @@ export default function CustomerInfoStep({
               placeholder="email@example.com"
               value={data.email}
               onChange={(e) => update("email", e.target.value)}
-              disabled={isLoggedIn}
             />
           </div>
           {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
@@ -207,7 +255,24 @@ export default function CustomerInfoStep({
 
         {/* Address */}
         <div className="space-y-2">
-          <Label htmlFor="address" className="text-muted-foreground">{t("checkout.address")}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="address" className="text-muted-foreground">{t("checkout.address")}</Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={requestGpsLocation}
+              disabled={locating}
+              className="h-8 gap-1.5 px-2 text-xs font-medium text-brand-blue hover:bg-brand-blue/10 hover:text-brand-blue"
+            >
+              {locating ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <MapPin className="h-3.5 w-3.5" />
+              )}
+              {locating ? "Detecting location..." : data.latitude && data.longitude ? "Update GPS Location" : "Use GPS Location"}
+            </Button>
+          </div>
           <div className="relative mt-1">
             <Image
               src="/assets/icons/location-icon.svg"
@@ -224,6 +289,17 @@ export default function CustomerInfoStep({
               onChange={(e) => update("address", e.target.value)}
             />
           </div>
+          {data.latitude && data.longitude ? (
+            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>
+                GPS location captured ({data.latitude.toFixed(5)}, {data.longitude.toFixed(5)})
+              </span>
+            </div>
+          ) : null}
+          {locationError ? (
+            <p className="text-xs text-red-500">{locationError}</p>
+          ) : null}
           {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
         </div>
 
