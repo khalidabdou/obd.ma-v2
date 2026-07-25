@@ -32,7 +32,7 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
   const addFavorite = useAddFavorite();
   const removeFavorite = useRemoveFavorite();
 
-  const price = product.discountedPrice ?? product.price;
+  const price = product.discountedPrice || product.price;
   const hasDiscount =
     product.discountedPrice !== null &&
     product.discountedPrice !== undefined &&

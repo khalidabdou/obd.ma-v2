@@ -213,7 +213,7 @@ export default async function ProductPage({
     offers: {
       "@type": "Offer",
       priceCurrency: "MAD",
-      price: product.discountedPrice ?? product.price ?? 0,
+      price: product.discountedPrice || product.price || 0,
       availability:
         product.quantity && product.quantity > 0
           ? "https://schema.org/InStock"

@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 const PAGE_SIZE = 12;
 
 function getPriceValue(product: Product): number {
-  return product.discountedPrice ?? product.price ?? 0;
+  return product.discountedPrice || product.price || 0;
 }
 
 export default function CatalogView() {

@@ -137,9 +137,9 @@ export default function SearchBox() {
                       {product.productCode}
                     </p>
                   </div>
-                  {(product.discountedPrice ?? product.price) != null && (
+                  {(product.discountedPrice || product.price) != null && (
                     <span className="flex-shrink-0 text-sm font-bold text-brand-blue">
-                      {(product.discountedPrice ?? product.price)!.toFixed(2)} MAD
+                      {(product.discountedPrice || product.price)!.toFixed(2)} MAD
                     </span>
                   )}
                 </button>
