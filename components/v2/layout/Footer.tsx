@@ -150,8 +150,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="lg:col-span-5">
-            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+          <div className="lg:col-span-6">
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <div className="mb-4 flex items-center gap-2 text-brand-blue">
                   <Link2 className="h-5 w-5" />
@@ -173,6 +173,19 @@ export default function Footer() {
                   <FooterLink href="/account">{t("nav.account")}</FooterLink>
                   <FooterLink href="/cart">{t("nav.cart")}</FooterLink>
                   <FooterLink href="/myfavorites">{t("nav.favorites")}</FooterLink>
+                </ul>
+              </div>
+
+              <div>
+                <div className="mb-4 flex items-center gap-2 text-brand-red">
+                  <Link2 className="h-5 w-5" />
+                  <h3 className="text-sm font-bold uppercase tracking-wide">Quick Links</h3>
+                </div>
+                <ul className="space-y-3">
+                  <FooterLink href="/forum-video">Forum Vidéo</FooterLink>
+                  <FooterLink href="/blog">Blog</FooterLink>
+                  <FooterLink href="/catalog">Catalogue</FooterLink>
+                  <FooterLink href="/tuning-online">Tuning Online</FooterLink>
                 </ul>
               </div>
             </div>

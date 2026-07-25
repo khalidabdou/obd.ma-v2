@@ -9,7 +9,7 @@ import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
 import { useAuth } from "@/Context/AuthContext";
 import ThemeToggle from "@components/v2/ui/ThemeToggle";
-import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download } from "lucide-react";
+import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -57,6 +57,15 @@ export default function NavBar() {
           </div>
 
           <nav className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex gap-2"
+              onClick={() => {}}
+            >
+              <Sparkles className="h-5 w-5" />
+              <span className="text-sm">AI Search</span>
+            </Button>
+
             <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
               <Link href="/myfavorites">
                 <Heart className="h-5 w-5" />
@@ -175,6 +184,14 @@ export default function NavBar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-72">
                 <div className="mt-6 flex flex-col gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {}}
+                    className="flex items-center gap-2 text-lg font-medium"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    AI Search
+                  </button>
                   <Link href="/catalog" className="text-lg font-medium">
                     {t("nav.catalog")}
                   </Link>
