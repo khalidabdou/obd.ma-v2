@@ -28,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const removeFavorite = useRemoveFavorite();
 
   const image = product.images?.mainImage || "/placeholder.svg";
-  const price = product.discountedPrice ?? product.price;
+  const price = product.discountedPrice || product.price;
 
   const stock = product.quantity ?? 0;
   const cartQty = getItemQuantity(product.productCode);
@@ -124,8 +124,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
           {product.discountedPrice !== null &&
             product.discountedPrice !== undefined &&
+            product.discountedPrice > 0 &&
             product.price !== null &&
-            product.price !== undefined && (
+            product.price !== undefined &&
+            product.discountedPrice < product.price && (
               <span className="text-sm text-muted-foreground line-through">
                 {product.price.toFixed(2)} MAD
               </span>
