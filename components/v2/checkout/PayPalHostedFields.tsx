@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, AlertCircle, Lock } from "lucide-react";
+import { Loader2, AlertCircle, Lock, CreditCard } from "lucide-react";
 import { useTranslation } from "@/Context/LanguageContext";
 
 declare global {
@@ -32,6 +32,8 @@ export default function PayPalCardButton({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
+  const [cardholderName, setCardholderName] = useState("");
   const sdkLoadedRef = useRef(false);
   const orderIdRef = useRef(paypalOrderId);
   const onApproveRef = useRef(onApprove);
@@ -46,71 +48,108 @@ export default function PayPalCardButton({
     sdkLoadedRef.current = true;
 
     const initCardFields = () => {
-      if (!window.paypal?.CardFields) {
-        setError(t("checkout.card_load_failed"));
-        setLoading(false);
-        return;
-      }
+      // 1. Try PayPal Hosted CardFields first
+      if (window.paypal?.CardFields) {
+        try {
+          const cardField = window.paypal.CardFields({
+            createOrder: () => {
+              return Promise.resolve(orderIdRef.current);
+            },
+            onApprove: (data: any) => {
+              onApproveRef.current(data.orderID || orderIdRef.current);
+            },
+            onError: (err: any) => {
+              console.error("PayPal CardFields error:", err);
+              const msg = err?.message || t("checkout.payment_failed");
+              setError(msg);
+              onErrorRef.current(msg);
+            },
+            style: {
+              input: {
+                "font-size": "16px",
+                "font-family": "inherit",
+                color: "#1E262D",
+                transition: "color 0.3s ease",
+              },
+              ":focus": {
+                color: "#278CD9",
+              },
+              ".invalid": {
+                color: "#ED312B",
+              },
+              ".valid": {
+                color: "#35C191",
+              },
+            },
+          });
 
-      try {
-        const cardField = window.paypal.CardFields({
-          createOrder: () => {
-            return Promise.resolve(orderIdRef.current);
-          },
-          onApprove: (data: any) => {
-            onApproveRef.current(data.orderID || orderIdRef.current);
-          },
-          onError: (err: any) => {
-            console.error("PayPal CardFields error:", err);
-            const msg = err?.message || t("checkout.payment_failed");
-            setError(msg);
-            onErrorRef.current(msg);
-          },
-          style: {
-            input: {
-              "font-size": "16px",
-              "font-family": "inherit",
-              color: "#1E262D",
-              transition: "color 0.3s ease",
-            },
-            ":focus": {
-              color: "#278CD9",
-            },
-            ".invalid": {
-              color: "#ED312B",
-            },
-            ".valid": {
-              color: "#35C191",
-            },
-          },
-        });
+          if (cardField.isEligible()) {
+            cardFieldRef.current = cardField;
 
-        if (!cardField.isEligible()) {
-          setError(t("checkout.card_load_failed"));
-          setLoading(false);
-          return;
+            cardField.NumberField({
+              placeholder: t("checkout.card_number_placeholder") || "1234 5678 9012 3456",
+            }).render("#paypal-card-number");
+
+            cardField.ExpiryField({
+              placeholder: t("checkout.card_expiry_placeholder") || "MM/YY",
+            }).render("#paypal-card-expiry");
+
+            cardField.CVVField({
+              placeholder: t("checkout.card_cvv_placeholder") || "123",
+            }).render("#paypal-card-cvv");
+
+            setLoading(false);
+            return;
+          }
+        } catch (err: any) {
+          console.warn("PayPal CardFields ineligible or failed, trying fallback buttons:", err);
         }
-
-        cardFieldRef.current = cardField;
-
-        cardField.NumberField({
-          placeholder: t("checkout.card_number_placeholder"),
-        }).render("#paypal-card-number");
-
-        cardField.ExpiryField({
-          placeholder: t("checkout.card_expiry_placeholder"),
-        }).render("#paypal-card-expiry");
-
-        cardField.CVVField({
-          placeholder: t("checkout.card_cvv_placeholder"),
-        }).render("#paypal-card-cvv");
-
-        setLoading(false);
-      } catch (err: any) {
-        console.error("PayPal CardFields init failed:", err);
-        setError(t("checkout.card_load_failed"));
-        setLoading(false);
       }
+
+      // 2. Fallback to PayPal Card / Smart Payment Button if CardFields is ineligible on the merchant account
+      if (window.paypal?.Buttons) {
+        try {
+          const cardFunding = window.paypal.FUNDING?.CARD;
+          const cardButton = window.paypal.Buttons({
+            fundingSource: cardFunding,
+            style: {
+              layout: "vertical",
+              color: "black",
+              shape: "rect",
+              label: "pay",
+            },
+            createOrder: () => {
+              return Promise.resolve(orderIdRef.current);
+            },
+            onApprove: (data: any) => {
+              onApproveRef.current(data.orderID || orderIdRef.current);
+            },
+            onError: (err: any) => {
+              console.error("PayPal Card Button error:", err);
+              const msg = err?.message || t("checkout.payment_failed");
+              setError(msg);
+              onErrorRef.current(msg);
+            },
+          });
+
+          setUseFallback(true);
+          setLoading(false);
+          setTimeout(() => {
+            const container = document.getElementById("paypal-card-button-container");
+            if (container) {
+              container.innerHTML = "";
+              cardButton.render("#paypal-card-button-container");
+            }
+          }, 50);
+          return;
+        } catch (err: any) {
+          console.error("PayPal Card Button init failed:", err);
+        }
+      }
+
+      // If both fail:
+      setError(t("checkout.card_load_failed"));
+      setLoading(false);
     };
 
     const existingScript = document.querySelector(
@@ -123,7 +162,7 @@ export default function PayPalCardButton({
     }
 
     const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&components=card-fields&currency=${currency}&intent=capture`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&components=card-fields,buttons&currency=${currency}&intent=capture`;
     script.setAttribute("data-paypal-sdk", "true");
     script.async = true;
     script.onload = () => initCardFields();
@@ -132,7 +171,7 @@ export default function PayPalCardButton({
       setLoading(false);
     };
     document.body.appendChild(script);
-  }, []);
+  }, [clientId, currency, t]);
 
   const handleSubmit = async () => {
     if (!cardFieldRef.current || submitting) return;
@@ -140,7 +179,9 @@ export default function PayPalCardButton({
     setError("");
 
     try {
-      await cardFieldRef.current.submit();
+      await cardFieldRef.current.submit({
+        cardholderName: cardholderName.trim() || undefined,
+      });
     } catch (err: any) {
       console.error("Card payment submit failed:", err);
       const msg =
@@ -172,16 +213,39 @@ export default function PayPalCardButton({
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && useFallback && (
+        <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <CreditCard className="h-4 w-4 text-brand-blue" />
+            <span>Pay with Credit / Debit Card (PayPal)</span>
+          </div>
+          <div id="paypal-card-button-container" className="min-h-[50px] w-full" />
+        </div>
+      )}
+
+      {!loading && !error && !useFallback && (
         <>
           <div className="space-y-3">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                Cardholder Name
+              </label>
+              <input
+                type="text"
+                value={cardholderName}
+                onChange={(e) => setCardholderName(e.target.value)}
+                placeholder="John Doe"
+                className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground transition-colors focus:border-brand-blue focus:outline-none"
+              />
+            </div>
+
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("checkout.card_number")}
               </label>
               <div
                 id="paypal-card-number"
-                className="h-11 rounded-lg border border-border bg-background px-3"
+                className="h-11 rounded-lg border border-border bg-background px-3 flex items-center"
               />
             </div>
 
@@ -192,7 +256,7 @@ export default function PayPalCardButton({
                 </label>
                 <div
                   id="paypal-card-expiry"
-                  className="h-11 rounded-lg border border-border bg-background px-3"
+                  className="h-11 rounded-lg border border-border bg-background px-3 flex items-center"
                 />
               </div>
               <div>
@@ -201,7 +265,7 @@ export default function PayPalCardButton({
                 </label>
                 <div
                   id="paypal-card-cvv"
-                  className="h-11 rounded-lg border border-border bg-background px-3"
+                  className="h-11 rounded-lg border border-border bg-background px-3 flex items-center"
                 />
               </div>
             </div>
@@ -229,3 +293,4 @@ export default function PayPalCardButton({
     </div>
   );
 }
+
