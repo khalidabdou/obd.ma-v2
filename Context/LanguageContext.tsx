@@ -59,12 +59,22 @@ export const LanguageProvider = ({ children, initialLanguage }: { children: Reac
 
   useEffect(() => {
     setMounted(true);
-    // Only auto-detect from localStorage/browser if the server did not provide a language
-    if (!initialLanguage) {
-      const initialLang = getInitialLanguage();
-      setLanguageState(initialLang);
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('obd-language') as Language;
+      if (stored && ['ar', 'fr', 'en'].includes(stored)) {
+        if (stored !== language) {
+          setLanguageState(stored);
+        }
+      } else {
+        const detected = detectBrowserLanguage();
+        if (detected !== language) {
+          setLanguageState(detected);
+        }
+        localStorage.setItem('obd-language', detected);
+        document.cookie = `obd-language=${detected}; path=/; max-age=31536000; SameSite=Lax`;
+      }
     }
-  }, [initialLanguage]);
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

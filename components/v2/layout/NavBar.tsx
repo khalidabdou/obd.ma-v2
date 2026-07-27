@@ -9,7 +9,7 @@ import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
 import { useAuth } from "@/Context/AuthContext";
 import ThemeToggle from "@components/v2/ui/ThemeToggle";
-import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles } from "lucide-react";
+import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles, Sun, Moon, Monitor } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "@/Context/LanguageContext";
+import { useTheme } from "@/hooks/v2/useTheme";
 
 const languages = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -30,6 +31,7 @@ export default function NavBar() {
   const { cartCount } = useCart();
   const { language, setLanguage, t } = useTranslation();
   const { isAuthenticated, logout } = useAuth();
+  const { preference, setPreference } = useTheme();
 
   const handleLogout = async () => {
     await logout();
@@ -63,7 +65,7 @@ export default function NavBar() {
               onClick={() => {}}
             >
               <Sparkles className="h-5 w-5" />
-              <span className="text-sm">AI Search</span>
+              <span className="text-sm">{t("nav.ai_search")}</span>
             </Button>
 
             <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
@@ -172,7 +174,7 @@ export default function NavBar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="hidden sm:block">
+            <div>
               <ThemeToggle />
             </div>
 
@@ -182,51 +184,110 @@ export default function NavBar() {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
+              <SheetContent side="right" className="w-80 overflow-y-auto">
                 <div className="mt-6 flex flex-col gap-4">
                   <button
                     type="button"
                     onClick={() => {}}
-                    className="flex items-center gap-2 text-lg font-medium"
+                    className="flex items-center gap-2 text-lg font-medium text-foreground"
                   >
                     <Sparkles className="h-5 w-5" />
-                    AI Search
+                    {t("nav.ai_search")}
                   </button>
-                  <Link href="/catalog" className="text-lg font-medium">
+                  <Link href="/catalog" className="text-lg font-medium text-foreground">
                     {t("nav.catalog")}
                   </Link>
-                  <Link href="/cart" className="text-lg font-medium">
+                  <Link href="/cart" className="text-lg font-medium text-foreground">
                     {t("nav.cart")}
                   </Link>
-                  <Link href="/myfavorites" className="text-lg font-medium">
+                  <Link href="/myfavorites" className="text-lg font-medium text-foreground">
                     {t("nav.favorites")}
                   </Link>
-                  <Link href="/downloads" className="text-lg font-medium">
+                  <Link href="/downloads" className="text-lg font-medium text-foreground">
                     {t("account.downloads")}
                   </Link>
                   {isAuthenticated ? (
                     <>
-                      <Link href="/account" className="text-lg font-medium">
+                      <Link href="/account" className="text-lg font-medium text-foreground">
                         {t("nav.account")}
                       </Link>
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="text-left text-lg font-medium"
+                        className="text-left text-lg font-medium text-foreground"
                       >
                         {t("nav.logout")}
                       </button>
                     </>
                   ) : (
                     <>
-                      <Link href="/login" className="text-lg font-medium">
+                      <Link href="/login" className="text-lg font-medium text-foreground">
                         {t("nav.login")}
                       </Link>
-                      <Link href="/register" className="text-lg font-medium">
+                      <Link href="/register" className="text-lg font-medium text-foreground">
                         {t("nav.register")}
                       </Link>
                     </>
                   )}
+
+                  <hr className="my-2 border-border" />
+
+                  {/* Theme Selector Section */}
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t("theme.title")}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        variant={preference === "light" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPreference("light")}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Sun className="h-3.5 w-3.5" />
+                        {t("theme.light")}
+                      </Button>
+                      <Button
+                        variant={preference === "dark" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPreference("dark")}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Moon className="h-3.5 w-3.5" />
+                        {t("theme.dark")}
+                      </Button>
+                      <Button
+                        variant={preference === "system" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPreference("system")}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Monitor className="h-3.5 w-3.5" />
+                        {t("theme.system")}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Language Selector Section */}
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Language
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {languages.map((lang) => (
+                        <Button
+                          key={lang.code}
+                          variant={language === lang.code ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setLanguage(lang.code)}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <span>{lang.flag}</span>
+                          <span>{lang.label}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>

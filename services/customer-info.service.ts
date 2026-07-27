@@ -58,6 +58,8 @@ export interface CustomerInfoResponse {
   city: string;
   cityId?: number;
   accountType?: 'NORMAL' | 'GOOGLE' | 'ZOBAZE' | string;
+  amountDue?: number;
+  wallet?: number;
 }
 
 /**

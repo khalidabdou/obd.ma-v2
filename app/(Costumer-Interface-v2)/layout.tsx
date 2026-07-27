@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
 import Script from "next/script";
 import "@/app/globals.css";
 import NavBar from "@components/v2/layout/NavBar";
@@ -11,6 +10,7 @@ import { LanguageProvider } from "@/Context/LanguageContext";
 import { AuthProvider } from "@/Context/AuthContext";
 import { CartProvider } from "@/Context/CartContext";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { getServerInitialLanguage } from "@/lib/languageServer";
 
 export const metadata: Metadata = {
   title: "OBD.ma",
@@ -24,9 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerV2Layout({ children }: { children: ReactNode }) {
-  const cookieStore = await cookies();
-  const langCookie = cookieStore.get('obd-language')?.value;
-  const initialLanguage = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'fr';
+  const initialLanguage = await getServerInitialLanguage();
 
   return (
     <LanguageProvider initialLanguage={initialLanguage as 'ar' | 'fr' | 'en'}>

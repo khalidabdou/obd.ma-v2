@@ -1,8 +1,8 @@
 import { ReactNode } from "react"
 import type { Metadata } from "next"
-import { cookies } from "next/headers"
 import "./globals.css"
 import { local_font } from "@/utils/variables"
+import { getServerInitialLanguage } from "@/lib/languageServer"
 
 export const metadata: Metadata = {
   icons: {
@@ -17,9 +17,7 @@ const themeInitScript = `(function(){try{var p=localStorage.getItem('theme-prefe
 const langInitScript = `(function(){try{var c=document.cookie.split(';').find(function(r){return r.trim().startsWith('obd-language=');});var l=c?c.split('=')[1].trim():'fr';if(l!=='ar'&&l!=='fr'&&l!=='en')l='fr';var r=document.documentElement;r.setAttribute('lang',l);r.setAttribute('dir',l==='ar'?'rtl':'ltr');}catch(e){}})();`;
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
-  const cookieStore = await cookies()
-  const langCookie = cookieStore.get('obd-language')?.value
-  const language = ['ar', 'fr', 'en'].includes(langCookie || '') ? langCookie : 'fr'
+  const language = await getServerInitialLanguage()
   const dir = language === 'ar' ? 'rtl' : 'ltr'
 
   return (

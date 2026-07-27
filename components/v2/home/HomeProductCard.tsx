@@ -87,7 +87,7 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/50 dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]">
       {isNewProduct(product.creationDate) && (
         <span className="absolute left-4 top-4 z-10 rounded-full bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white">
-          NOUVEAU
+          {t("home.new")}
         </span>
       )}
 

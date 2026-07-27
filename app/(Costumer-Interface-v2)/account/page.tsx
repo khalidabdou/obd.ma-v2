@@ -6,7 +6,7 @@ import Container from "@components/v2/layout/Container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Package, Pencil, Lock, User, Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
+import { Loader2, Package, Pencil, Lock, User, Mail, Phone, MapPin, ShieldCheck, Wallet, AlertCircle } from "lucide-react";
 import { customerInfoService } from "@/services/customer-info.service";
 import { getErrorMessage } from "@/lib/apiError";
 import { useTranslation } from "@/Context/LanguageContext";
@@ -140,6 +140,33 @@ export default function AccountPage() {
               <p className="mb-6 text-sm text-muted-foreground">
                 {t("account.account_and_info")}
               </p>
+
+              {/* Financial Balance & Debt */}
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+                    <Wallet className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("account.balance")}</p>
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                      {(customer.wallet || 0).toFixed(2)} MAD
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${(customer.amountDue || 0) > 0 ? "bg-amber-500/10 text-amber-500" : "bg-gray-500/10 text-gray-500"}`}>
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("account.debt")}</p>
+                    <p className={`text-lg font-bold ${(customer.amountDue || 0) > 0 ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}>
+                      {(customer.amountDue || 0).toFixed(2)} MAD
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* Login method */}
               <div className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-4 dark:border-white/10 dark:bg-white/5">

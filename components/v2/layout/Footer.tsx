@@ -179,13 +179,13 @@ export default function Footer() {
               <div>
                 <div className="mb-4 flex items-center gap-2 text-brand-red">
                   <Link2 className="h-5 w-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-wide">Quick Links</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.quick_links")}</h3>
                 </div>
                 <ul className="space-y-3">
-                  <FooterLink href="/forum-video">Forum Vidéo</FooterLink>
-                  <FooterLink href="/blog">Blog</FooterLink>
-                  <FooterLink href="/catalog">Catalogue</FooterLink>
-                  <FooterLink href="/tuning-online">Tuning Online</FooterLink>
+                  <FooterLink href="/forum-video">{t("footer.forum_video")}</FooterLink>
+                  <FooterLink href="/blog">{t("footer.blog")}</FooterLink>
+                  <FooterLink href="/catalog">{t("nav.catalog")}</FooterLink>
+                  <FooterLink href="/tuning-online">{t("footer.tuning_online")}</FooterLink>
                 </ul>
               </div>
             </div>
