@@ -83,10 +83,16 @@ export const customerAuthService = {
   },
 
   /**
-   * Get customer information
-   * @returns Promise with customer info
+   * Send WhatsApp OTP
    */
-  getCustomerInfo: async (): Promise<ApiSuccess<{ customer_info: CustomerInfo }>> => {
-    return await apiClient.get('/customer_info');
+  sendWhatsAppOtp: async (payload: { countryCode: string; phoneNumber: string }): Promise<ApiSuccess<{ message: string }>> => {
+    return await apiClient.post('/otp/whatsapp/send', payload);
+  },
+
+  /**
+   * Verify WhatsApp OTP
+   */
+  verifyWhatsAppOtp: async (payload: { countryCode: string; phoneNumber: string; otp: string }): Promise<ApiSuccess<{ message: string }>> => {
+    return await apiClient.post('/otp/whatsapp/verify', payload);
   },
 };

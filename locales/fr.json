@@ -386,7 +386,8 @@
     "error_email_or_phone_required": "Veuillez entrer l'email ou le numéro de téléphone.",
     "error_email_or_phone_invalid": "Email ou numéro de téléphone invalide.",
     "send_again": "Renvoyer le code",
-    "error_generic": "Une erreur s'est produite. Veuillez réessayer."
+    "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "verify_via_whatsapp": "Vérifier via WhatsApp"
   },
   "loginPage": {
     "welcome": "Bienvenue !",
@@ -456,7 +457,8 @@
     "yes": "Oui",
     "no": "Non",
     "default": "Par défaut",
-    "not_available": "Non disponible"
+    "not_available": "Non disponible",
+    "add": "Ajouter"
   },
   "theme": {
     "title": "Thème",

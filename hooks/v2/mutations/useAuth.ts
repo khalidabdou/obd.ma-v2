@@ -27,3 +27,15 @@ export function useLogout() {
     mutationFn: customerAuthService.customerLogout,
   });
 }
+
+export function useSendWhatsAppOtp() {
+  return useMutation({
+    mutationFn: customerAuthService.sendWhatsAppOtp,
+  });
+}
+
+export function useVerifyWhatsAppOtp() {
+  return useMutation({
+    mutationFn: customerAuthService.verifyWhatsAppOtp,
+  });
+}

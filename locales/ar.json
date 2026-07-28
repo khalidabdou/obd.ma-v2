@@ -291,7 +291,8 @@
     "error_email_or_phone_required": "المرجو إدخال البريد الإلكتروني أو رقم الهاتف.",
     "error_email_or_phone_invalid": "بريد إلكتروني أو رقم هاتف غير صالح.",
     "send_again": "أرسل مرة أخرى",
-    "error_generic": "حدث خطأ. يرجى المحاولة مرة أخرى."
+    "error_generic": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "verify_via_whatsapp": "التحقق عبر واتساب"
   },
   "loginPage": {
     "welcome": "مرحباً!",
@@ -361,7 +362,8 @@
     "yes": "نعم",
     "no": "لا",
     "default": "الافتراضي",
-    "not_available": "غير متوفر"
+    "not_available": "غير متوفر",
+    "add": "إضافة"
   },
   "theme": {
     "title": "المظهر",
