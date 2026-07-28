@@ -22,7 +22,7 @@ export interface CustomerInfoData {
 export interface CreateCustomerAccountRequest {
   firstName: string;
   lastName: string;
-  email: string;
+  email?: string;
   password: string;
   countryCode: string;
   phoneNumber: string;

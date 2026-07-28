@@ -23,7 +23,7 @@ export default async function HomeCarousel() {
   if (carouselSlides.length === 0) return null;
 
   return (
-    <section className="bg-background py-4 dark:bg-[#0B0D10] md:py-6 lg:py-8">
+    <section className="bg-background py-10 dark:bg-[#0B0D10] md:py-16 lg:py-20">
       <Container className="max-w-[1600px]">
         <HeroCarousel slides={carouselSlides} />
       </Container>

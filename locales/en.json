@@ -412,7 +412,8 @@
   },
   "registerPage": {
     "welcome": "Create Account",
-    "subtitle": "Sign up to get started"
+    "subtitle": "Sign up to get started",
+    "email_optional_hint": "Optional — add your email to enable email login in the future"
   },
   "filter": {
     "filter": "Filter",

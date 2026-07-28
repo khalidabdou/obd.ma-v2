@@ -50,8 +50,13 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
+    // Omit email from payload when left blank so the backend uses its optional path
+    // (sending an empty string would fail backend IsEmail validation)
+    const { email, ...rest } = form;
+    const payload = email ? { ...rest, email } : rest;
+
     try {
-      await register.mutateAsync(form);
+      await register.mutateAsync(payload);
       authLogin();
       toast({
         title: t("common.success"),
@@ -163,7 +168,7 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-[120px_1fr]">
+                <div className="grid grid-cols-[100px_1fr] gap-3">
                   <div>
                     <Label
                       htmlFor="countryCode"
@@ -171,14 +176,16 @@ export default function RegisterPage() {
                     >
                       {t("auth.country_code")}
                     </Label>
-                    <Input
-                      id="countryCode"
-                      value={form.countryCode}
-                      onChange={handleChange}
-                      required
-                      maxLength={5}
-                      className="border-border bg-input text-foreground placeholder:text-muted-foreground focus-visible:ring-brand-blue dark:border-white/10 dark:bg-white/5"
-                    />
+                    <div className="mt-1">
+                      <Input
+                        id="countryCode"
+                        value={form.countryCode}
+                        onChange={handleChange}
+                        required
+                        maxLength={5}
+                        className="border-border bg-input text-foreground placeholder:text-muted-foreground focus-visible:ring-brand-blue dark:border-white/10 dark:bg-white/5"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label
@@ -205,7 +212,10 @@ export default function RegisterPage() {
 
                 <div>
                   <Label htmlFor="email" className="text-muted-foreground">
-                    {t("auth.email")}
+                    {t("auth.email")}{" "}
+                    <span className="text-xs text-muted-foreground/70">
+                      ({t("auth.phone_optional")})
+                    </span>
                   </Label>
                   <div className="relative mt-1">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -215,10 +225,12 @@ export default function RegisterPage() {
                       placeholder={t("personal_info.enter_email")}
                       value={form.email}
                       onChange={handleChange}
-                      required
                       className="border-border bg-input pl-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-brand-blue dark:border-white/10 dark:bg-white/5"
                     />
                   </div>
+                  <p className="mt-1 text-xs text-muted-foreground/70">
+                    {t("registerPage.email_optional_hint")}
+                  </p>
                 </div>
 
                 <div>

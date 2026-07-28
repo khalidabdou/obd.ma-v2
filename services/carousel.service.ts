@@ -8,6 +8,9 @@ export interface CarouselImage {
   link: string | null;
   category: string | null;
   productCode: string | null;
+  title?: string | null;
+  subtitle?: string | null;
+  buttonText?: string | null;
 }
 
 export interface CarouselData {

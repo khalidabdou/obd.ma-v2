@@ -316,7 +316,8 @@
   },
   "registerPage": {
     "welcome": "إنشاء حساب",
-    "subtitle": "سجل للبدء"
+    "subtitle": "سجل للبدء",
+    "email_optional_hint": "اختياري — أضف بريدك الإلكتروني لتفعيل تسجيل الدخول به مستقبلاً"
   },
   "filter": {
     "filter": "تصفية",

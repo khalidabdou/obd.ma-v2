@@ -21,10 +21,11 @@ export default function AccountPage() {
   const [error, setError] = useState<unknown>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Name editor state
+  // Name & email editor state
   const [editingName, setEditingName] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [nameSaving, setNameSaving] = useState(false);
 
   // Password change state
@@ -33,6 +34,12 @@ export default function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  // Detect synthetic placeholder emails — phone-based (+xxx@obd.ma) or the legacy noemail_ format
+  const isSyntheticEmail = (email?: string) =>
+    !!email &&
+    email.endsWith("@obd.ma") &&
+    (email.startsWith("+") || email.startsWith("noemail_"));
 
   useEffect(() => {
     if (authLoading) return;
@@ -47,6 +54,7 @@ export default function AccountPage() {
         setCustomer(info);
         setFirstName(info.firstName || "");
         setLastName(info.lastName || "");
+        setEmail(isSyntheticEmail(info.email) ? "" : info.email || "");
       })
       .catch((err) => setError(err))
       .finally(() => setLoading(false));
@@ -64,16 +72,26 @@ export default function AccountPage() {
     if (!customer) return;
     const trimmedFirst = firstName.trim();
     const trimmedLast = lastName.trim();
+    const trimmedEmail = email.trim();
     if (trimmedFirst.length < 2 || trimmedLast.length < 2) return;
 
     setNameSaving(true);
     setError(null);
     try {
-      await customerInfoService.updateCustomerInfo({
+      const updatePayload: { firstName: string; lastName: string; email?: string } = {
         firstName: trimmedFirst,
         lastName: trimmedLast,
+      };
+      if (trimmedEmail && trimmedEmail !== (isSyntheticEmail(customer.email) ? "" : customer.email)) {
+        updatePayload.email = trimmedEmail;
+      }
+      await customerInfoService.updateCustomerInfo(updatePayload);
+      setCustomer({
+        ...customer,
+        firstName: trimmedFirst,
+        lastName: trimmedLast,
+        ...(updatePayload.email ? { email: updatePayload.email } : {}),
       });
-      setCustomer({ ...customer, firstName: trimmedFirst, lastName: trimmedLast });
       setEditingName(false);
       showSuccess("account.name_updated");
     } catch (err) {
@@ -215,6 +233,17 @@ export default function AccountPage() {
                         />
                       </div>
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">{t("personal_info.email")}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder={t("personal_info.enter_email")}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={nameSaving}
+                      />
+                    </div>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -231,6 +260,7 @@ export default function AccountPage() {
                           setEditingName(false);
                           setFirstName(customer.firstName || "");
                           setLastName(customer.lastName || "");
+                          setEmail(isSyntheticEmail(customer.email) ? "" : customer.email || "");
                         }}
                         disabled={nameSaving}
                       >
@@ -242,8 +272,39 @@ export default function AccountPage() {
                   <dl className="grid gap-4 sm:grid-cols-2">
                     <InfoRow icon={<User className="h-4 w-4" />} label={t("personal_info.first_name")} value={customer.firstName} />
                     <InfoRow icon={<User className="h-4 w-4" />} label={t("personal_info.last_name")} value={customer.lastName} />
-                    <InfoRow icon={<Mail className="h-4 w-4" />} label={t("personal_info.email")} value={customer.email} />
-                    <InfoRow icon={<Phone className="h-4 w-4" />} label={t("personal_info.phone")} value={customer.phoneNumber || t("common.not_available")} />
+                    {/* Email — full width, shows placeholder text when synthetic */}
+                    <div className="sm:col-span-2">
+                      <InfoRow
+                        icon={<Mail className="h-4 w-4" />}
+                        label={t("personal_info.email")}
+                        value={
+                          isSyntheticEmail(customer.email)
+                            ? t("common.not_available")
+                            : customer.email || t("common.not_available")
+                        }
+                        hint={
+                          isSyntheticEmail(customer.email)
+                            ? t("registerPage.email_optional_hint")
+                            : undefined
+                        }
+                        action={
+                          isSyntheticEmail(customer.email) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs text-brand-blue border-brand-blue/30 hover:bg-brand-blue/10"
+                              onClick={() => setEditingName(true)}
+                            >
+                              + {t("common.add")} {t("auth.email")}
+                            </Button>
+                          ) : undefined
+                        }
+                      />
+                    </div>
+                    {/* Phone — full width */}
+                    <div className="sm:col-span-2">
+                      <InfoRow icon={<Phone className="h-4 w-4" />} label={t("personal_info.phone")} value={customer.phoneNumber || t("common.not_available")} />
+                    </div>
                     <div className="sm:col-span-2">
                       <InfoRow icon={<MapPin className="h-4 w-4" />} label={t("personal_info.address")} value={`${customer.address || ""}, ${customer.city || ""}`.replace(/^,\s*|,\s*$/g, "") || t("common.not_available")} />
                     </div>
@@ -346,18 +407,26 @@ function InfoRow({
   icon,
   label,
   value,
+  hint,
+  action,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  hint?: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 text-muted-foreground">{icon}</div>
-      <div>
-        <dt className="text-xs text-muted-foreground">{label}</dt>
-        <dd className="font-medium text-foreground">{value}</dd>
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3 min-w-0">
+        <div className="mt-0.5 shrink-0 text-muted-foreground">{icon}</div>
+        <div className="min-w-0">
+          <dt className="text-xs text-muted-foreground">{label}</dt>
+          <dd className="break-all font-medium text-foreground">{value}</dd>
+          {hint && <p className="mt-0.5 text-xs text-muted-foreground/70">{hint}</p>}
+        </div>
       </div>
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }

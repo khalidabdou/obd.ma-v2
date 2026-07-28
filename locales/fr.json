@@ -411,7 +411,8 @@
   },
   "registerPage": {
     "welcome": "Créer un compte",
-    "subtitle": "Inscrivez-vous pour commencer"
+    "subtitle": "Inscrivez-vous pour commencer",
+    "email_optional_hint": "Optionnel — ajoutez votre email pour pouvoir vous connecter avec par la suite"
   },
   "filter": {
     "filter": "Filtrer",
