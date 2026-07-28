@@ -107,14 +107,17 @@ export async function generateMetadata({
     return { title: "Product Not Found | OBD.ma" };
   }
 
-  // Multi-language descriptions
+  // Multi-language descriptions — prefer shortDescription, fall back to full description
   const descriptionFr =
+    (product as any).shortDescription?.slice(0, 160) ||
     product.description?.slice(0, 160) ||
     `Achetez ${product.title} chez OBD.ma — les meilleurs outils de diagnostic et pièces auto au Maroc.`;
   const descriptionEn =
+    (product as any).shortDescription_en?.slice(0, 160) ||
     product.description_en?.slice(0, 160) ||
     `Buy ${product.title} at OBD.ma — the best diagnostic tools and auto parts in Morocco.`;
   const descriptionAr =
+    (product as any).shortDescription_ar?.slice(0, 160) ||
     product.description_ar?.slice(0, 160) ||
     `اشتري ${product.title} من OBD.ma — أفضل أدوات التشخيص وقطع غيار السيارات في المغرب.`;
   // Default to French (primary market)

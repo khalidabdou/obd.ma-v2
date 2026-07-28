@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { CarouselImage } from "@/services/carousel.service";
+import { useTranslation } from "@/Context/LanguageContext";
 
 interface HeroCarouselProps {
   slides: CarouselImage[];
@@ -12,6 +13,7 @@ interface HeroCarouselProps {
 export default function HeroCarousel({ slides }: HeroCarouselProps) {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { language } = useTranslation();
 
   const validSlides = slides.filter((s) => s.carouselImage);
   const slideCount = validSlides.length;
@@ -37,8 +39,27 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
     return "/";
   }
 
+  function localized(
+    base?: string | null,
+    ar?: string | null,
+    en?: string | null
+  ): string | null {
+    return (
+      (language === "ar" && ar) ||
+      (language === "en" && en) ||
+      base ||
+      en ||
+      ar ||
+      null
+    );
+  }
+
   function hasHeroContent(slide: CarouselImage): boolean {
-    return Boolean(slide.title || slide.subtitle || slide.buttonText);
+    return Boolean(
+      localized(slide.title, slide.title_ar, slide.title_en) ||
+      localized(slide.subtitle, slide.subtitle_ar, slide.subtitle_en) ||
+      localized(slide.buttonText, slide.buttonText_ar, slide.buttonText_en)
+    );
   }
 
   return (
@@ -72,6 +93,10 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
           );
         }
 
+        const title = localized(slide.title, slide.title_ar, slide.title_en);
+        const subtitle = localized(slide.subtitle, slide.subtitle_ar, slide.subtitle_en);
+        const buttonText = localized(slide.buttonText, slide.buttonText_ar, slide.buttonText_en);
+
         return (
           <div
             key={index}
@@ -80,22 +105,22 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
             <div className="flex flex-col items-center gap-10 md:flex-row md:gap-8 lg:gap-16">
               {/* Text content */}
               <div className="flex flex-1 flex-col items-center gap-4 text-center md:items-start md:gap-6 md:text-start">
-                {slide.title && (
+                {title && (
                   <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-6xl">
-                    {slide.title}
+                    {title}
                   </h2>
                 )}
-                {slide.subtitle && (
+                {subtitle && (
                   <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-                    {slide.subtitle}
+                    {subtitle}
                   </p>
                 )}
-                {slide.buttonText && (
+                {buttonText && (
                   <Link
                     href={getHref(slide)}
                     className="mt-2 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-[0_0_24px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_0_36px_rgba(37,99,235,0.55)] md:text-base"
                   >
-                    {slide.buttonText}
+                    {buttonText}
                   </Link>
                 )}
               </div>
@@ -104,7 +129,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
               <div className="relative hidden aspect-square w-full max-w-md md:block md:w-1/2 md:max-w-none lg:aspect-[4/3]">
                 <Image
                   src={slide.carouselImage!}
-                  alt={slide.title || `Promotion ${index + 1}`}
+                  alt={title || `Promotion ${index + 1}`}
                   fill
                   priority={index === 0}
                   sizes="(max-width: 1024px) 50vw, 720px"

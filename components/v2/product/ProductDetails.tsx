@@ -87,9 +87,12 @@ export default function ProductDetails({
     product.description;
 
   // Short description — language-aware fallback
-  const shortDescription =
-    (product as any).shortDescription || null;
-  const displayShortDescription = shortDescription || displayDescription?.slice(0, 200) || null;
+  const displayShortDescription =
+    (language === "ar" && (product as any).shortDescription_ar) ||
+    (language === "en" && (product as any).shortDescription_en) ||
+    (product as any).shortDescription ||
+    displayDescription?.slice(0, 200) ||
+    null;
 
   const filteredProductContent =
     product.productContent?.filter(

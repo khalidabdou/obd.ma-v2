@@ -9,8 +9,14 @@ export interface CarouselImage {
   category: string | null;
   productCode: string | null;
   title?: string | null;
+  title_ar?: string | null;
+  title_en?: string | null;
   subtitle?: string | null;
+  subtitle_ar?: string | null;
+  subtitle_en?: string | null;
   buttonText?: string | null;
+  buttonText_ar?: string | null;
+  buttonText_en?: string | null;
 }
 
 export interface CarouselData {

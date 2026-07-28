@@ -40,17 +40,17 @@ export default function NavBar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-      <Container>
-        <div className="flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-2 z-50 px-3 sm:px-4">
+      <Container className="rounded-2xl border border-border/60 bg-background/60 shadow-lg backdrop-blur-sm">
+        <div className="flex h-12 items-center justify-between gap-4">
           <Link href="/" className="flex items-center">
             <Image
               src="/assets/icons/logo.svg"
               alt="OBD.ma"
-              width={80}
-              height={36}
+              width={64}
+              height={28}
               priority
-              className="h-9 w-auto lg:h-10 xl:h-11"
+              className="h-7 w-auto lg:h-8"
             />
           </Link>
 

@@ -85,7 +85,7 @@ export default function SearchBox() {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={t("nav.search")}
-          className="pl-9 pr-8"
+          className="h-9 rounded-full border-0 bg-muted/60 pl-9 pr-8 shadow-none transition-colors focus-visible:bg-muted focus-visible:ring-1 focus-visible:ring-brand-blue/40"
         />
         {query && (
           <button
@@ -103,7 +103,7 @@ export default function SearchBox() {
       </div>
 
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
+        <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-96 overflow-y-auto rounded-2xl bg-popover/95 shadow-xl backdrop-blur-sm">
           {isLoading ? (
             <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />

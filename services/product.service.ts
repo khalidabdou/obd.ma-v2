@@ -41,6 +41,9 @@ export interface Product {
   description: string;
   description_ar?: string;
   description_en?: string;
+  shortDescription?: string;
+  shortDescription_ar?: string;
+  shortDescription_en?: string;
   categoryId: string;
   productContent: string[];
   choices: string[];
