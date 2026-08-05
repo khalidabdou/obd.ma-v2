@@ -577,6 +577,24 @@
     "secure_payment": "Secure Payment",
     "seasonal_offers": "Seasonal Offers"
   },
+  "privacy": {
+    "title": "Privacy Policy",
+    "last_updated": "Last updated: August 2026",
+    "data_collected": "Data We Collect",
+    "data_collected_text": "When you use OBD.ma, we collect the information you provide directly: full name, phone number, email address, and delivery address when creating an account or placing an order. We also collect order history and, if you sign in with Google, your basic Google profile information (name and email).",
+    "data_use": "How We Use Your Data",
+    "data_use_text": "Your data is used exclusively to process and deliver your orders, manage your account, communicate with you about your orders or inquiries, and improve your shopping experience. We never sell or rent your personal data to third parties for marketing purposes.",
+    "cookies": "Cookies",
+    "cookies_text": "We use essential cookies to keep you signed in, remember your cart and preferences (language, theme), and ensure the proper functioning of the site. You can disable cookies in your browser settings, but some features of the site may no longer work correctly.",
+    "data_sharing": "Data Sharing",
+    "data_sharing_text": "We only share your data with the partners necessary to fulfill your order: delivery companies (name, phone, address) and secure payment providers for online payments. These partners are required to use your data solely for the purpose of providing their service.",
+    "data_security": "Data Security",
+    "data_security_text": "We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, loss, or disclosure. Online payments are processed by certified secure payment providers; we never store your bank card details on our servers.",
+    "your_rights": "Your Rights",
+    "your_rights_text": "In accordance with Moroccan Law 09-08 on the protection of personal data, you have the right to access, rectify, and delete your personal data, as well as the right to object to its processing. You can update your information at any time from your account page or by contacting us.",
+    "contact": "Contact",
+    "contact_text": "For any question regarding this privacy policy or the processing of your personal data, you can contact us by email at sales@obd.ma or by phone/WhatsApp at 06.50.36.99.21."
+  },
   "trackOrders": {
     "title": "Orders",
     "no_orders": "You have no orders!",

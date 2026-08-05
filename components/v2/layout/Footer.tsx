@@ -173,6 +173,7 @@ export default function Footer() {
                   <FooterLink href="/account">{t("nav.account")}</FooterLink>
                   <FooterLink href="/cart">{t("nav.cart")}</FooterLink>
                   <FooterLink href="/myfavorites">{t("nav.favorites")}</FooterLink>
+                  <FooterLink href="/privacy-policy">{t("footer.privacy")}</FooterLink>
                 </ul>
               </div>
 

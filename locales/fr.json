@@ -576,6 +576,24 @@
     "secure_payment": "Paiement sécurisé",
     "seasonal_offers": "Offres saisonnières"
   },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "last_updated": "Dernière mise à jour : août 2026",
+    "data_collected": "Données collectées",
+    "data_collected_text": "Lorsque vous utilisez OBD.ma, nous collectons les informations que vous nous fournissez directement : nom complet, numéro de téléphone, adresse email et adresse de livraison lors de la création d'un compte ou d'une commande. Nous collectons également l'historique de vos commandes et, si vous vous connectez avec Google, les informations de base de votre profil Google (nom et email).",
+    "data_use": "Utilisation de vos données",
+    "data_use_text": "Vos données sont utilisées exclusivement pour traiter et livrer vos commandes, gérer votre compte, communiquer avec vous au sujet de vos commandes ou demandes, et améliorer votre expérience d'achat. Nous ne vendons ni ne louons jamais vos données personnelles à des tiers à des fins marketing.",
+    "cookies": "Cookies",
+    "cookies_text": "Nous utilisons des cookies essentiels pour vous maintenir connecté, mémoriser votre panier et vos préférences (langue, thème), et assurer le bon fonctionnement du site. Vous pouvez désactiver les cookies dans les paramètres de votre navigateur, mais certaines fonctionnalités du site peuvent ne plus fonctionner correctement.",
+    "data_sharing": "Partage des données",
+    "data_sharing_text": "Nous ne partageons vos données qu'avec les partenaires nécessaires à l'exécution de votre commande : les sociétés de livraison (nom, téléphone, adresse) et les prestataires de paiement sécurisés pour les paiements en ligne. Ces partenaires sont tenus d'utiliser vos données uniquement dans le cadre de la fourniture de leur service.",
+    "data_security": "Sécurité des données",
+    "data_security_text": "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données personnelles contre tout accès non autorisé, perte ou divulgation. Les paiements en ligne sont traités par des prestataires de paiement sécurisés et certifiés ; nous ne stockons jamais les données de votre carte bancaire sur nos serveurs.",
+    "your_rights": "Vos droits",
+    "your_rights_text": "Conformément à la loi marocaine 09-08 relative à la protection des données personnelles, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles, ainsi que d'un droit d'opposition à leur traitement. Vous pouvez mettre à jour vos informations à tout moment depuis votre page compte ou en nous contactant.",
+    "contact": "Contact",
+    "contact_text": "Pour toute question concernant cette politique de confidentialité ou le traitement de vos données personnelles, vous pouvez nous contacter par email à sales@obd.ma ou par téléphone/WhatsApp au 06.50.36.99.21."
+  },
   "trackOrders": {
     "title": "Commandes",
     "no_orders": "Vous n'avez aucune commande !",
