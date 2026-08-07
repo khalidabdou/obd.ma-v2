@@ -154,6 +154,7 @@ export default function PaymentStep({
         email: customerData.email,
         phoneCode: customerData.countryCode || "+212",
         phoneNumber: customerData.phoneNumber,
+        country: customerData.country,
         address: customerData.address,
         city: customerData.city,
         cityId: customerData.cityId || 0,
@@ -168,6 +169,7 @@ export default function PaymentStep({
           password: customerData.password,
           countryCode: customerData.countryCode || "+212",
           phoneNumber: customerData.phoneNumber,
+          country: customerData.country,
           withCart: true,
         });
         // Account creation logs the user in and clears the guest customer_id cookie.

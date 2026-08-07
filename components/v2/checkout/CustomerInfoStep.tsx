@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerFormData } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
 import citiesData from "@/locales/cities.json";
+import { COUNTRIES, getCountryByPhoneCode, getCountryByName, type Country } from "@/locales/countries";
 
 interface CustomerInfoStepProps {
   data: CustomerFormData;
@@ -37,14 +38,18 @@ export default function CustomerInfoStep({
   isLoggedIn,
   onNext,
 }: CustomerInfoStepProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [cityOpen, setCityOpen] = useState(false);
   const [citySearch, setCitySearch] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
   const cityRef = useRef<HTMLDivElement>(null);
   const cityInputRef = useRef<HTMLInputElement>(null);
+  const countryRef = useRef<HTMLDivElement>(null);
+  const countryInputRef = useRef<HTMLInputElement>(null);
 
   const requestGpsLocation = () => {
     if (typeof window === "undefined" || !navigator.geolocation) {
@@ -85,8 +90,13 @@ export default function CustomerInfoStep({
     );
   };
 
-  // Auto-fill cityId when city name is provided but id is missing
+  const selectedCity = cities.find((c) => c.id === data.cityId);
+  const selectedCountry: Country | undefined =
+    getCountryByName(data.country) || getCountryByPhoneCode(data.countryCode);
+
+  // Auto-fill cityId when city name is provided but id is missing (Morocco only)
   useEffect(() => {
+    if (selectedCountry?.code !== "MA") return;
     if (data.city && !data.cityId) {
       const match = cities.find(
         (c) => c.name.toLowerCase() === data.city.trim().toLowerCase()
@@ -95,13 +105,16 @@ export default function CustomerInfoStep({
         onChange({ ...data, city: match.name, cityId: match.id });
       }
     }
-  }, [data.city, data.cityId]);
+  }, [data.city, data.cityId, selectedCountry?.code]);
 
   // Close city dropdown on click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (cityRef.current && !cityRef.current.contains(e.target as Node)) {
         setCityOpen(false);
+      }
+      if (countryRef.current && !countryRef.current.contains(e.target as Node)) {
+        setCountryOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -112,13 +125,35 @@ export default function CustomerInfoStep({
     ? cities.filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
     : cities;
 
-  const selectedCity = cities.find((c) => c.id === data.cityId);
+  const filteredCountries = countrySearch.trim()
+    ? COUNTRIES.filter((c) => {
+        const q = countrySearch.toLowerCase();
+        return (
+          c.name.toLowerCase().includes(q) ||
+          c.names[language].toLowerCase().includes(q) ||
+          c.code.toLowerCase().includes(q) ||
+          c.phoneCode.includes(q)
+        );
+      })
+    : COUNTRIES;
 
   const handleCitySelect = (city: (typeof cities)[0]) => {
     onChange({ ...data, city: city.name, cityId: city.id });
     setCitySearch("");
     setCityOpen(false);
     if (errors.city) setErrors((prev) => ({ ...prev, city: "" }));
+  };
+
+  const handleCountrySelect = (country: Country) => {
+    // Update country and sync the phone dial code to match
+    onChange({
+      ...data,
+      country: country.name,
+      countryCode: country.phoneCode,
+    });
+    setCountrySearch("");
+    setCountryOpen(false);
+    if (errors.country) setErrors((prev) => ({ ...prev, country: "" }));
   };
 
   const validate = (): boolean => {
@@ -132,6 +167,9 @@ export default function CustomerInfoStep({
     if (!data.city.trim()) errs.city = t("checkout.required");
     if (data.createAccount && !data.password?.trim()) errs.password = t("checkout.required");
 
+    // GPS location: only prompt for permission when we don't already have a
+    // saved location (from a previous order or localStorage). Returning
+    // customers reuse their last location without re-prompting.
     if (data.latitude == null || data.longitude == null) {
       const msg = "GPS location permission is required to complete your order. Please allow location access.";
       errs.location = msg;
@@ -217,7 +255,11 @@ export default function CustomerInfoStep({
           <div className="mt-1 flex gap-2">
             <Select
               value={data.countryCode || "+212"}
-              onValueChange={(value) => update("countryCode", value)}
+              onValueChange={(value) => {
+                // Sync the default country to match the chosen dial code
+                const c = getCountryByPhoneCode(value);
+                onChange({ ...data, countryCode: value, country: c.name });
+              }}
             >
               <SelectTrigger className="w-[90px] flex-shrink-0 border-brand-blue/30 bg-input focus:ring-brand-blue dark:border-brand-blue/30 dark:bg-white/5">
                 <SelectValue />
@@ -303,43 +345,54 @@ export default function CustomerInfoStep({
           {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
         </div>
 
-        {/* City */}
-        <div className="space-y-2" ref={cityRef}>
-          <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
+        {/* Country */}
+        <div className="space-y-2" ref={countryRef}>
+          <Label htmlFor="country" className="text-muted-foreground">{t("checkout.country")}</Label>
           <button
             type="button"
-            id="city"
+            id="country"
             onClick={() => {
-              setCityOpen(!cityOpen);
-              setTimeout(() => cityInputRef.current?.focus(), 10);
+              setCountryOpen(!countryOpen);
+              setTimeout(() => countryInputRef.current?.focus(), 10);
             }}
             className={`mt-1 flex w-full items-center justify-between rounded-md border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-brand-blue focus-visible:ring-1 focus-visible:ring-brand-blue dark:bg-white/5 ${
-              errors.city ? "border-red-500" : "border-brand-blue/30 dark:border-brand-blue/30"
+              errors.country ? "border-red-500" : "border-brand-blue/30 dark:border-brand-blue/30"
             }`}
           >
-            <span className={selectedCity ? "text-foreground" : "text-muted-foreground"}>
-              {selectedCity ? selectedCity.name : t("checkout.city_placeholder")}
+            <span className={`flex items-center gap-2 ${selectedCountry ? "text-foreground" : "text-muted-foreground"}`}>
+              {selectedCountry ? (
+                <>
+                  <span className="text-base leading-none">{selectedCountry.flag}</span>
+                  <span>{selectedCountry.names[language]}</span>
+                  <span className="text-xs text-muted-foreground">({selectedCountry.phoneCode})</span>
+                </>
+              ) : (
+                <>
+                  <Globe className="h-4 w-4" />
+                  <span>{t("checkout.country_placeholder")}</span>
+                </>
+              )}
             </span>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${cityOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${countryOpen ? "rotate-180" : ""}`} />
           </button>
 
-          {cityOpen && (
+          {countryOpen && (
             <div className="relative z-50 w-full">
               <div className="max-h-72 overflow-auto rounded-md border border-brand-blue/30 bg-popover shadow-md dark:border-brand-blue/30 dark:bg-card">
                 <div className="sticky top-0 z-10 border-b border-border bg-popover p-2 dark:border-border dark:bg-card">
                   <div className="relative">
                     <Search className="absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      ref={cityInputRef}
-                      value={citySearch}
-                      onChange={(e) => setCitySearch(e.target.value)}
-                      placeholder={t("checkout.search_city")}
+                      ref={countryInputRef}
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      placeholder={t("checkout.search_country")}
                       className="border-brand-blue/30 bg-input ps-9 pe-8 text-sm focus-visible:border-brand-blue focus-visible:ring-brand-blue dark:border-brand-blue/30 dark:bg-white/5"
                     />
-                    {citySearch && (
+                    {countrySearch && (
                       <button
                         type="button"
-                        onClick={() => setCitySearch("")}
+                        onClick={() => setCountrySearch("")}
                         className="absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-4 w-4" />
@@ -347,24 +400,26 @@ export default function CustomerInfoStep({
                     )}
                   </div>
                 </div>
-                {filteredCities.length === 0 ? (
+                {filteredCountries.length === 0 ? (
                   <div className="p-3 text-center text-sm text-muted-foreground">
-                    {t("checkout.no_city_found")}
+                    {t("checkout.no_country_found")}
                   </div>
                 ) : (
                   <div className="p-1">
-                    {filteredCities.map((city) => (
+                    {filteredCountries.map((country) => (
                       <button
-                        key={city.id}
+                        key={country.code}
                         type="button"
-                        onClick={() => handleCitySelect(city)}
-                        className={`w-full rounded-sm px-3 py-2 text-start text-sm transition-colors ${
-                          data.cityId === city.id
+                        onClick={() => handleCountrySelect(country)}
+                        className={`flex w-full items-center gap-2 rounded-sm px-3 py-2 text-start text-sm transition-colors ${
+                          selectedCountry?.code === country.code
                             ? "bg-brand-blue/10 text-brand-blue"
                             : "text-foreground hover:bg-muted dark:hover:bg-white/5"
                         }`}
                       >
-                        {city.name}
+                        <span className="text-base leading-none">{country.flag}</span>
+                        <span className="flex-1">{country.names[language]}</span>
+                        <span className="text-xs text-muted-foreground">{country.phoneCode}</span>
                       </button>
                     ))}
                   </div>
@@ -372,8 +427,102 @@ export default function CustomerInfoStep({
               </div>
             </div>
           )}
-          {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
+          {errors.country && <p className="text-sm text-red-500">{errors.country}</p>}
         </div>
+
+        {/* City */}
+        {/* City — dropdown for Morocco, free text for other countries */}
+        {selectedCountry?.code === "MA" ? (
+          <div className="space-y-2" ref={cityRef}>
+            <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
+            <button
+              type="button"
+              id="city"
+              onClick={() => {
+                setCityOpen(!cityOpen);
+                setTimeout(() => cityInputRef.current?.focus(), 10);
+              }}
+              className={`mt-1 flex w-full items-center justify-between rounded-md border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-brand-blue focus-visible:ring-1 focus-visible:ring-brand-blue dark:bg-white/5 ${
+                errors.city ? "border-red-500" : "border-brand-blue/30 dark:border-brand-blue/30"
+              }`}
+            >
+              <span className={selectedCity ? "text-foreground" : "text-muted-foreground"}>
+                {selectedCity ? selectedCity.name : t("checkout.city_placeholder")}
+              </span>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${cityOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {cityOpen && (
+              <div className="relative z-50 w-full">
+                <div className="max-h-72 overflow-auto rounded-md border border-brand-blue/30 bg-popover shadow-md dark:border-brand-blue/30 dark:bg-card">
+                  <div className="sticky top-0 z-10 border-b border-border bg-popover p-2 dark:border-border dark:bg-card">
+                    <div className="relative">
+                      <Search className="absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        ref={cityInputRef}
+                        value={citySearch}
+                        onChange={(e) => setCitySearch(e.target.value)}
+                        placeholder={t("checkout.search_city")}
+                        className="border-brand-blue/30 bg-input ps-9 pe-8 text-sm focus-visible:border-brand-blue focus-visible:ring-brand-blue dark:border-brand-blue/30 dark:bg-white/5"
+                      />
+                      {citySearch && (
+                        <button
+                          type="button"
+                          onClick={() => setCitySearch("")}
+                          className="absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {filteredCities.length === 0 ? (
+                    <div className="p-3 text-center text-sm text-muted-foreground">
+                      {t("checkout.no_city_found")}
+                    </div>
+                  ) : (
+                    <div className="p-1">
+                      {filteredCities.map((city) => (
+                        <button
+                          key={city.id}
+                          type="button"
+                          onClick={() => handleCitySelect(city)}
+                          className={`w-full rounded-sm px-3 py-2 text-start text-sm transition-colors ${
+                            data.cityId === city.id
+                              ? "bg-brand-blue/10 text-brand-blue"
+                              : "text-foreground hover:bg-muted dark:hover:bg-white/5"
+                          }`}
+                        >
+                          {city.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
+            <div className="relative mt-1">
+              <MapPin className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="city"
+                className="border-brand-blue/30 bg-input ps-10 text-foreground placeholder:text-muted-foreground focus-visible:border-brand-blue focus-visible:ring-brand-blue dark:border-brand-blue/30 dark:bg-white/5"
+                placeholder={t("checkout.city_placeholder")}
+                value={data.city}
+                onChange={(e) => {
+                  // Free-text city for non-Morocco countries — no cityId mapping
+                  onChange({ ...data, city: e.target.value, cityId: 0 });
+                  if (errors.city) setErrors((prev) => ({ ...prev, city: "" }));
+                }}
+              />
+            </div>
+            {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
+          </div>
+        )}
 
         {/* Create account (only for guests) */}
         {!isLoggedIn && (

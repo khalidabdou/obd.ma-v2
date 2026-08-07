@@ -31,6 +31,7 @@ import {
   RefreshCw,
   CheckCircle2,
 } from "lucide-react";
+import { getCountryByPhoneCode } from "@/locales/countries";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -129,7 +130,9 @@ export default function RegisterPage() {
 
       // Omit email when blank so backend uses phone-based synthetic email
       const { email, ...rest } = form;
-      const payload = email ? { ...rest, email } : rest;
+      // Derive the default country from the chosen dial code
+      const country = getCountryByPhoneCode(form.countryCode).name;
+      const payload = email ? { ...rest, email, country } : { ...rest, country };
 
       await register.mutateAsync(payload);
       authLogin();

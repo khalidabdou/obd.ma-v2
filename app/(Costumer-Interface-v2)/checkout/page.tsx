@@ -8,6 +8,7 @@ import { useTranslation } from "@/Context/LanguageContext";
 import { customerAuthService } from "@/services/customer-auth.service";
 import { customerInfoService } from "@/services/customer-info.service";
 import type { CustomerInfoResponse } from "@/services/customer-info.service";
+import { getCountryByPhoneCode } from "@/locales/countries";
 import CheckoutProgress from "@components/v2/checkout/CheckoutProgress";
 import CustomerInfoStep from "@components/v2/checkout/CustomerInfoStep";
 import DeliveryStep from "@components/v2/checkout/DeliveryStep";
@@ -24,6 +25,7 @@ export interface CustomerFormData {
   email: string;
   phoneNumber: string;
   countryCode: string;
+  country: string;
   address: string;
   city: string;
   cityId: number;
@@ -67,6 +69,7 @@ export default function CheckoutPage() {
     email: "",
     phoneNumber: "",
     countryCode: "+212",
+    country: getCountryByPhoneCode("+212").name,
     address: "",
     city: "",
     cityId: 0,
@@ -134,10 +137,15 @@ export default function CheckoutPage() {
                 lastName: info.lastName || "",
                 email: info.email || "",
                 countryCode: phoneCode,
+                country: info.country || getCountryByPhoneCode(phoneCode).name,
                 phoneNumber: phoneNum,
                 address: info.address || "",
                 city: info.city || "",
                 cityId: info.cityId ?? 0,
+                // Reuse the last saved GPS location so the customer doesn't have
+                // to grant geolocation permission on every checkout.
+                latitude: info.lastLocation?.latitude ?? prev.latitude,
+                longitude: info.lastLocation?.longitude ?? prev.longitude,
               }));
             }
           } catch {}
@@ -167,6 +175,7 @@ export default function CheckoutPage() {
                 lastName: "",
                 email: "",
                 countryCode: phoneCode,
+                country: parsed.country || getCountryByPhoneCode(phoneCode).name,
                 phoneNumber: phoneNum,
                 address: parsed.address || "",
                 city: parsed.city || "",
@@ -248,6 +257,7 @@ export default function CheckoutPage() {
                     cityId: customerData.cityId || undefined,
                     phoneCode: customerData.countryCode,
                     phoneNumber: customerData.phoneNumber,
+                    country: customerData.country,
                   });
                 } catch (err) {
                   console.error("Failed to update customer info:", err);

@@ -11,6 +11,7 @@ export interface CustomerInfoData {
   email: string;
   phoneCode?: string;
   phoneNumber: string;
+  country?: string;
   address: string;
   city: string;
   cityId: number;
@@ -26,6 +27,7 @@ export interface CreateCustomerAccountRequest {
   password: string;
   countryCode: string;
   phoneNumber: string;
+  country?: string;
   withCart?: boolean;
 }
 
@@ -38,6 +40,7 @@ export interface UpdateCustomerInfoRequest {
   email?: string | null;
   phoneCode?: string | null;
   phoneNumber?: string | null;
+  country?: string | null;
   address?: string | null;
   city?: string | null;
   cityId?: number | null;
@@ -54,12 +57,18 @@ export interface CustomerInfoResponse {
   email: string;
   phoneCode?: string;
   phoneNumber: string;
+  country?: string;
   address: string;
   city: string;
   cityId?: number;
   accountType?: 'NORMAL' | 'GOOGLE' | 'ZOBAZE' | string;
   amountDue?: number;
   wallet?: number;
+  lastLocation?: {
+    latitude: number;
+    longitude: number;
+    city?: string | null;
+  } | null;
 }
 
 /**
