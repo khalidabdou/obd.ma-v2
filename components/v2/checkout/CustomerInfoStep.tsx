@@ -167,17 +167,9 @@ export default function CustomerInfoStep({
     if (!data.city.trim()) errs.city = t("checkout.required");
     if (data.createAccount && !data.password?.trim()) errs.password = t("checkout.required");
 
-    // GPS location: only prompt for permission when we don't already have a
-    // saved location (from a previous order or localStorage). Returning
-    // customers reuse their last location without re-prompting.
-    if (data.latitude == null || data.longitude == null) {
-      const msg = "GPS location permission is required to complete your order. Please allow location access.";
-      errs.location = msg;
-      setLocationError(msg);
-      requestGpsLocation();
-    } else {
-      setLocationError("");
-    }
+    // GPS location is optional — customers can share their location via the
+    // "Use GPS Location" button, but it is no longer required to place an order.
+    setLocationError("");
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
