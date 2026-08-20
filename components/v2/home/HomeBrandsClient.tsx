@@ -18,13 +18,13 @@ export default function HomeBrandsClient({ brands }: { brands: BrandInfo[] }) {
 
   return (
     <section className="relative overflow-hidden bg-background py-14 text-foreground dark:bg-[#0B0D10] dark:text-white">
-      <div className="pointer-events-none absolute -right-10 top-0 hidden opacity-60 md:block lg:-right-6 dark:opacity-90">
+      <div className="pointer-events-none absolute -right-10 top-0 hidden opacity-60 md:block lg:-right-6 rtl:-left-10 rtl:right-auto rtl:lg:-left-6 rtl:lg:right-auto dark:opacity-90">
         <Image
           src="/assets/images/car.png"
           alt="Diagnostic auto"
           width={560}
           height={380}
-          className="object-contain"
+          className="object-contain rtl:-scale-x-100"
           priority={false}
         />
       </div>

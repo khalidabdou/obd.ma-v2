@@ -83,16 +83,16 @@ export default function Footer() {
           src="/assets/images/car-blue.png"
           alt=""
           fill
-          className="object-cover object-right-bottom opacity-[0.8] dark:opacity-90"
+          className="object-cover object-right-bottom opacity-[0.8] dark:opacity-90 rtl:-scale-x-100"
           priority={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60 dark:from-[#05070a] dark:via-[#05070a]/90 dark:to-[#05070a]/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60 rtl:bg-gradient-to-l dark:from-[#05070a] dark:via-[#05070a]/90 dark:to-[#05070a]/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-background/40 dark:from-[#05070a]/30 dark:via-transparent dark:to-[#05070a]/40" />
       </div>
 
       <Container className="relative z-10">
         <div className="grid gap-10 py-12 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <h3 className="text-lg font-bold uppercase tracking-wide text-brand-red">
               {t("footer.contact_us")}
             </h3>
@@ -150,18 +150,33 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="lg:col-span-6">
-            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <div className="mb-4 flex items-center gap-2 text-brand-blue">
-                  <Link2 className="h-5 w-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.about")}</h3>
+          <div className="lg:col-span-4">
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+              <div className="space-y-10">
+                <div>
+                  <div className="mb-4 flex items-center gap-2 text-brand-blue">
+                    <Link2 className="h-5 w-5" />
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.about")}</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    <FooterLink href="/about">{t("footer.about_store")}</FooterLink>
+                    <FooterLink href="/about">{t("footer.about_obd")}</FooterLink>
+                    <FooterLink href="/about">{t("footer.about_suppliers")}</FooterLink>
+                  </ul>
                 </div>
-                <ul className="space-y-3">
-                  <FooterLink href="/about">{t("footer.about_store")}</FooterLink>
-                  <FooterLink href="/about">{t("footer.about_obd")}</FooterLink>
-                  <FooterLink href="/about">{t("footer.about_suppliers")}</FooterLink>
-                </ul>
+
+                <div>
+                  <div className="mb-4 flex items-center gap-2 text-brand-red">
+                    <Link2 className="h-5 w-5" />
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.quick_links")}</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    <FooterLink href="/forum-video">{t("footer.forum_video")}</FooterLink>
+                    <FooterLink href="/blog">{t("footer.blog")}</FooterLink>
+                    <FooterLink href="/catalog">{t("nav.catalog")}</FooterLink>
+                    <FooterLink href="/tuning-online">{t("footer.tuning_online")}</FooterLink>
+                  </ul>
+                </div>
               </div>
 
               <div>
@@ -174,19 +189,6 @@ export default function Footer() {
                   <FooterLink href="/cart">{t("nav.cart")}</FooterLink>
                   <FooterLink href="/myfavorites">{t("nav.favorites")}</FooterLink>
                   <FooterLink href="/privacy-policy">{t("footer.privacy")}</FooterLink>
-                </ul>
-              </div>
-
-              <div>
-                <div className="mb-4 flex items-center gap-2 text-brand-red">
-                  <Link2 className="h-5 w-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.quick_links")}</h3>
-                </div>
-                <ul className="space-y-3">
-                  <FooterLink href="/forum-video">{t("footer.forum_video")}</FooterLink>
-                  <FooterLink href="/blog">{t("footer.blog")}</FooterLink>
-                  <FooterLink href="/catalog">{t("nav.catalog")}</FooterLink>
-                  <FooterLink href="/tuning-online">{t("footer.tuning_online")}</FooterLink>
                 </ul>
               </div>
             </div>
