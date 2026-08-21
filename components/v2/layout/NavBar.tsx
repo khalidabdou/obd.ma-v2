@@ -9,7 +9,7 @@ import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
 import { useAuth } from "@/Context/AuthContext";
 import ThemeToggle from "@components/v2/ui/ThemeToggle";
-import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles, Sun, Moon, Monitor } from "lucide-react";
+import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles, Sun, Moon, Monitor, PlayCircle } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "@/Context/LanguageContext";
 import { useTheme } from "@/hooks/v2/useTheme";
+import { openVideoTutorial } from "@components/v2/home/VideoTutorialDialog";
 
 const languages = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -43,7 +44,7 @@ export default function NavBar() {
     <header className="sticky top-2 z-50 px-3 sm:px-4">
       <Container className="rounded-2xl border border-border/60 bg-background/60 shadow-lg backdrop-blur-sm">
         <div className="flex h-12 items-center justify-between gap-4">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex shrink-0 items-center">
             <Image
               src="/assets/icons/logo.svg"
               alt="OBD.ma"
@@ -174,6 +175,17 @@ export default function NavBar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              aria-label={t("nav.video_tutorial")}
+              title={t("nav.video_tutorial")}
+              onClick={openVideoTutorial}
+            >
+              <PlayCircle className="h-5 w-5" />
+            </Button>
+
             <div>
               <ThemeToggle />
             </div>
@@ -231,6 +243,15 @@ export default function NavBar() {
                   )}
 
                   <hr className="my-2 border-border" />
+
+                  <button
+                    type="button"
+                    onClick={openVideoTutorial}
+                    className="flex items-center gap-2 text-lg font-medium text-foreground"
+                  >
+                    <PlayCircle className="h-5 w-5" />
+                    {t("nav.video_tutorial")}
+                  </button>
 
                   {/* Theme Selector Section */}
                   <div>

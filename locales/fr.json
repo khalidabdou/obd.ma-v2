@@ -9,7 +9,8 @@
     "logout": "Déconnexion",
     "search": "Rechercher des produits...",
     "catalog": "Catalogue",
-    "ai_search": "Recherche IA"
+    "ai_search": "Recherche IA",
+    "video_tutorial": "Tutoriel vidéo"
   },
   "home": {
     "welcome": "Bienvenue sur OBD.ma",
@@ -41,7 +42,12 @@
     "view_all_products": "Voir tous les produits",
     "no_products": "Aucun produit disponible.",
     "discover_brands": "Découvrez les grandes marques disponibles",
-    "new": "NOUVEAU"
+    "new": "NOUVEAU",
+    "video_tutorial_title": "Bienvenue sur OBD.ma",
+    "video_tutorial_subtitle": "Regardez ce tutoriel rapide pour apprendre à trouver les bons outils de diagnostic et pièces.",
+    "video_tutorial_close": "J'ai compris",
+    "video_tutorial_dismiss_hint": "Ce tutoriel ne s'affichera plus après l'avoir fermé.",
+    "video_tutorial_unsupported": "Votre navigateur ne prend pas en charge la lecture vidéo."
   },
   "product": {
     "add_to_cart": "Ajouter au panier",

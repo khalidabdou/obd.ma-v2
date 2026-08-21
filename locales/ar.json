@@ -9,7 +9,8 @@
     "logout": "تسجيل الخروج",
     "search": "ابحث عن المنتجات...",
     "catalog": "المنتجات",
-    "ai_search": "بحث الذكاء الاصطناعي"
+    "ai_search": "بحث الذكاء الاصطناعي",
+    "video_tutorial": "شرح فيديو"
   },
   "home": {
     "welcome": "مرحبا بك في OBD.ma",
@@ -41,7 +42,12 @@
     "view_all_products": "عرض جميع المنتجات",
     "no_products": "لا توجد منتجات متاحة.",
     "discover_brands": "اكتشف أبرز العلامات التجارية المتاحة",
-    "new": "جديد"
+    "new": "جديد",
+    "video_tutorial_title": "مرحبا بك في OBD.ma",
+    "video_tutorial_subtitle": "شاهد هذا الشرح السريع لتتعرّف على كيفية العثور على أدوات التشخيص والقطع المناسبة.",
+    "video_tutorial_close": "فهمت",
+    "video_tutorial_dismiss_hint": "لن يظهر هذا الشرح مرة أخرى بعد إغلاقه.",
+    "video_tutorial_unsupported": "متصفحك لا يدعم تشغيل الفيديو."
   },
   "product": {
     "add_to_cart": "أضف إلى السلة",
@@ -321,7 +327,7 @@
     "email_optional_hint": "اختياري — أضف بريدك الإلكتروني لتفعيل تسجيل الدخول به مستقبلاً"
   },
   "filter": {
-    "filter": "تصفية",
+    "filter": "فرز",
     "customize": "تخصيص",
     "sort_by": "ترتيب حسب",
     "price_range": "نطاق السعر",

@@ -6,6 +6,7 @@ import NavBar from "@components/v2/layout/NavBar";
 import FooterWrapper from "@components/v2/layout/FooterWrapper";
 import Toaster from "@components/Toaster";
 import DirectionWrapper from "@components/DirectionWrapper";
+import VideoTutorialDialog from "@components/v2/home/VideoTutorialDialog";
 import { LanguageProvider } from "@/Context/LanguageContext";
 import { AuthProvider } from "@/Context/AuthContext";
 import { CartProvider } from "@/Context/CartContext";
@@ -36,6 +37,7 @@ export default async function CustomerV2Layout({ children }: { children: ReactNo
                 <NavBar />
                 <main className="min-h-screen bg-background">{children}</main>
                 <FooterWrapper />
+                <VideoTutorialDialog />
                 <Script src="https://accounts.google.com/gsi/client" async defer />
               </Toaster>
             </DirectionWrapper>

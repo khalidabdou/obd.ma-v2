@@ -9,7 +9,8 @@
     "logout": "Logout",
     "search": "Search for products...",
     "catalog": "Catalog",
-    "ai_search": "AI Search"
+    "ai_search": "AI Search",
+    "video_tutorial": "Video Tutorial"
   },
   "home": {
     "welcome": "Welcome to OBD.ma",
@@ -41,7 +42,12 @@
     "view_all_products": "View All Products",
     "no_products": "No products available.",
     "discover_brands": "Discover top brands available",
-    "new": "NEW"
+    "new": "NEW",
+    "video_tutorial_title": "Welcome to OBD.ma",
+    "video_tutorial_subtitle": "Watch this quick tutorial to learn how to find the right diagnostic tools and parts.",
+    "video_tutorial_close": "Got it",
+    "video_tutorial_dismiss_hint": "This tutorial won't show again after you close it.",
+    "video_tutorial_unsupported": "Your browser does not support the video tag."
   },
   "product": {
     "add_to_cart": "Add to Cart",
