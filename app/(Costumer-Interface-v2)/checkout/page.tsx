@@ -273,6 +273,7 @@ export default function CheckoutPage() {
             onSelect={setSelectedDelivery}
             onBack={() => setStep("info")}
             onNext={() => setStep("payment")}
+            subtotal={subtotal}
           />
         )}
         {step === "payment" && (

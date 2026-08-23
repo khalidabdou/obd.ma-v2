@@ -6,13 +6,16 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/Context/LanguageContext";
 import { orderService } from "@/services/order.service";
 import type { DeliveryCompany } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, AlertCircle, Phone, Scissors, PackageMinus } from "lucide-react";
+
+const OZONE_MAX_LIMIT = 9900;
 
 interface DeliveryStepProps {
   selected: DeliveryCompany | null;
   onSelect: (company: DeliveryCompany) => void;
   onBack: () => void;
   onNext: () => void;
+  subtotal: number;
 }
 
 export default function DeliveryStep({
@@ -20,6 +23,7 @@ export default function DeliveryStep({
   onSelect,
   onBack,
   onNext,
+  subtotal,
 }: DeliveryStepProps) {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<DeliveryCompany[]>([]);
@@ -82,6 +86,8 @@ export default function DeliveryStep({
           <div className="grid gap-3 sm:grid-cols-2">
             {companies.map((company) => {
               const isSelected = selected?.id === company.id;
+              const isOzone = company.name === "OZONE_EXPRESS";
+              const isOverLimit = isOzone && subtotal > OZONE_MAX_LIMIT;
               const logoSrc =
                 company.name === "OZONE_EXPRESS"
                   ? "/assets/icons/ozone_icon.png"
@@ -89,32 +95,59 @@ export default function DeliveryStep({
                     ? "/assets/icons/tawsil-logo.svg"
                     : "/assets/icons/box-icon.svg";
               return (
-                <button
-                  key={company.id}
-                  onClick={() => onSelect(company)}
-                  className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
-                    isSelected
-                      ? "border-brand-blue bg-brand-blue/5 shadow-md ring-1 ring-brand-blue/20"
-                      : "border-brand-blue/30 bg-card hover:border-brand-blue hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
-                  }`}
-                >
-                  <div
-                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
-                      isSelected ? "bg-white" : "bg-muted"
+                <div key={company.id} className="flex flex-col gap-2">
+                  <button
+                    onClick={() => !isOverLimit && onSelect(company)}
+                    disabled={isOverLimit}
+                    className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
+                      isOverLimit
+                        ? "cursor-not-allowed border-muted bg-muted/30 opacity-60 dark:border-muted/30 dark:bg-muted/10"
+                        : isSelected
+                          ? "border-brand-blue bg-brand-blue/5 shadow-md ring-1 ring-brand-blue/20"
+                          : "border-brand-blue/30 bg-card hover:border-brand-blue hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
                     }`}
                   >
-                    <Image
-                      src={logoSrc}
-                      alt={company.displayName || company.name}
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-full object-contain"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-foreground">{company.displayName || company.name}</p>
-                  </div>
-                </button>
+                    <div
+                      className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
+                        isSelected ? "bg-white" : "bg-muted"
+                      }`}
+                    >
+                      <Image
+                        src={logoSrc}
+                        alt={company.displayName || company.name}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-contain"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-foreground">{company.displayName || company.name}</p>
+                    </div>
+                  </button>
+                  {isOverLimit && (
+                    <div className="rounded-xl border border-amber-400/40 bg-amber-50 p-3 text-sm dark:border-amber-400/30 dark:bg-amber-950/30">
+                      <div className="flex items-center gap-2 font-medium text-amber-700 dark:text-amber-400">
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <span>{t("checkout.ozone_limit_reason")}</span>
+                      </div>
+                      <p className="mt-2 text-xs font-medium text-muted-foreground">{t("checkout.ozone_limit_solutions")}</p>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        <li className="flex items-center gap-2">
+                          <Scissors className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-500" />
+                          <span>{t("checkout.ozone_limit_solution_split")}</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <PackageMinus className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-500" />
+                          <span>{t("checkout.ozone_limit_solution_reduce")}</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Phone className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-500" />
+                          <span>{t("checkout.ozone_limit_solution_support")}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

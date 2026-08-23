@@ -62,11 +62,11 @@ export default function NavBar() {
           <nav className="flex items-center gap-2">
             <Button
               variant="ghost"
-              className="hidden sm:inline-flex gap-2"
+              className="inline-flex gap-2"
               onClick={() => {}}
             >
               <Sparkles className="h-5 w-5" />
-              <span className="text-sm">{t("nav.ai_search")}</span>
+              <span className="hidden sm:inline text-sm">{t("nav.ai_search")}</span>
             </Button>
 
             <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
@@ -92,7 +92,7 @@ export default function NavBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2">
                   <User className="h-5 w-5" />
-                  <span className="text-sm">{t("nav.account")}</span>
+                  <span className="hidden sm:inline text-sm">{t("nav.account")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

@@ -51,15 +51,15 @@ export default function HomeBrandsCarousel({ brands }: HomeBrandsCarouselProps) 
           <Link
             key={brand.brandId}
             href={`/brand/${brand.brandId}`}
-            className="group relative flex shrink-0 flex-col items-center gap-4 rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:bg-muted dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]"
+            className="group relative flex shrink-0 flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:bg-muted dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]"
           >
-            <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl md:h-28 md:w-28">
+            <div className="relative flex h-20 w-36 items-center justify-center overflow-hidden rounded-xl md:h-24 md:w-40">
               {brand.brandImage ? (
                 <Image
                   src={brand.brandImage}
                   alt={brand.brandName}
                   fill
-                  sizes="112px"
+                  sizes="160px"
                   className="object-contain p-2"
                 />
               ) : (
