@@ -71,7 +71,7 @@ export default function SearchBox() {
         <button
           type="button"
           onClick={handleGlobalSearch}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          className="absolute start-4 top-1/2 z-10 -translate-y-1/2 text-muted-foreground transition-colors hover:text-brand-blue"
           aria-label="Search"
         >
           <Search className="h-4 w-4" />
@@ -85,7 +85,7 @@ export default function SearchBox() {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={t("nav.search")}
-          className="h-9 rounded-full border-0 bg-muted/60 pl-9 pr-8 shadow-none transition-colors focus-visible:bg-muted focus-visible:ring-1 focus-visible:ring-brand-blue/40"
+          className="h-11 rounded-full border border-border/70 bg-muted/45 pe-10 ps-11 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/80 hover:bg-muted/60 focus-visible:border-brand-blue/40 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-brand-blue/15"
         />
         {query && (
           <button
@@ -94,7 +94,7 @@ export default function SearchBox() {
               setQuery("");
               setIsOpen(false);
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute end-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Clear"
           >
             <X className="h-4 w-4" />
@@ -103,7 +103,7 @@ export default function SearchBox() {
       </div>
 
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-96 overflow-y-auto rounded-2xl bg-popover/95 shadow-xl backdrop-blur-sm">
+        <div className="absolute left-0 right-0 top-full z-50 mt-3 max-h-96 overflow-y-auto rounded-2xl border border-border/70 bg-popover/95 p-2 shadow-[0_20px_60px_-24px_rgba(15,23,42,0.45)] backdrop-blur-xl">
           {isLoading ? (
             <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -116,7 +116,7 @@ export default function SearchBox() {
                   key={product.productCode}
                   type="button"
                   onClick={() => handleProductClick(product.productCode)}
-                  className="flex w-full items-center gap-3 border-b border-border p-2 text-left last:border-0 hover:bg-accent transition-colors"
+                  className="flex w-full items-center gap-3 rounded-xl p-2.5 text-start transition-colors hover:bg-accent"
                 >
                   <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-muted">
                     {product.images?.mainImage && (

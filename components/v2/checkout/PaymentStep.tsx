@@ -11,11 +11,10 @@ import { customerInfoService } from "@/services/customer-info.service";
 import { customerAuthService } from "@/services/customer-auth.service";
 import type { CustomerFormData, DeliveryCompany } from "@/app/(Costumer-Interface-v2)/checkout/page";
 import type { CartItem } from "@/Context/CartContext";
+import type { CheckoutOptions, CheckoutPaymentMethod } from "@/services/order.service";
 import { ArrowLeft, Loader2, AlertCircle, Check } from "lucide-react";
 import PayPalHostedFields from "@components/v2/checkout/PayPalHostedFields";
 import { NEXT_PUBLIC_PAYPAL_CLIENT_ID } from "@/utils/variables";
-
-const FALLBACK_DELIVERY_PRICE = 35;
 
 interface PaymentStepProps {
   orderId: string;
@@ -23,14 +22,15 @@ interface PaymentStepProps {
   subtotal: number;
   customerData: CustomerFormData;
   selectedDelivery: DeliveryCompany | null;
+  checkoutOptions?: CheckoutOptions;
   isLoggedIn: boolean;
   onBack: () => void;
-  onSuccess: (orderId: string) => void;
+  onSuccess: (orderId: string, paymentMethod: PaymentMethod) => void;
   onFailure?: (errorMessage: string) => void;
   onLoggedIn?: () => void;
 }
 
-type PaymentMethod = "COD" | "paypal" | "card";
+type PaymentMethod = CheckoutPaymentMethod;
 
 export default function PaymentStep({
   orderId,
@@ -38,6 +38,7 @@ export default function PaymentStep({
   subtotal,
   customerData,
   selectedDelivery,
+  checkoutOptions,
   isLoggedIn,
   onBack,
   onSuccess,
@@ -49,32 +50,12 @@ export default function PaymentStep({
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [paypalLoaded, setPaypalLoaded] = useState(false);
-  const [deliveryPrice, setDeliveryPrice] = useState<number>(FALLBACK_DELIVERY_PRICE);
-  const [deliveryPriceLoading, setDeliveryPriceLoading] = useState(true);
   const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const [cardAmount, setCardAmount] = useState<string>("");
 
+  const deliveryPrice = selectedDelivery?.fee ?? 0;
   const total = subtotal + deliveryPrice;
-
-  // Fetch dynamic delivery price from API
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await orderService.getDeliveryPrice();
-        if (mounted && res.success && res.data) {
-          const price = (res.data as any).deliveryPrice ?? (res.data as any).price ?? FALLBACK_DELIVERY_PRICE;
-          setDeliveryPrice(Number(price));
-        }
-      } catch (err) {
-        console.error("Failed to fetch delivery price, using fallback:", err);
-      } finally {
-        if (mounted) setDeliveryPriceLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+  const availableMethods = selectedDelivery?.paymentMethods ?? [];
 
   // Check for returning PayPal approval on mount
   useEffect(() => {
@@ -98,7 +79,7 @@ export default function PaymentStep({
               longitude
             );
             if (capRes.success) {
-              onSuccess(String(capRes.data.orderId ?? ppOrderId));
+              onSuccess(String(capRes.data.orderId ?? ppOrderId), "paypal");
             } else {
               const msg = t("checkout.payment_failed");
               if (onFailure) {
@@ -131,6 +112,10 @@ export default function PaymentStep({
     setCardOrderId(null);
     setError("");
   }, [method]);
+
+  useEffect(() => {
+    if (method && !availableMethods.includes(method)) setMethod(null);
+  }, [availableMethods, method]);
 
   // Parse backend error message for user-friendly display
   const parseErrorMessage = useCallback((err: any, fallbackKey: string): string => {
@@ -237,7 +222,7 @@ export default function PaymentStep({
         } catch (statusErr) {
           console.error("Failed to update order status to waiting:", statusErr);
         }
-        onSuccess(finalOrderId);
+        onSuccess(finalOrderId, "CRBT");
       } else {
         setError(t("checkout.order_failed"));
       }
@@ -262,7 +247,8 @@ export default function PaymentStep({
       const infoSaved = await saveCustomerInfo();
       if (!infoSaved) return;
 
-      const res = await orderService.createPayPalOrder(orderId);
+      if (!selectedDelivery) throw new Error("Delivery method is required");
+      const res = await orderService.createPayPalOrder(orderId, selectedDelivery.id);
       if (res.success && res.data.paypal_order_id) {
         const paypalOrderId = res.data.paypal_order_id;
         const approvalUrl = res.data.approval_url;
@@ -294,7 +280,7 @@ export default function PaymentStep({
           customerData.longitude
         );
         if (capRes.success) {
-          onSuccess(String(capRes.data.orderId ?? orderId));
+          onSuccess(String(capRes.data.orderId ?? orderId), "paypal");
         } else {
           const msg = t("checkout.payment_failed");
           if (onFailure) {
@@ -332,12 +318,12 @@ export default function PaymentStep({
       const infoSaved = await saveCustomerInfo();
       if (!infoSaved) return;
 
-      const res = await orderService.createCardOrder(orderId);
+      if (!selectedDelivery) throw new Error("Delivery method is required");
+      const res = await orderService.createCardOrder(orderId, selectedDelivery.id);
       if (res.success && res.data.card_order_id) {
         setCardOrderId(res.data.card_order_id);
-        // PayPal expects USD amount
-        const usdTotal = (total / 10).toFixed(2); // approximate MAD→USD conversion
-        setCardAmount(usdTotal);
+        if (!res.data.card_amount) throw new Error("Card amount was not returned by the server");
+        setCardAmount(res.data.card_amount);
       } else {
         const msg = t("checkout.payment_failed");
         if (onFailure) {
@@ -373,7 +359,7 @@ export default function PaymentStep({
         customerData.longitude
       );
       if (capRes.success) {
-        onSuccess(String(capRes.data.orderId ?? orderId));
+        onSuccess(String(capRes.data.orderId ?? orderId), "card");
       } else {
         const msg = t("checkout.payment_failed");
         if (onFailure) {
@@ -393,6 +379,31 @@ export default function PaymentStep({
     } finally {
       setLoading(false);
       setCardOrderId(null);
+    }
+  };
+
+  const handleBankTransfer = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const infoSaved = await saveCustomerInfo();
+      if (!infoSaved) return;
+      if (!selectedDelivery) throw new Error("Delivery method is required");
+      const response = await orderService.createBankTransferOrder(
+        orderId,
+        new Date().toISOString(),
+        selectedDelivery.id,
+        customerData.latitude,
+        customerData.longitude
+      );
+      if (!response.success) throw new Error(t("checkout.order_failed"));
+      onSuccess(String(response.data.orderId ?? orderId), "bank_transfer");
+    } catch (err) {
+      const message = parseErrorMessage(err, "checkout.order_failed");
+      if (onFailure) onFailure(message);
+      else setError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -424,16 +435,17 @@ export default function PaymentStep({
               <div className="grid gap-3">
                 {/* COD */}
                 <button
-                  onClick={() => setMethod("COD")}
-                  className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
-                    method === "COD"
+                  onClick={() => setMethod("CRBT")}
+                  disabled={!availableMethods.includes("CRBT")}
+                  className={`${availableMethods.includes("CRBT") ? "flex" : "hidden"} items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
+                    method === "CRBT"
                       ? "border-brand-red bg-brand-red/5 shadow-md ring-1 ring-brand-red/20"
                       : "border-brand-blue/30 bg-card hover:border-brand-red hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
                   }`}
                 >
                   <div
                     className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
-                      method === "COD"
+                      method === "CRBT"
                         ? "bg-brand-red text-white"
                         : "bg-muted text-muted-foreground"
                     }`}
@@ -443,7 +455,7 @@ export default function PaymentStep({
                       alt=""
                       width={28}
                       height={28}
-                      className={`h-7 w-7 ${method === "COD" ? "" : "dark:invert"}`}
+                      className={`h-7 w-7 ${method === "CRBT" ? "" : "dark:invert"}`}
                     />
                   </div>
                   <div className="flex-1">
@@ -454,19 +466,20 @@ export default function PaymentStep({
                   </div>
                   <div
                     className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-                      method === "COD"
+                      method === "CRBT"
                         ? "border-brand-red bg-brand-red"
                         : "border-border"
                     }`}
                   >
-                    {method === "COD" && <Check className="h-3.5 w-3.5 text-white" />}
+                    {method === "CRBT" && <Check className="h-3.5 w-3.5 text-white" />}
                   </div>
                 </button>
 
                 {/* PayPal */}
                 <button
                   onClick={() => setMethod("paypal")}
-                  className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
+                  disabled={!availableMethods.includes("paypal")}
+                  className={`${availableMethods.includes("paypal") ? "flex" : "hidden"} items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
                     method === "paypal"
                       ? "border-brand-red bg-brand-red/5 shadow-md ring-1 ring-brand-red/20"
                       : "border-brand-blue/30 bg-card hover:border-brand-red hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
@@ -507,7 +520,8 @@ export default function PaymentStep({
                 {/* Card */}
                 <button
                   onClick={() => setMethod("card")}
-                  className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
+                  disabled={!availableMethods.includes("card")}
+                  className={`${availableMethods.includes("card") ? "flex" : "hidden"} items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
                     method === "card"
                       ? "border-brand-red bg-brand-red/5 shadow-md ring-1 ring-brand-red/20"
                       : "border-brand-blue/30 bg-card hover:border-brand-red hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
@@ -551,7 +565,40 @@ export default function PaymentStep({
                     {method === "card" && <Check className="h-3.5 w-3.5 text-white" />}
                   </div>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMethod("bank_transfer")}
+                  disabled={!availableMethods.includes("bank_transfer")}
+                  className={`${availableMethods.includes("bank_transfer") ? "flex" : "hidden"} items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-300 ${
+                    method === "bank_transfer"
+                      ? "border-brand-red bg-brand-red/5 shadow-md ring-1 ring-brand-red/20"
+                      : "border-brand-blue/30 bg-card hover:border-brand-red hover:bg-muted/50 dark:border-brand-blue/30 dark:bg-card dark:hover:bg-white/5"
+                  }`}
+                >
+                  <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full ${method === "bank_transfer" ? "bg-brand-red" : "bg-muted"}`}>
+                    <Image src="/assets/icons/wallet-icon.svg" alt="" width={28} height={28} className={`h-7 w-7 ${method === "bank_transfer" ? "" : "dark:invert"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">{t("checkout.bank_transfer")}</p>
+                    <p className="text-sm text-muted-foreground">{t("checkout.bank_transfer_desc")}</p>
+                  </div>
+                  <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${method === "bank_transfer" ? "border-brand-red bg-brand-red" : "border-border"}`}>
+                    {method === "bank_transfer" && <Check className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                </button>
               </div>
+
+              {method === "bank_transfer" && checkoutOptions?.bankDetails && (
+                <div className="mt-4 space-y-1 rounded-xl border border-border bg-muted/50 p-4 text-sm">
+                  <p className="font-semibold">{checkoutOptions.bankDetails.bankName}</p>
+                  <p>{checkoutOptions.bankDetails.accountHolder}</p>
+                  {checkoutOptions.bankDetails.accountNumber && <p>{t("checkout.account_number")}: {checkoutOptions.bankDetails.accountNumber}</p>}
+                  {checkoutOptions.bankDetails.iban && <p>IBAN: {checkoutOptions.bankDetails.iban}</p>}
+                  {checkoutOptions.bankDetails.swift && <p>SWIFT: {checkoutOptions.bankDetails.swift}</p>}
+                  {checkoutOptions.bankDetails.instructions && <p className="pt-1 text-muted-foreground">{checkoutOptions.bankDetails.instructions}</p>}
+                </div>
+              )}
 
               {error && (
                 <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
@@ -594,16 +641,17 @@ export default function PaymentStep({
                 </Button>
                 <Button
                   onClick={() => {
-                    if (method === "COD") handleCOD();
+                    if (method === "CRBT") handleCOD();
                     else if (method === "paypal") handlePayPal();
                     else if (method === "card") handleCard();
+                    else if (method === "bank_transfer") handleBankTransfer();
                   }}
                   size="lg"
                   disabled={!method || loading}
                   className="gap-2 bg-brand-red px-8 hover:bg-brand-red/90"
                 >
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-                  {method === "COD" ? t("checkout.place_order") : t("checkout.pay_now")}
+                  {method === "CRBT" || method === "bank_transfer" ? t("checkout.place_order") : t("checkout.pay_now")}
                 </Button>
               </div>
               )}
@@ -623,11 +671,7 @@ export default function PaymentStep({
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{t("cart.shipping")}</span>
                       <span className="font-medium">
-                        {deliveryPriceLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                        ) : (
-                          `${deliveryPrice.toFixed(2)} MAD`
-                        )}
+                        {deliveryPrice === 0 ? t("checkout.free") : `${deliveryPrice.toFixed(2)} MAD`}
                       </span>
                     </div>
                   </div>

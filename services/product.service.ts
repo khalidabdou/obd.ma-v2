@@ -49,6 +49,14 @@ export interface Product {
   choices: string[];
   creationDate: string;
   showInHome?: boolean | null;
+  setting?: {
+    trackStock: boolean;
+    snRequired: boolean;
+    webstore: boolean;
+    noShipping: boolean;
+    worldwide: boolean;
+    downloadable: boolean;
+  } | null;
   [key: string]: any;
 }
 

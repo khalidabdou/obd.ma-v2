@@ -62,6 +62,15 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        heroGradient: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+      },
+      animation: {
+        heroGradient: "heroGradient 4s ease-in-out infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

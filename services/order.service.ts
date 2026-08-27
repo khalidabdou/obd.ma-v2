@@ -103,15 +103,49 @@ export interface CustomerOrdersData {
 /**
  * Create order request data (unified for all payment methods)
  */
+export type CheckoutPaymentMethod = 'CRBT' | 'paypal' | 'card' | 'bank_transfer';
+
+export interface BankDetails {
+  bankName: string;
+  accountHolder: string;
+  accountNumber?: string | null;
+  iban?: string | null;
+  swift?: string | null;
+  instructions?: string | null;
+}
+
+export interface CheckoutDeliveryOption {
+  id: string;
+  name: string;
+  displayName: string;
+  fee: number;
+  available: boolean;
+  unavailableReason: string | null;
+  paymentMethods: CheckoutPaymentMethod[];
+}
+
+export interface CheckoutOptions {
+  country: string;
+  region: 'MOROCCO' | 'INTERNATIONAL';
+  subtotal: number;
+  blockedReason: string | null;
+  incompatibleProducts: string[];
+  deliveryOptions: CheckoutDeliveryOption[];
+  pickupAddress: string | null;
+  pickupInstructions: string | null;
+  bankDetails: BankDetails | null;
+}
+
 export interface CreateOrderRequest {
   orderId: string;
-  paymentMethod: 'COD' | 'paypal' | 'card';
+  paymentMethod: CheckoutPaymentMethod | 'COD';
   creationDate?: string;
   deliveryCompanyId?: string;
   paypalOrderId?: string;
   cardOrderId?: string;
   latitude?: number;
   longitude?: number;
+  checkoutVersion?: number;
 }
 
 /**
@@ -122,7 +156,12 @@ export interface CreateOrderResponse {
   paypal_order_id?: string;
   approval_url?: string;
   card_order_id?: string;
+  card_amount?: string;
+  currency?: string;
   message?: string;
+  bankDetails?: BankDetails | null;
+  pickupAddress?: string | null;
+  pickupInstructions?: string | null;
 }
 
 /**
@@ -173,11 +212,12 @@ export const orderService = {
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
-      paymentMethod: 'COD',
+      paymentMethod: 'CRBT',
       creationDate,
       deliveryCompanyId,
       latitude,
       longitude,
+      checkoutVersion: 2,
     });
   },
 
@@ -186,10 +226,12 @@ export const orderService = {
    * @param orderId - Order ID
    * @returns Promise with PayPal order ID
    */
-  createPayPalOrder: async (orderId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
+  createPayPalOrder: async (orderId: string, deliveryCompanyId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
       paymentMethod: 'paypal',
+      deliveryCompanyId,
+      checkoutVersion: 2,
     });
   },
 
@@ -219,6 +261,7 @@ export const orderService = {
       deliveryCompanyId,
       latitude,
       longitude,
+      checkoutVersion: 2,
     });
   },
 
@@ -227,10 +270,12 @@ export const orderService = {
    * @param orderId - Order ID
    * @returns Promise with card order ID
    */
-  createCardOrder: async (orderId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
+  createCardOrder: async (orderId: string, deliveryCompanyId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
       paymentMethod: 'card',
+      deliveryCompanyId,
+      checkoutVersion: 2,
     });
   },
 
@@ -260,7 +305,30 @@ export const orderService = {
       deliveryCompanyId,
       latitude,
       longitude,
+      checkoutVersion: 2,
     });
+  },
+
+  createBankTransferOrder: async (
+    orderId: string,
+    creationDate: string,
+    deliveryCompanyId: string,
+    latitude?: number,
+    longitude?: number
+  ): Promise<ApiSuccess<CreateOrderResponse>> => {
+    return await apiClient.post('/order', {
+      orderId,
+      paymentMethod: 'bank_transfer',
+      creationDate,
+      deliveryCompanyId,
+      latitude,
+      longitude,
+      checkoutVersion: 2,
+    });
+  },
+
+  getCheckoutOptions: async (country: string): Promise<ApiSuccess<CheckoutOptions>> => {
+    return await apiClient.get('/checkout/options', { country });
   },
 
   /**

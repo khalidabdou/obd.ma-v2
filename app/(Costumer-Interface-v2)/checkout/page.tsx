@@ -16,6 +16,8 @@ import PaymentStep from "@components/v2/checkout/PaymentStep";
 import OrderSuccess from "@components/v2/checkout/OrderSuccess";
 import OrderFailure from "@components/v2/checkout/OrderFailure";
 import { Loader2 } from "lucide-react";
+import { useCheckoutOptions } from "@/hooks/v2/queries/useCheckoutOptions";
+import type { CheckoutDeliveryOption, CheckoutOptions, CheckoutPaymentMethod } from "@/services/order.service";
 
 export type CheckoutStep = "info" | "delivery" | "payment" | "success" | "failure";
 
@@ -35,11 +37,7 @@ export interface CustomerFormData {
   longitude?: number;
 }
 
-export interface DeliveryCompany {
-  id: string;
-  name: string;
-  displayName: string;
-}
+export type DeliveryCompany = CheckoutDeliveryOption;
 
 function generateOrderId(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -58,6 +56,8 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<CheckoutStep>("info");
   const [orderId] = useState(() => generateOrderId());
   const [finalOrderId, setFinalOrderId] = useState(orderId);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<CheckoutPaymentMethod | null>(null);
+  const [successCheckoutOptions, setSuccessCheckoutOptions] = useState<CheckoutOptions | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingCustomer, setLoadingCustomer] = useState(true);
   const [orderError, setOrderError] = useState("");
@@ -202,6 +202,22 @@ export default function CheckoutPage() {
       return sum + unitPrice * item.quantity;
     }, 0);
   }, [cartItems]);
+  const cartSignature = useMemo(
+    () => cartItems.map((item) => `${item.productCode}:${item.quantity}`).sort().join("|"),
+    [cartItems]
+  );
+  const checkoutOptionsQuery = useCheckoutOptions(
+    customerData.country,
+    cartSignature,
+    !cartLoading && !loadingCustomer && cartItems.length > 0
+  );
+  const checkoutOptions = checkoutOptionsQuery.data as CheckoutOptions | undefined;
+
+  useEffect(() => {
+    if (!selectedDelivery || !checkoutOptions) return;
+    const current = checkoutOptions.deliveryOptions.find((option) => option.id === selectedDelivery.id);
+    if (!current?.available) setSelectedDelivery(null);
+  }, [checkoutOptions, selectedDelivery]);
 
   if (cartLoading || loadingCustomer) {
     return (
@@ -273,20 +289,25 @@ export default function CheckoutPage() {
             onSelect={setSelectedDelivery}
             onBack={() => setStep("info")}
             onNext={() => setStep("payment")}
-            subtotal={subtotal}
+            options={checkoutOptions}
+            loading={checkoutOptionsQuery.isLoading}
+            error={checkoutOptionsQuery.error instanceof Error ? checkoutOptionsQuery.error.message : undefined}
           />
         )}
         {step === "payment" && (
           <PaymentStep
             orderId={orderId}
             cartItems={cartItems}
-            subtotal={subtotal}
+            subtotal={checkoutOptions?.subtotal ?? subtotal}
             customerData={customerData}
             selectedDelivery={selectedDelivery}
+            checkoutOptions={checkoutOptions}
             isLoggedIn={isLoggedIn}
             onBack={() => setStep("delivery")}
-            onSuccess={(finalOrderId) => {
+            onSuccess={(finalOrderId, paymentMethod) => {
               setFinalOrderId(finalOrderId);
+              setSelectedPaymentMethod(paymentMethod);
+              setSuccessCheckoutOptions(checkoutOptions);
               setStep("success");
               clearCart();
             }}
@@ -300,7 +321,14 @@ export default function CheckoutPage() {
             }}
           />
         )}
-        {step === "success" && <OrderSuccess orderId={finalOrderId} />}
+        {step === "success" && (
+          <OrderSuccess
+            orderId={finalOrderId}
+            paymentMethod={selectedPaymentMethod}
+            delivery={selectedDelivery}
+            checkoutOptions={successCheckoutOptions}
+          />
+        )}
         {step === "failure" && (
           <OrderFailure
             errorMessage={orderError}

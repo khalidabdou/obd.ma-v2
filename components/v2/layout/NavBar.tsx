@@ -41,48 +41,52 @@ export default function NavBar() {
   };
 
   return (
-    <header className="sticky top-2 z-50 px-3 sm:px-4">
-      <Container className="rounded-2xl border border-border/60 bg-background/60 shadow-lg backdrop-blur-sm">
-        <div className="flex h-12 items-center justify-between gap-4">
-          <Link href="/" className="flex shrink-0 items-center">
+    <header className="sticky top-3 z-50 px-2 sm:px-4">
+      <Container className="max-w-[1440px] rounded-[1.5rem] border border-border/70 bg-background/85 px-3 shadow-[0_16px_50px_-24px_rgba(15,23,42,0.35)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 sm:px-4">
+        <div className="flex h-16 items-center justify-between gap-3 lg:gap-5">
+          <Link
+            href="/"
+            aria-label="OBD.ma home"
+            className="flex shrink-0 items-center rounded-xl px-1.5 py-2 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
             <Image
               src="/assets/icons/logo.svg"
               alt="OBD.ma"
-              width={64}
-              height={28}
+              width={76}
+              height={34}
               priority
-              className="h-7 w-auto lg:h-8"
+              className="h-8 w-auto lg:h-9"
             />
           </Link>
 
-          <div className="hidden max-w-md flex-1 md:block lg:max-w-lg xl:max-w-xl">
+          <div className="hidden min-w-0 max-w-2xl flex-1 md:block">
             <SearchBox />
           </div>
 
-          <nav className="flex items-center gap-2">
+          <nav className="flex shrink-0 items-center gap-1">
             <Button
               variant="ghost"
-              className="inline-flex gap-2"
+              size="icon"
+              className="hidden rounded-full bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/15 hover:text-brand-blue md:inline-flex"
+              aria-label={t("nav.ai_search")}
+              title={t("nav.ai_search")}
               onClick={() => {}}
             >
               <Sparkles className="h-5 w-5" />
-              <span className="hidden sm:inline text-sm">{t("nav.ai_search")}</span>
             </Button>
 
-            <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
-              <Link href="/myfavorites">
+            <Button variant="ghost" size="icon" asChild className="hidden rounded-full lg:inline-flex">
+              <Link href="/myfavorites" aria-label={t("nav.favorites")} title={t("nav.favorites")}>
                 <Heart className="h-5 w-5" />
-                <span className="text-sm">{t("nav.favorites")}</span>
               </Link>
             </Button>
 
-            <Button variant="ghost" asChild className="hidden sm:inline-flex gap-2">
-              <Link href="/cart" className="relative">
+            <Button variant="ghost" size="icon" asChild className="rounded-full">
+              <Link href="/cart" className="relative" aria-label={t("nav.cart")} title={t("nav.cart")}>
                 <ShoppingCart className="h-5 w-5" />
-                <span className="text-sm">{t("nav.cart")}</span>
                 {cartCount > 0 && (
-                  <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-red text-[10px] font-medium text-white">
-                    {cartCount}
+                  <span className="absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-brand-red px-1 text-[10px] font-bold leading-none text-white">
+                    {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
               </Link>
@@ -90,12 +94,11 @@ export default function NavBar() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2">
+                <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("nav.account")} title={t("nav.account")}>
                   <User className="h-5 w-5" />
-                  <span className="hidden sm:inline text-sm">{t("nav.account")}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border/70 p-2 shadow-xl">
                 {isAuthenticated ? (
                   <>
                     <DropdownMenuItem asChild>
@@ -154,11 +157,11 @@ export default function NavBar() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="hidden rounded-full md:inline-flex" aria-label="Language" title="Language">
                   <Globe className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border/70 p-2 shadow-xl">
                 {languages.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}
@@ -168,7 +171,7 @@ export default function NavBar() {
                     <span className="text-lg leading-none">{lang.flag}</span>
                     <span className="text-sm">{lang.label}</span>
                     {language === lang.code && (
-                      <span className="ml-auto h-2 w-2 rounded-full bg-brand-blue" />
+                      <span className="ms-auto h-2 w-2 rounded-full bg-brand-blue" />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -178,7 +181,7 @@ export default function NavBar() {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full"
+              className="hidden rounded-full xl:inline-flex"
               aria-label={t("nav.video_tutorial")}
               title={t("nav.video_tutorial")}
               onClick={openVideoTutorial}
@@ -186,57 +189,57 @@ export default function NavBar() {
               <PlayCircle className="h-5 w-5" />
             </Button>
 
-            <div>
+            <div className="hidden md:block">
               <ThemeToggle />
             </div>
 
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 overflow-y-auto">
-                <div className="mt-6 flex flex-col gap-4">
+              <SheetContent side="right" className="w-[88vw] max-w-sm overflow-y-auto border-border/70 bg-background p-6">
+                <div className="mt-8 flex flex-col gap-3">
                   <button
                     type="button"
                     onClick={() => {}}
-                    className="flex items-center gap-2 text-lg font-medium text-foreground"
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                   >
                     <Sparkles className="h-5 w-5" />
                     {t("nav.ai_search")}
                   </button>
-                  <Link href="/catalog" className="text-lg font-medium text-foreground">
+                  <Link href="/catalog" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                     {t("nav.catalog")}
                   </Link>
-                  <Link href="/cart" className="text-lg font-medium text-foreground">
+                  <Link href="/cart" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                     {t("nav.cart")}
                   </Link>
-                  <Link href="/myfavorites" className="text-lg font-medium text-foreground">
+                  <Link href="/myfavorites" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                     {t("nav.favorites")}
                   </Link>
-                  <Link href="/downloads" className="text-lg font-medium text-foreground">
+                  <Link href="/downloads" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                     {t("account.downloads")}
                   </Link>
                   {isAuthenticated ? (
                     <>
-                      <Link href="/account" className="text-lg font-medium text-foreground">
+                      <Link href="/account" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                         {t("nav.account")}
                       </Link>
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="text-left text-lg font-medium text-foreground"
+                        className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
                       >
                         {t("nav.logout")}
                       </button>
                     </>
                   ) : (
                     <>
-                      <Link href="/login" className="text-lg font-medium text-foreground">
+                      <Link href="/login" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                         {t("nav.login")}
                       </Link>
-                      <Link href="/register" className="text-lg font-medium text-foreground">
+                      <Link href="/register" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
                         {t("nav.register")}
                       </Link>
                     </>
@@ -247,15 +250,15 @@ export default function NavBar() {
                   <button
                     type="button"
                     onClick={openVideoTutorial}
-                    className="flex items-center gap-2 text-lg font-medium text-foreground"
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                   >
                     <PlayCircle className="h-5 w-5" />
                     {t("nav.video_tutorial")}
                   </button>
 
                   {/* Theme Selector Section */}
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="rounded-2xl border border-border/70 bg-muted/30 p-3">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       {t("theme.title")}
                     </p>
                     <div className="grid grid-cols-3 gap-2">
@@ -290,8 +293,8 @@ export default function NavBar() {
                   </div>
 
                   {/* Language Selector Section */}
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="rounded-2xl border border-border/70 bg-muted/30 p-3">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Language
                     </p>
                     <div className="grid grid-cols-3 gap-2">
@@ -313,6 +316,9 @@ export default function NavBar() {
               </SheetContent>
             </Sheet>
           </nav>
+        </div>
+        <div className="pb-3 md:hidden">
+          <SearchBox />
         </div>
       </Container>
     </header>

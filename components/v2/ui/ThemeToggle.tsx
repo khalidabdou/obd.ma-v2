@@ -25,7 +25,7 @@ export default function ThemeToggle() {
           size="icon"
           aria-label={t("theme.title")}
           title={t("theme.title")}
-          className="relative rounded-full"
+          className="relative rounded-full hover:text-brand-blue"
         >
           {mounted ? (
             preference === "system" ? (
