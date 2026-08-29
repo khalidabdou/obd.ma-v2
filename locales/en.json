@@ -229,7 +229,11 @@
 
   "favorites": {
     "title": "Favorites",
+    "my_title": "My Favorites",
     "no_favorites": "You don't have any favorites!",
+    "empty_title": "No favorites yet",
+    "empty_subtitle": "Save items you love by tapping the heart icon on any product.",
+    "browse_products": "Browse products",
     "home_page": "Home Page"
   },
   "account": {

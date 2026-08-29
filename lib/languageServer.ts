@@ -1,6 +1,15 @@
 import { cookies, headers } from "next/headers";
+import arTranslations from "@/locales/ar.json";
+import frTranslations from "@/locales/fr.json";
+import enTranslations from "@/locales/en.json";
 
 export type Language = "ar" | "fr" | "en";
+
+const translations: Record<Language, Record<string, unknown>> = {
+  ar: arTranslations as Record<string, unknown>,
+  fr: frTranslations as Record<string, unknown>,
+  en: enTranslations as Record<string, unknown>,
+};
 
 export async function getServerInitialLanguage(): Promise<Language> {
   try {
@@ -33,4 +42,28 @@ export async function getServerInitialLanguage(): Promise<Language> {
   }
 
   return "fr";
+}
+
+/**
+ * Server-side translation function with nested key support (e.g. "favorites.title").
+ * Resolves the language from the obd-language cookie / Accept-Language header.
+ * Falls back to the key itself if not found.
+ */
+export async function getServerTranslation(): Promise<(key: string) => string> {
+  const language = await getServerInitialLanguage();
+
+  return (key: string): string => {
+    const keys = key.split(".");
+    let value: unknown = translations[language];
+
+    for (const k of keys) {
+      if (value && typeof value === "object" && value !== null && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        return key;
+      }
+    }
+
+    return typeof value === "string" ? value : key;
+  };
 }
