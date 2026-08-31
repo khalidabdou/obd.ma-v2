@@ -8,12 +8,12 @@ interface CheckoutProgressProps {
 }
 
 const steps: { key: CheckoutStep; label: string; icon: React.ElementType }[] = [
-  { key: "info", label: "Infos", icon: Package },
   { key: "delivery", label: "Livraison", icon: Truck },
+  { key: "info", label: "Infos", icon: Package },
   { key: "payment", label: "Paiement", icon: CreditCard },
 ];
 
-const stepOrder: CheckoutStep[] = ["info", "delivery", "payment", "success", "failure"];
+const stepOrder: CheckoutStep[] = ["delivery", "info", "payment", "success", "failure"];
 
 export default function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
   const currentIdx = stepOrder.indexOf(currentStep);

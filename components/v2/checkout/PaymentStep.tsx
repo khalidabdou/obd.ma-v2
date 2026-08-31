@@ -146,58 +146,48 @@ export default function PaymentStep({
       };
 
       if (customerData.createAccount && customerData.password) {
-        // Create account — this sets auth cookies (auto-login)
-        await customerInfoService.createAccount({
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          email: customerData.email,
-          password: customerData.password,
-          countryCode: customerData.countryCode || "+212",
-          phoneNumber: customerData.phoneNumber,
-          country: customerData.country,
-          withCart: true,
-        });
-        // Account creation logs the user in and clears the guest customer_id cookie.
-        // Verify the new auth state so subsequent calls use the new identity.
         try {
-          await customerAuthService.checkCustomerToken();
-          if (onLoggedIn) onLoggedIn();
-        } catch (e) {
-          console.error("Failed to verify new auth after account creation:", e);
-        }
-        // Save the shipping details against the new account.
-        try {
-          await customerInfoService.createCustomerInfo(infoPayload);
-        } catch (infoErr: any) {
-          // If info already exists (e.g. guest had info), fall back to update
-          const msg = infoErr?.response?.data?.message || infoErr?.response?.data?.data?.error || "";
-          if (msg.toLowerCase().includes("already exists")) {
-            await customerInfoService.updateCustomerInfo(infoPayload);
-          } else {
-            throw infoErr;
+          // Create account — this sets auth cookies (auto-login)
+          await customerInfoService.createAccount({
+            firstName: customerData.firstName,
+            lastName: customerData.lastName,
+            email: customerData.email,
+            password: customerData.password,
+            countryCode: customerData.countryCode || "+212",
+            phoneNumber: customerData.phoneNumber,
+            country: customerData.country,
+            withCart: true,
+          });
+          // Verify new auth state
+          try {
+            await customerAuthService.checkCustomerToken();
+            if (onLoggedIn) onLoggedIn();
+          } catch (e) {
+            console.warn("Failed to verify auth after account creation:", e);
           }
-        }
-      } else {
-        // Just save info as guest
-        try {
-          await customerInfoService.createCustomerInfo(infoPayload);
-        } catch (infoErr: any) {
-          // If info already exists from a previous attempt, fall back to update
-          const msg = infoErr?.response?.data?.message || infoErr?.response?.data?.data?.error || "";
-          if (msg.toLowerCase().includes("already exists")) {
-            await customerInfoService.updateCustomerInfo(infoPayload);
-          } else {
-            throw infoErr;
-          }
+        } catch (accountErr: any) {
+          // If email or phone already exists, continue checkout without throwing error
+          console.warn("Account creation skipped (email or phone may already exist):", accountErr);
         }
       }
+
+      // Save or update customer shipping info
+      try {
+        await customerInfoService.createCustomerInfo(infoPayload);
+      } catch (infoErr: any) {
+        try {
+          await customerInfoService.updateCustomerInfo(infoPayload);
+        } catch (updateErr) {
+          console.warn("Customer info update skipped/failed, proceeding with order:", updateErr);
+        }
+      }
+
       return true;
     } catch (err) {
-      console.error("Failed to save customer info:", err);
-      setError(parseErrorMessage(err, "checkout.customer_info_failed"));
-      return false;
+      console.warn("saveCustomerInfo encountered an error, continuing order placement:", err);
+      return true;
     }
-  }, [customerData, isLoggedIn, parseErrorMessage, onLoggedIn]);
+  }, [customerData, isLoggedIn, onLoggedIn]);
 
   // COD order
   const handleCOD = async () => {

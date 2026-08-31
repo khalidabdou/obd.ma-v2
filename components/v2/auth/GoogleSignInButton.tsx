@@ -50,7 +50,7 @@ export function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProps) {
       client_id: googleClientId,
       scope: "openid email profile",
       ux_mode: "popup",
-      redirect_uri: googleRedirectUri || `${window.location.origin}/auth/google`,
+      redirect_uri: "postmessage",
       callback: async (tokenResponse: any) => {
         console.log("[Google Sign-In] Token response", tokenResponse);
         setError(null);
@@ -73,7 +73,7 @@ export function GoogleSignInButton({ onSuccess }: GoogleSignInButtonProps) {
 
         console.log("[Google Sign-In] Sending authorization code to backend");
         try {
-          await googleLogin.mutateAsync({ code });
+          await googleLogin.mutateAsync({ code, redirectUri: "postmessage" });
           console.log("[Google Sign-In] Backend login succeeded");
           onSuccessRef.current?.();
         } catch (err) {

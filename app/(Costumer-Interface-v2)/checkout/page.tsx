@@ -19,7 +19,7 @@ import { Loader2 } from "lucide-react";
 import { useCheckoutOptions } from "@/hooks/v2/queries/useCheckoutOptions";
 import type { CheckoutDeliveryOption, CheckoutOptions, CheckoutPaymentMethod } from "@/services/order.service";
 
-export type CheckoutStep = "info" | "delivery" | "payment" | "success" | "failure";
+export type CheckoutStep = "delivery" | "info" | "payment" | "success" | "failure";
 
 export interface CustomerFormData {
   firstName: string;
@@ -53,7 +53,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, cartCount, isLoading: cartLoading, refreshCart, clearCart } = useCart();
 
-  const [step, setStep] = useState<CheckoutStep>("info");
+  const [step, setStep] = useState<CheckoutStep>("delivery");
   const [orderId] = useState(() => generateOrderId());
   const [finalOrderId, setFinalOrderId] = useState(orderId);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<CheckoutPaymentMethod | null>(null);
@@ -255,11 +255,23 @@ export default function CheckoutPage() {
 
       {/* Steps */}
       <div className="mt-8">
+        {step === "delivery" && (
+          <DeliveryStep
+            selected={selectedDelivery}
+            onSelect={setSelectedDelivery}
+            onBack={() => router.push("/cart")}
+            onNext={() => setStep("info")}
+            options={checkoutOptions}
+            loading={checkoutOptionsQuery.isLoading}
+            error={checkoutOptionsQuery.error instanceof Error ? checkoutOptionsQuery.error.message : undefined}
+          />
+        )}
         {step === "info" && (
           <CustomerInfoStep
             data={customerData}
             onChange={setCustomerData}
             isLoggedIn={isLoggedIn}
+            onBack={() => setStep("delivery")}
             onNext={async () => {
               // Save guest info for next checkout
               if (!isLoggedIn) {
@@ -279,19 +291,8 @@ export default function CheckoutPage() {
                   console.error("Failed to update customer info:", err);
                 }
               }
-              setStep("delivery");
+              setStep("payment");
             }}
-          />
-        )}
-        {step === "delivery" && (
-          <DeliveryStep
-            selected={selectedDelivery}
-            onSelect={setSelectedDelivery}
-            onBack={() => setStep("info")}
-            onNext={() => setStep("payment")}
-            options={checkoutOptions}
-            loading={checkoutOptionsQuery.isLoading}
-            error={checkoutOptionsQuery.error instanceof Error ? checkoutOptionsQuery.error.message : undefined}
           />
         )}
         {step === "payment" && (
@@ -303,7 +304,7 @@ export default function CheckoutPage() {
             selectedDelivery={selectedDelivery}
             checkoutOptions={checkoutOptions}
             isLoggedIn={isLoggedIn}
-            onBack={() => setStep("delivery")}
+            onBack={() => setStep("info")}
             onSuccess={(finalOrderId, paymentMethod) => {
               setFinalOrderId(finalOrderId);
               setSelectedPaymentMethod(paymentMethod);

@@ -23,6 +23,7 @@ export interface CustomerLoginResponse {
  */
 export interface GoogleAuthRequest {
   code: string;
+  redirectUri?: string;
 }
 
 /**

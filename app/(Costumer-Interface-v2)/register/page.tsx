@@ -378,6 +378,7 @@ export default function RegisterPage() {
 
                   <GoogleSignInButton
                     onSuccess={() => {
+                      authLogin();
                       toast({
                         title: t("common.success"),
                         description: t("registerPage.welcome"),

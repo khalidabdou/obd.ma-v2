@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerFormData } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
 import citiesData from "@/locales/cities.json";
 import { COUNTRIES, getCountryByPhoneCode, getCountryByName, type Country } from "@/locales/countries";
 
@@ -22,6 +22,7 @@ interface CustomerInfoStepProps {
   data: CustomerFormData;
   onChange: (data: CustomerFormData) => void;
   isLoggedIn: boolean;
+  onBack?: () => void;
   onNext: () => void;
 }
 
@@ -36,6 +37,7 @@ export default function CustomerInfoStep({
   data,
   onChange,
   isLoggedIn,
+  onBack,
   onNext,
 }: CustomerInfoStepProps) {
   const { t, language } = useTranslation();
@@ -557,10 +559,18 @@ export default function CustomerInfoStep({
             <p className="text-muted-foreground">{t("checkout.secure_payment")}</p>
           </div>
         </div>
-        <Button onClick={handleNext} size="lg" className="gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90">
-          {t("checkout.continue")}
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <Button variant="outline" type="button" onClick={onBack} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {t("checkout.back")}
+            </Button>
+          )}
+          <Button onClick={handleNext} size="lg" className="gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90">
+            {t("checkout.continue")}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
