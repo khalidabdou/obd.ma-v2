@@ -22,6 +22,7 @@ interface CustomerInfoStepProps {
   data: CustomerFormData;
   onChange: (data: CustomerFormData) => void;
   isLoggedIn: boolean;
+  deliveryName?: string;
   onBack?: () => void;
   onNext: () => void;
 }
@@ -37,6 +38,7 @@ export default function CustomerInfoStep({
   data,
   onChange,
   isLoggedIn,
+  deliveryName,
   onBack,
   onNext,
 }: CustomerInfoStepProps) {
@@ -95,10 +97,12 @@ export default function CustomerInfoStep({
   const selectedCity = cities.find((c) => c.id === data.cityId);
   const selectedCountry: Country | undefined =
     getCountryByName(data.country) || getCountryByPhoneCode(data.countryCode);
+  const isPickup = deliveryName === "PICKUP";
+  const usesOzoneCityList = deliveryName === "OZONE_EXPRESS" && selectedCountry?.code === "MA";
 
-  // Auto-fill cityId when city name is provided but id is missing (Morocco only)
+  // Auto-fill cityId when an Ozone city name is provided but its id is missing
   useEffect(() => {
-    if (selectedCountry?.code !== "MA") return;
+    if (!usesOzoneCityList) return;
     if (data.city && !data.cityId) {
       const match = cities.find(
         (c) => c.name.toLowerCase() === data.city.trim().toLowerCase()
@@ -107,7 +111,7 @@ export default function CustomerInfoStep({
         onChange({ ...data, city: match.name, cityId: match.id });
       }
     }
-  }, [data.city, data.cityId, selectedCountry?.code]);
+  }, [data.city, data.cityId, usesOzoneCityList]);
 
   // Close city dropdown on click outside
   useEffect(() => {
@@ -165,8 +169,8 @@ export default function CustomerInfoStep({
     if (!data.email.trim()) errs.email = t("checkout.required");
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = t("checkout.invalid_email");
     if (!data.phoneNumber.trim()) errs.phoneNumber = t("checkout.required");
-    if (!data.address.trim()) errs.address = t("checkout.required");
-    if (!data.city.trim()) errs.city = t("checkout.required");
+    if (!isPickup && !data.address.trim()) errs.address = t("checkout.required");
+    if (!isPickup && (usesOzoneCityList ? !data.cityId : !data.city.trim())) errs.city = t("checkout.required");
     if (data.createAccount && !data.password?.trim()) errs.password = t("checkout.required");
 
     // GPS location is optional — customers can share their location via the
@@ -425,8 +429,8 @@ export default function CustomerInfoStep({
         </div>
 
         {/* City */}
-        {/* City — dropdown for Morocco, free text for other countries */}
-        {selectedCountry?.code === "MA" ? (
+        {/* City — Ozone list selection or free text for other delivery methods */}
+        {usesOzoneCityList ? (
           <div className="space-y-2" ref={cityRef}>
             <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
             <button
@@ -508,7 +512,7 @@ export default function CustomerInfoStep({
                 placeholder={t("checkout.city_placeholder")}
                 value={data.city}
                 onChange={(e) => {
-                  // Free-text city for non-Morocco countries — no cityId mapping
+                  // Free-text city for non-Ozone delivery methods — no cityId mapping
                   onChange({ ...data, city: e.target.value, cityId: 0 });
                   if (errors.city) setErrors((prev) => ({ ...prev, city: "" }));
                 }}

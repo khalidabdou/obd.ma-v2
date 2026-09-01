@@ -15,6 +15,7 @@ export interface CustomerInfoData {
   address: string;
   city: string;
   cityId: number;
+  deliveryName?: string;
 }
 
 /**

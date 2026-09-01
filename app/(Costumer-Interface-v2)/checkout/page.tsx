@@ -271,6 +271,7 @@ export default function CheckoutPage() {
             data={customerData}
             onChange={setCustomerData}
             isLoggedIn={isLoggedIn}
+            deliveryName={selectedDelivery?.name}
             onBack={() => setStep("delivery")}
             onNext={async () => {
               // Save guest info for next checkout

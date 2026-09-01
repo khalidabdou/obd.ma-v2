@@ -144,6 +144,7 @@ export default function PaymentStep({
         address: customerData.address,
         city: customerData.city,
         cityId: customerData.cityId || 0,
+        deliveryName: selectedDelivery?.name,
       };
 
       if (customerData.createAccount && customerData.password) {
@@ -188,7 +189,7 @@ export default function PaymentStep({
       console.warn("saveCustomerInfo encountered an error, continuing order placement:", err);
       return true;
     }
-  }, [customerData, isLoggedIn, onLoggedIn]);
+  }, [customerData, isLoggedIn, onLoggedIn, selectedDelivery?.name]);
 
   // COD order
   const handleCOD = async () => {
