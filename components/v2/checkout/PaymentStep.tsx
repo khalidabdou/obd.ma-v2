@@ -63,7 +63,7 @@ export default function PaymentStep({
     // Card payments now use Hosted Fields (no redirect), so only handle PayPal
     if (pendingPayPal) {
       try {
-        const { orderId: ppOrderId, paypalOrderId, deliveryCompanyId, latitude, longitude } = JSON.parse(pendingPayPal);
+        const { orderId: ppOrderId, paypalOrderId, deliveryCompanyId, latitude, longitude, receiverPhone } = JSON.parse(pendingPayPal);
         sessionStorage.removeItem("obd_paypal_pending");
         // Auto-capture after user returns from PayPal approval
         (async () => {
@@ -76,7 +76,8 @@ export default function PaymentStep({
               paypalOrderId,
               deliveryCompanyId,
               latitude,
-              longitude
+              longitude,
+              receiverPhone
             );
             if (capRes.success) {
               onSuccess(String(capRes.data.orderId ?? ppOrderId), "paypal");
@@ -202,7 +203,8 @@ export default function PaymentStep({
         new Date().toISOString(),
         selectedDelivery?.id,
         customerData.latitude,
-        customerData.longitude
+        customerData.longitude,
+        isLoggedIn ? customerData.phoneNumber : undefined
       );
       if (res.success) {
         const finalOrderId = String(res.data.orderId ?? orderId);
@@ -253,6 +255,7 @@ export default function PaymentStep({
               deliveryCompanyId: selectedDelivery?.id,
               latitude: customerData.latitude,
               longitude: customerData.longitude,
+              receiverPhone: isLoggedIn ? customerData.phoneNumber : undefined,
             })
           );
           // Redirect to PayPal for buyer approval
@@ -267,7 +270,8 @@ export default function PaymentStep({
           paypalOrderId,
           selectedDelivery?.id,
           customerData.latitude,
-          customerData.longitude
+          customerData.longitude,
+          isLoggedIn ? customerData.phoneNumber : undefined
         );
         if (capRes.success) {
           onSuccess(String(capRes.data.orderId ?? orderId), "paypal");
@@ -346,7 +350,8 @@ export default function PaymentStep({
         paypalOrderId,
         selectedDelivery?.id,
         customerData.latitude,
-        customerData.longitude
+        customerData.longitude,
+        isLoggedIn ? customerData.phoneNumber : undefined
       );
       if (capRes.success) {
         onSuccess(String(capRes.data.orderId ?? orderId), "card");
@@ -384,7 +389,8 @@ export default function PaymentStep({
         new Date().toISOString(),
         selectedDelivery.id,
         customerData.latitude,
-        customerData.longitude
+        customerData.longitude,
+        isLoggedIn ? customerData.phoneNumber : undefined
       );
       if (!response.success) throw new Error(t("checkout.order_failed"));
       onSuccess(String(response.data.orderId ?? orderId), "bank_transfer");

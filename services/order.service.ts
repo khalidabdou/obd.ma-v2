@@ -146,6 +146,7 @@ export interface CreateOrderRequest {
   latitude?: number;
   longitude?: number;
   checkoutVersion?: number;
+  receiverPhone?: string;
 }
 
 /**
@@ -208,7 +209,8 @@ export const orderService = {
     creationDate: string,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    receiverPhone?: string
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -218,6 +220,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
+      receiverPhone,
     });
   },
 
@@ -251,7 +254,8 @@ export const orderService = {
     paypalOrderId: string,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    receiverPhone?: string
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -262,6 +266,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
+      receiverPhone,
     });
   },
 
@@ -295,7 +300,8 @@ export const orderService = {
     cardOrderId: string,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    receiverPhone?: string
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -306,6 +312,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
+      receiverPhone,
     });
   },
 
@@ -314,7 +321,8 @@ export const orderService = {
     creationDate: string,
     deliveryCompanyId: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    receiverPhone?: string
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -324,6 +332,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
+      receiverPhone,
     });
   },
 

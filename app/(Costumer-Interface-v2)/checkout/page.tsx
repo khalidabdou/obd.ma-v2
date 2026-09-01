@@ -283,8 +283,6 @@ export default function CheckoutPage() {
                     address: customerData.address,
                     city: customerData.city,
                     cityId: customerData.cityId || undefined,
-                    phoneCode: customerData.countryCode,
-                    phoneNumber: customerData.phoneNumber,
                     country: customerData.country,
                   });
                 } catch (err) {
