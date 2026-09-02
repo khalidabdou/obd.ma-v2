@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Container from "./Container";
 import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
@@ -209,39 +209,55 @@ export default function NavBar() {
                     <Sparkles className="h-5 w-5" />
                     {t("nav.ai_search")}
                   </button>
-                  <Link href="/catalog" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                    {t("nav.catalog")}
-                  </Link>
-                  <Link href="/cart" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                    {t("nav.cart")}
-                  </Link>
-                  <Link href="/myfavorites" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                    {t("nav.favorites")}
-                  </Link>
-                  <Link href="/downloads" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                    {t("account.downloads")}
-                  </Link>
+                  <SheetClose asChild>
+                    <Link href="/catalog" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                      {t("nav.catalog")}
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/cart" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                      {t("nav.cart")}
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/myfavorites" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                      {t("nav.favorites")}
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link href="/downloads" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                      {t("account.downloads")}
+                    </Link>
+                  </SheetClose>
                   {isAuthenticated ? (
                     <>
-                      <Link href="/account" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                        {t("nav.account")}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                      >
-                        {t("nav.logout")}
-                      </button>
+                      <SheetClose asChild>
+                        <Link href="/account" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                          {t("nav.account")}
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                        >
+                          {t("nav.logout")}
+                        </button>
+                      </SheetClose>
                     </>
                   ) : (
                     <>
-                      <Link href="/login" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                        {t("nav.login")}
-                      </Link>
-                      <Link href="/register" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-                        {t("nav.register")}
-                      </Link>
+                      <SheetClose asChild>
+                        <Link href="/login" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                          {t("nav.login")}
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link href="/register" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                          {t("nav.register")}
+                        </Link>
+                      </SheetClose>
                     </>
                   )}
 
