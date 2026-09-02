@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Heart, Loader2 } from "lucide-react";
+import { ArrowUpRight, Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/Context/AuthContext";
 import { useTranslation } from "@/Context/LanguageContext";
 import { useFavorites } from "@/hooks/v2/queries/useFavorites";
@@ -22,9 +22,10 @@ function isNewProduct(creationDate: string): boolean {
 
 interface HomeProductCardProps {
   product: Product;
+  compact?: boolean;
 }
 
-export default function HomeProductCard({ product }: HomeProductCardProps) {
+export default function HomeProductCard({ product, compact = false }: HomeProductCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -83,8 +84,49 @@ export default function HomeProductCard({ product }: HomeProductCardProps) {
     }
   };
 
+  if (compact) {
+    return (
+      <Link
+        href={`/product/${product.productCode}`}
+        className="group relative flex min-h-28 w-[260px] shrink-0 items-center justify-between overflow-hidden rounded-lg bg-muted/70 p-4 transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none sm:w-auto"
+      >
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col items-start self-stretch">
+          <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">
+            {product.categoryName || product.brandName}
+          </p>
+          <h3 className="line-clamp-2 max-w-36 text-sm font-semibold leading-tight text-foreground">
+            {product.title}
+          </h3>
+          <div className="mt-auto flex items-center gap-2">
+            {price !== null && price !== undefined && (
+              <span className="text-xs font-bold text-brand-blue">{price.toFixed(2)} MAD</span>
+            )}
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-background text-foreground transition-colors group-hover:bg-brand-blue group-hover:text-white">
+              <ArrowUpRight className="h-3.5 w-3.5 rtl:-rotate-90" aria-hidden="true" />
+            </span>
+          </div>
+        </div>
+        <div className="relative h-24 w-24 shrink-0">
+          {product.images?.mainImage ? (
+            <Image
+              src={product.images.mainImage}
+              alt={product.title}
+              fill
+              sizes="96px"
+              className="object-contain transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
+            />
+          ) : (
+            <span className="grid h-full place-items-center text-lg font-bold text-brand-blue">
+              {product.title.slice(0, 2).toUpperCase()}
+            </span>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/50 dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 transition-[background-color,border-color,transform] duration-300 hover:-translate-y-1 hover:border-brand-blue/50 motion-reduce:transition-none dark:border-white/10 dark:bg-[#14161B] dark:hover:bg-[#1A1D24]">
       {isNewProduct(product.creationDate) && (
         <span className="absolute left-4 top-4 z-10 rounded-full bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white">
           {t("home.new")}

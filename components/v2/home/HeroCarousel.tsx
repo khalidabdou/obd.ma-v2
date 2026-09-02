@@ -73,9 +73,11 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   return (
     <div
-      className="relative isolate w-full overflow-hidden rounded-[2rem]"
+      className="relative isolate w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
     >
       {validSlides.map((slide, index) => {
         const isActive = index === current;
@@ -88,10 +90,10 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
           return (
             <div
               key={index}
-              className={`transition-all duration-700 ease-out ${visibilityClass}`}
+              className={`transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none ${visibilityClass}`}
             >
               <Link href={getHref(slide)} className="block">
-                <div className="relative aspect-[16/20] w-full overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] sm:aspect-[16/14] md:aspect-[16/12] lg:aspect-[16/10] xl:aspect-[16/8]">
+                <div className="relative aspect-[4/3] min-h-[280px] w-full overflow-hidden sm:aspect-[16/9] md:min-h-0 md:aspect-[16/6] xl:aspect-[16/5]">
                   <Image
                     src={slide.carouselImage!}
                     alt={`Promotion ${index + 1}`}
@@ -113,9 +115,9 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         return (
           <div
             key={index}
-            className={`transition-all duration-700 ease-out ${visibilityClass}`}
+            className={`transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none ${visibilityClass}`}
           >
-            <div className="grid items-center gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] md:gap-10 lg:gap-16">
+            <div className="grid min-h-[340px] items-center gap-6 py-1 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] md:gap-8 lg:gap-10">
               {/* Text content */}
               <div className="flex w-full flex-col items-center gap-5 px-2 text-center md:items-start md:px-0 md:text-start lg:gap-6">
                 {title && (
@@ -131,7 +133,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                 {buttonText && (
                   <Link
                     href={getHref(slide)}
-                    className="group relative mt-1 inline-flex min-h-12 items-center gap-2 overflow-hidden rounded-full px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(217,44,39,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-12px_rgba(217,44,39,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2 focus-visible:ring-offset-background md:text-base"
+                    className="group relative mt-1 inline-flex min-h-12 items-center gap-2 overflow-hidden rounded-full px-7 py-3 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none md:text-base"
                   >
                     {/* Solid brand background */}
                     <span
@@ -168,14 +170,14 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
               </div>
 
               {/* Image - clean framed presentation, takes 2/3 on desktop */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.75rem] border border-border/60 bg-card shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)]">
+              <div className="relative aspect-[16/11] w-full overflow-hidden sm:aspect-[16/10] md:aspect-[16/9]">
                 <Image
                   src={slide.carouselImage!}
                   alt={title || `Promotion ${index + 1}`}
                   fill
                   priority={index === 0}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 60vw, 860px"
-                  className="object-cover transition-transform duration-700 ease-out hover:scale-[1.015]"
+                  className="object-cover transition-transform duration-700 ease-out hover:scale-[1.015] motion-reduce:transition-none"
                 />
               </div>
             </div>
@@ -185,18 +187,18 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
       {/* Modern slide indicators */}
       {slideCount > 1 && (
-        <div className="mt-7 flex items-center justify-center gap-4">
+        <div className="absolute bottom-5 right-5 z-20 flex items-center justify-center gap-2 rounded-full border border-border/70 bg-background/75 p-1.5 backdrop-blur-md rtl:left-5 rtl:right-auto">
           <button
             type="button"
             onClick={goPrev}
             aria-label="Previous slide"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/50 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="grid h-8 w-8 place-items-center rounded-full text-foreground transition-colors hover:bg-muted hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             <svg className="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="m15 18-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-2 shadow-sm">
+          <div className="flex items-center gap-1.5 px-1">
             {validSlides.map((_, index) => {
               const isActive = index === current;
               return (
@@ -206,7 +208,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
                   onClick={() => goTo(index)}
                   aria-label={`Go to slide ${index + 1}`}
                   aria-current={isActive ? "true" : undefined}
-                  className={`h-2 rounded-full transition-all duration-300 ${
+                  className={`h-2 rounded-full transition-[width,background-color] duration-300 motion-reduce:transition-none ${
                     isActive
                       ? "w-8 bg-brand-red"
                       : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
@@ -219,7 +221,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
             type="button"
             onClick={goNext}
             aria-label="Next slide"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/50 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="grid h-8 w-8 place-items-center rounded-full text-foreground transition-colors hover:bg-muted hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             <svg className="h-4 w-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
