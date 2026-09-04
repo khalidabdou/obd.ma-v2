@@ -136,6 +136,17 @@ export interface CheckoutOptions {
   bankDetails: BankDetails | null;
 }
 
+export interface ShippingInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneCode: string;
+  phoneNumber: string;
+  country: string;
+  address: string;
+  city: string;
+}
+
 export interface CreateOrderRequest {
   orderId: string;
   paymentMethod: CheckoutPaymentMethod | 'COD';
@@ -146,7 +157,7 @@ export interface CreateOrderRequest {
   latitude?: number;
   longitude?: number;
   checkoutVersion?: number;
-  receiverPhone?: string;
+  shippingInfo: ShippingInfo;
 }
 
 /**
@@ -207,10 +218,10 @@ export const orderService = {
   createCODOrder: async (
     orderId: string,
     creationDate: string,
+    shippingInfo: ShippingInfo,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number,
-    receiverPhone?: string
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -220,7 +231,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
-      receiverPhone,
+      shippingInfo,
     });
   },
 
@@ -229,12 +240,17 @@ export const orderService = {
    * @param orderId - Order ID
    * @returns Promise with PayPal order ID
    */
-  createPayPalOrder: async (orderId: string, deliveryCompanyId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
+  createPayPalOrder: async (
+    orderId: string,
+    deliveryCompanyId: string,
+    shippingInfo: ShippingInfo
+  ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
       paymentMethod: 'paypal',
       deliveryCompanyId,
       checkoutVersion: 2,
+      shippingInfo,
     });
   },
 
@@ -252,10 +268,10 @@ export const orderService = {
     orderId: string,
     creationDate: string,
     paypalOrderId: string,
+    shippingInfo: ShippingInfo,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number,
-    receiverPhone?: string
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -266,7 +282,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
-      receiverPhone,
+      shippingInfo,
     });
   },
 
@@ -275,12 +291,17 @@ export const orderService = {
    * @param orderId - Order ID
    * @returns Promise with card order ID
    */
-  createCardOrder: async (orderId: string, deliveryCompanyId: string): Promise<ApiSuccess<CreateOrderResponse>> => {
+  createCardOrder: async (
+    orderId: string,
+    deliveryCompanyId: string,
+    shippingInfo: ShippingInfo
+  ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
       paymentMethod: 'card',
       deliveryCompanyId,
       checkoutVersion: 2,
+      shippingInfo,
     });
   },
 
@@ -298,10 +319,10 @@ export const orderService = {
     orderId: string,
     creationDate: string,
     cardOrderId: string,
+    shippingInfo: ShippingInfo,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number,
-    receiverPhone?: string
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -312,7 +333,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
-      receiverPhone,
+      shippingInfo,
     });
   },
 
@@ -320,9 +341,9 @@ export const orderService = {
     orderId: string,
     creationDate: string,
     deliveryCompanyId: string,
+    shippingInfo: ShippingInfo,
     latitude?: number,
-    longitude?: number,
-    receiverPhone?: string
+    longitude?: number
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -332,7 +353,7 @@ export const orderService = {
       latitude,
       longitude,
       checkoutVersion: 2,
-      receiverPhone,
+      shippingInfo,
     });
   },
 

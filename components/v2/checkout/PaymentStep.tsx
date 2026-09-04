@@ -11,7 +11,7 @@ import { customerInfoService } from "@/services/customer-info.service";
 import { customerAuthService } from "@/services/customer-auth.service";
 import type { CustomerFormData, DeliveryCompany } from "@/app/(Costumer-Interface-v2)/checkout/page";
 import type { CartItem } from "@/Context/CartContext";
-import type { CheckoutOptions, CheckoutPaymentMethod } from "@/services/order.service";
+import type { CheckoutOptions, CheckoutPaymentMethod, ShippingInfo } from "@/services/order.service";
 import { ArrowLeft, Loader2, AlertCircle, Check } from "lucide-react";
 import PayPalHostedFields from "@components/v2/checkout/PayPalHostedFields";
 import { NEXT_PUBLIC_PAYPAL_CLIENT_ID } from "@/utils/variables";
@@ -52,6 +52,16 @@ export default function PaymentStep({
   const [error, setError] = useState("");
   const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const [cardAmount, setCardAmount] = useState<string>("");
+  const [shippingInfo] = useState<ShippingInfo>(() => ({
+    firstName: customerData.firstName,
+    lastName: customerData.lastName,
+    email: customerData.email,
+    phoneCode: customerData.countryCode,
+    phoneNumber: customerData.phoneNumber,
+    country: customerData.country,
+    address: customerData.address,
+    city: customerData.city,
+  }));
 
   const deliveryPrice = selectedDelivery?.fee ?? 0;
   const total = subtotal + deliveryPrice;
@@ -63,7 +73,21 @@ export default function PaymentStep({
     // Card payments now use Hosted Fields (no redirect), so only handle PayPal
     if (pendingPayPal) {
       try {
-        const { orderId: ppOrderId, paypalOrderId, deliveryCompanyId, latitude, longitude, receiverPhone } = JSON.parse(pendingPayPal);
+        const {
+          orderId: ppOrderId,
+          paypalOrderId,
+          deliveryCompanyId,
+          latitude,
+          longitude,
+          shippingInfo: pendingShippingInfo,
+        } = JSON.parse(pendingPayPal) as {
+          orderId: string;
+          paypalOrderId: string;
+          deliveryCompanyId: string;
+          latitude?: number;
+          longitude?: number;
+          shippingInfo: ShippingInfo;
+        };
         sessionStorage.removeItem("obd_paypal_pending");
         // Auto-capture after user returns from PayPal approval
         (async () => {
@@ -74,10 +98,10 @@ export default function PaymentStep({
               ppOrderId,
               new Date().toISOString(),
               paypalOrderId,
+              pendingShippingInfo,
               deliveryCompanyId,
               latitude,
-              longitude,
-              receiverPhone
+              longitude
             );
             if (capRes.success) {
               onSuccess(String(capRes.data.orderId ?? ppOrderId), "paypal");
@@ -130,82 +154,49 @@ export default function PaymentStep({
     return t(fallbackKey);
   }, [t]);
 
-  // Save customer info for guests before proceeding
-  const saveCustomerInfo = useCallback(async (): Promise<boolean> => {
-    if (isLoggedIn) return true;
+  // Account creation remains an explicit guest action and is independent of shipping details.
+  const createAccountIfRequested = useCallback(async (): Promise<void> => {
+    if (isLoggedIn || !customerData.createAccount || !customerData.password) return;
+
     try {
-      const infoPayload = {
-        firstName: customerData.firstName,
-        lastName: customerData.lastName,
-        email: customerData.email,
-        phoneCode: customerData.countryCode || "+212",
-        phoneNumber: customerData.phoneNumber,
-        country: customerData.country,
-        address: customerData.address,
-        city: customerData.city,
-        cityId: customerData.cityId || 0,
-        deliveryName: selectedDelivery?.name,
-      };
-
-      if (customerData.createAccount && customerData.password) {
-        try {
-          // Create account — this sets auth cookies (auto-login)
-          await customerInfoService.createAccount({
-            firstName: customerData.firstName,
-            lastName: customerData.lastName,
-            email: customerData.email,
-            password: customerData.password,
-            countryCode: customerData.countryCode || "+212",
-            phoneNumber: customerData.phoneNumber,
-            country: customerData.country,
-            withCart: true,
-          });
-          // Verify new auth state
-          try {
-            await customerAuthService.checkCustomerToken();
-            if (onLoggedIn) onLoggedIn();
-          } catch (e) {
-            console.warn("Failed to verify auth after account creation:", e);
-          }
-        } catch (accountErr: any) {
-          // If email or phone already exists, continue checkout without throwing error
-          console.warn("Account creation skipped (email or phone may already exist):", accountErr);
-        }
-      }
-
-      // Save or update customer shipping info
+      // Create account — this sets auth cookies (auto-login)
+      await customerInfoService.createAccount({
+        firstName: shippingInfo.firstName,
+        lastName: shippingInfo.lastName,
+        email: shippingInfo.email,
+        password: customerData.password,
+        countryCode: shippingInfo.phoneCode,
+        phoneNumber: shippingInfo.phoneNumber,
+        country: shippingInfo.country,
+        withCart: true,
+      });
+      // Verify new auth state
       try {
-        await customerInfoService.createCustomerInfo(infoPayload);
-      } catch (infoErr: any) {
-        try {
-          await customerInfoService.updateCustomerInfo(infoPayload);
-        } catch (updateErr) {
-          console.warn("Customer info update skipped/failed, proceeding with order:", updateErr);
-        }
+        await customerAuthService.checkCustomerToken();
+        if (onLoggedIn) onLoggedIn();
+      } catch (e) {
+        console.warn("Failed to verify auth after account creation:", e);
       }
-
-      return true;
-    } catch (err) {
-      console.warn("saveCustomerInfo encountered an error, continuing order placement:", err);
-      return true;
+    } catch (accountErr: any) {
+      // If email or phone already exists, continue checkout without throwing error
+      console.warn("Account creation skipped (email or phone may already exist):", accountErr);
     }
-  }, [customerData, isLoggedIn, onLoggedIn, selectedDelivery?.name]);
+  }, [customerData.createAccount, customerData.password, isLoggedIn, onLoggedIn, shippingInfo]);
 
   // COD order
   const handleCOD = async () => {
     setLoading(true);
     setError("");
     try {
-      const infoSaved = await saveCustomerInfo();
-      if (!infoSaved) return;
+      await createAccountIfRequested();
 
       const res = await orderService.createCODOrder(
         orderId,
         new Date().toISOString(),
+        shippingInfo,
         selectedDelivery?.id,
         customerData.latitude,
-        customerData.longitude,
-        isLoggedIn ? customerData.phoneNumber : undefined
+        customerData.longitude
       );
       if (res.success) {
         const finalOrderId = String(res.data.orderId ?? orderId);
@@ -237,11 +228,10 @@ export default function PaymentStep({
     setLoading(true);
     setError("");
     try {
-      const infoSaved = await saveCustomerInfo();
-      if (!infoSaved) return;
+      await createAccountIfRequested();
 
       if (!selectedDelivery) throw new Error("Delivery method is required");
-      const res = await orderService.createPayPalOrder(orderId, selectedDelivery.id);
+      const res = await orderService.createPayPalOrder(orderId, selectedDelivery.id, shippingInfo);
       if (res.success && res.data.paypal_order_id) {
         const paypalOrderId = res.data.paypal_order_id;
         const approvalUrl = res.data.approval_url;
@@ -253,10 +243,10 @@ export default function PaymentStep({
             JSON.stringify({
               orderId,
               paypalOrderId,
-              deliveryCompanyId: selectedDelivery?.id,
+              deliveryCompanyId: selectedDelivery.id,
               latitude: customerData.latitude,
               longitude: customerData.longitude,
-              receiverPhone: isLoggedIn ? customerData.phoneNumber : undefined,
+              shippingInfo,
             })
           );
           // Redirect to PayPal for buyer approval
@@ -269,10 +259,10 @@ export default function PaymentStep({
           orderId,
           new Date().toISOString(),
           paypalOrderId,
-          selectedDelivery?.id,
+          shippingInfo,
+          selectedDelivery.id,
           customerData.latitude,
-          customerData.longitude,
-          isLoggedIn ? customerData.phoneNumber : undefined
+          customerData.longitude
         );
         if (capRes.success) {
           onSuccess(String(capRes.data.orderId ?? orderId), "paypal");
@@ -310,11 +300,10 @@ export default function PaymentStep({
     setLoading(true);
     setError("");
     try {
-      const infoSaved = await saveCustomerInfo();
-      if (!infoSaved) return;
+      await createAccountIfRequested();
 
       if (!selectedDelivery) throw new Error("Delivery method is required");
-      const res = await orderService.createCardOrder(orderId, selectedDelivery.id);
+      const res = await orderService.createCardOrder(orderId, selectedDelivery.id, shippingInfo);
       if (res.success && res.data.card_order_id) {
         setCardOrderId(res.data.card_order_id);
         if (!res.data.card_amount) throw new Error("Card amount was not returned by the server");
@@ -349,10 +338,10 @@ export default function PaymentStep({
         orderId,
         new Date().toISOString(),
         paypalOrderId,
+        shippingInfo,
         selectedDelivery?.id,
         customerData.latitude,
-        customerData.longitude,
-        isLoggedIn ? customerData.phoneNumber : undefined
+        customerData.longitude
       );
       if (capRes.success) {
         onSuccess(String(capRes.data.orderId ?? orderId), "card");
@@ -382,16 +371,15 @@ export default function PaymentStep({
     setLoading(true);
     setError("");
     try {
-      const infoSaved = await saveCustomerInfo();
-      if (!infoSaved) return;
+      await createAccountIfRequested();
       if (!selectedDelivery) throw new Error("Delivery method is required");
       const response = await orderService.createBankTransferOrder(
         orderId,
         new Date().toISOString(),
         selectedDelivery.id,
+        shippingInfo,
         customerData.latitude,
-        customerData.longitude,
-        isLoggedIn ? customerData.phoneNumber : undefined
+        customerData.longitude
       );
       if (!response.success) throw new Error(t("checkout.order_failed"));
       onSuccess(String(response.data.orderId ?? orderId), "bank_transfer");

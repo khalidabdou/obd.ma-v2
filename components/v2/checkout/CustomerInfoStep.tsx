@@ -16,7 +16,7 @@ import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerFormData } from "@/app/(Costumer-Interface-v2)/checkout/page";
 import { ArrowLeft, ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
 import citiesData from "@/locales/cities.json";
-import { COUNTRIES, getCountryByPhoneCode, getCountryByName, type Country } from "@/locales/countries";
+import { COUNTRIES, getCountryByName, type Country } from "@/locales/countries";
 
 interface CustomerInfoStepProps {
   data: CustomerFormData;
@@ -95,8 +95,7 @@ export default function CustomerInfoStep({
   };
 
   const selectedCity = cities.find((c) => c.id === data.cityId);
-  const selectedCountry: Country | undefined =
-    getCountryByName(data.country) || getCountryByPhoneCode(data.countryCode);
+  const selectedCountry: Country | undefined = getCountryByName(data.country);
   const isPickup = deliveryName === "PICKUP";
   const usesOzoneCityList = deliveryName === "OZONE_EXPRESS" && selectedCountry?.code === "MA";
 
@@ -151,11 +150,9 @@ export default function CustomerInfoStep({
   };
 
   const handleCountrySelect = (country: Country) => {
-    // Update country and sync the phone dial code to match
     onChange({
       ...data,
       country: country.name,
-      countryCode: country.phoneCode,
     });
     setCountrySearch("");
     setCountryOpen(false);
@@ -253,11 +250,7 @@ export default function CustomerInfoStep({
           <div className="mt-1 flex gap-2">
             <Select
               value={data.countryCode || "+212"}
-              onValueChange={(value) => {
-                // Sync the default country to match the chosen dial code
-                const c = getCountryByPhoneCode(value);
-                onChange({ ...data, countryCode: value, country: c.name });
-              }}
+              onValueChange={(value) => update("countryCode", value)}
             >
               <SelectTrigger className="w-[90px] flex-shrink-0 border-brand-blue/30 bg-input focus:ring-brand-blue dark:border-brand-blue/30 dark:bg-white/5">
                 <SelectValue />

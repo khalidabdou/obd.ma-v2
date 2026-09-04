@@ -273,22 +273,10 @@ export default function CheckoutPage() {
             isLoggedIn={isLoggedIn}
             deliveryName={selectedDelivery?.name}
             onBack={() => setStep("delivery")}
-            onNext={async () => {
-              // Save guest info for next checkout
+            onNext={() => {
+              // Save guest info for next checkout. Logged-in profile data is prefill-only.
               if (!isLoggedIn) {
                 localStorage.setItem("obd_checkout_info", JSON.stringify(customerData));
-              } else {
-                // Update logged-in customer info in the background
-                try {
-                  await customerInfoService.updateCustomerInfo({
-                    address: customerData.address,
-                    city: customerData.city,
-                    cityId: customerData.cityId || undefined,
-                    country: customerData.country,
-                  });
-                } catch (err) {
-                  console.error("Failed to update customer info:", err);
-                }
               }
               setStep("payment");
             }}
