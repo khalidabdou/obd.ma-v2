@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +32,17 @@ interface PaymentStepProps {
 
 type PaymentMethod = CheckoutPaymentMethod;
 
+function normalizePaymentMethods(methods: string[]): CheckoutPaymentMethod[] {
+  return methods.reduce<CheckoutPaymentMethod[]>((normalized, method) => {
+    const value = method.toLowerCase();
+    if (value === "crbt") normalized.push("CRBT");
+    if (value === "paypal" || value === "card" || value === "bank_transfer") {
+      normalized.push(value);
+    }
+    return normalized;
+  }, []);
+}
+
 export default function PaymentStep({
   orderId,
   cartItems,
@@ -50,6 +61,7 @@ export default function PaymentStep({
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const errorRef = useRef<HTMLDivElement>(null);
   const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const [cardAmount, setCardAmount] = useState<string>("");
   const [shippingInfo] = useState<ShippingInfo>(() => ({
@@ -65,7 +77,21 @@ export default function PaymentStep({
 
   const deliveryPrice = selectedDelivery?.fee ?? 0;
   const total = subtotal + deliveryPrice;
-  const availableMethods = selectedDelivery?.paymentMethods ?? [];
+  const deliveryCompanyId = selectedDelivery?.sourceId ?? selectedDelivery?.id;
+  const currentDeliveryOption = checkoutOptions?.deliveryOptions.find(
+    (option) => option.id === deliveryCompanyId,
+  );
+  const isInternationalShipping = selectedDelivery?.name === "INTERNATIONAL";
+  const paymentMethods = selectedDelivery?.paymentMethods?.length
+    ? selectedDelivery.paymentMethods
+    : currentDeliveryOption?.paymentMethods ?? [];
+  const availableMethods = normalizePaymentMethods(paymentMethods).filter(
+    (item) => !isInternationalShipping || item !== "CRBT",
+  );
+
+  useEffect(() => {
+    if (error) requestAnimationFrame(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+  }, [error]);
 
   // Check for returning PayPal approval on mount
   useEffect(() => {
@@ -194,7 +220,7 @@ export default function PaymentStep({
         orderId,
         new Date().toISOString(),
         shippingInfo,
-        selectedDelivery?.id,
+        deliveryCompanyId,
         customerData.latitude,
         customerData.longitude
       );
@@ -231,7 +257,7 @@ export default function PaymentStep({
       await createAccountIfRequested();
 
       if (!selectedDelivery) throw new Error("Delivery method is required");
-      const res = await orderService.createPayPalOrder(orderId, selectedDelivery.id, shippingInfo);
+      const res = await orderService.createPayPalOrder(orderId, deliveryCompanyId!, shippingInfo);
       if (res.success && res.data.paypal_order_id) {
         const paypalOrderId = res.data.paypal_order_id;
         const approvalUrl = res.data.approval_url;
@@ -243,7 +269,7 @@ export default function PaymentStep({
             JSON.stringify({
               orderId,
               paypalOrderId,
-              deliveryCompanyId: selectedDelivery.id,
+              deliveryCompanyId,
               latitude: customerData.latitude,
               longitude: customerData.longitude,
               shippingInfo,
@@ -260,7 +286,7 @@ export default function PaymentStep({
           new Date().toISOString(),
           paypalOrderId,
           shippingInfo,
-          selectedDelivery.id,
+          deliveryCompanyId!,
           customerData.latitude,
           customerData.longitude
         );
@@ -303,7 +329,7 @@ export default function PaymentStep({
       await createAccountIfRequested();
 
       if (!selectedDelivery) throw new Error("Delivery method is required");
-      const res = await orderService.createCardOrder(orderId, selectedDelivery.id, shippingInfo);
+      const res = await orderService.createCardOrder(orderId, deliveryCompanyId!, shippingInfo);
       if (res.success && res.data.card_order_id) {
         setCardOrderId(res.data.card_order_id);
         if (!res.data.card_amount) throw new Error("Card amount was not returned by the server");
@@ -339,7 +365,7 @@ export default function PaymentStep({
         new Date().toISOString(),
         paypalOrderId,
         shippingInfo,
-        selectedDelivery?.id,
+        deliveryCompanyId,
         customerData.latitude,
         customerData.longitude
       );
@@ -376,7 +402,7 @@ export default function PaymentStep({
       const response = await orderService.createBankTransferOrder(
         orderId,
         new Date().toISOString(),
-        selectedDelivery.id,
+        deliveryCompanyId!,
         shippingInfo,
         customerData.latitude,
         customerData.longitude
@@ -586,7 +612,7 @@ export default function PaymentStep({
               )}
 
               {error && (
-                <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+                <div ref={errorRef} role="alert" className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   <span>{error}</span>
                 </div>

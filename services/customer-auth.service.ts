@@ -45,6 +45,11 @@ export interface CustomerInfo {
   phone?: string;
 }
 
+export interface ExistingAccountLookup {
+  exists: boolean;
+  identifierType: 'email' | 'phone';
+}
+
 /**
  * Authentication service for customer operations
  */
@@ -95,5 +100,21 @@ export const customerAuthService = {
    */
   verifyWhatsAppOtp: async (payload: { countryCode: string; phoneNumber: string; otp: string }): Promise<ApiSuccess<{ message: string }>> => {
     return await apiClient.post('/otp/whatsapp/verify', payload);
+  },
+
+  lookupExistingAccount: async (payload: { email?: string; countryCode?: string; phoneNumber?: string }): Promise<ApiSuccess<ExistingAccountLookup>> => {
+    return await apiClient.post('/customer_account_exists', payload);
+  },
+
+  sendEmailOtp: async (payload: { email: string; lang: 'fr' | 'ar' | 'en' }): Promise<ApiSuccess<{ message: string }>> => {
+    return await apiClient.post('/otp', payload);
+  },
+
+  sendPhonePasswordResetOtp: async (payload: { countryCode: string; phoneNumber: string }): Promise<ApiSuccess<{ message: string }>> => {
+    return await apiClient.post('/otp/whatsapp/password-reset/send', payload);
+  },
+
+  resetPassword: async (payload: { email?: string; countryCode?: string; phoneNumber?: string; otp: string; password: string }): Promise<ApiSuccess<{ message: string }>> => {
+    return await apiClient.post('/reset_password', payload);
   },
 };

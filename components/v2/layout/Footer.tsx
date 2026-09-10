@@ -3,8 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Phone,
-  Mail,
   Truck,
   Shield,
   Award,
@@ -12,7 +10,7 @@ import {
   Headphones,
   ChevronRight,
   Lock,
-  Wallet,
+  Landmark,
   Link2,
 } from "lucide-react";
 import Container from "./Container";
@@ -102,41 +100,35 @@ export default function Footer() {
             </p>
 
             <div className="mt-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-brand-red text-brand-red">
-                  <Phone className="h-5 w-5" />
+              <a
+                href="https://wa.me/212650369921"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl transition-colors hover:bg-green-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label="WhatsApp: 06.50.36.99.21"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-green-500 text-green-500">
+                  <WhatsAppIcon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-base font-bold">06.50.36.99.21</p>
                   <p className="text-xs text-muted-foreground dark:text-gray-400">{t("footer.call_us_on_whatsapp")}</p>
                 </div>
-                <a
-                  href="https://wa.me/212650369921"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-green-500 text-green-500 transition-colors hover:bg-green-500/10"
-                  aria-label="WhatsApp"
-                >
-                  <WhatsAppIcon className="h-5 w-5" />
-                </a>
-              </div>
+              </a>
 
-              <div className="flex items-center gap-3">
+              <a
+                href="mailto:sales@obd.ma"
+                className="flex items-center gap-3 rounded-xl transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label="Email: sales@obd.ma"
+              >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-brand-blue text-brand-blue">
-                  <Mail className="h-5 w-5" />
+                  <GoogleIcon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold">sales@obd.ma</p>
                   <p className="text-xs text-muted-foreground dark:text-gray-400">{t("footer.send_us_email")}</p>
                 </div>
-                <a
-                  href="mailto:sales@obd.ma"
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-400 text-foreground transition-colors hover:bg-black/5 dark:border-gray-500 dark:text-white dark:hover:bg-white/10"
-                  aria-label="Email"
-                >
-                  <GoogleIcon className="h-5 w-5" />
-                </a>
-              </div>
+              </a>
             </div>
 
             <div className="mt-6 flex items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-muted/50 to-transparent p-4 dark:border-gray-700 dark:from-gray-800/50">
@@ -159,9 +151,9 @@ export default function Footer() {
                     <h3 className="text-sm font-bold uppercase tracking-wide">{t("footer.about")}</h3>
                   </div>
                   <ul className="space-y-3">
-                    <FooterLink href="/about">{t("footer.about_store")}</FooterLink>
-                    <FooterLink href="/about">{t("footer.about_obd")}</FooterLink>
-                    <FooterLink href="/about">{t("footer.about_suppliers")}</FooterLink>
+                    <FooterLink href="/about-store">{t("footer.about_store")}</FooterLink>
+                    <FooterLink href="/about-obd">{t("footer.about_obd")}</FooterLink>
+                    <FooterLink href="/about-suppliers">{t("footer.about_suppliers")}</FooterLink>
                   </ul>
                 </div>
 
@@ -249,7 +241,7 @@ export default function Footer() {
                 <Lock className="h-4 w-4 text-brand-red" />
                 <span>{t("footer.secure_payment")}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <Image
                   src="/assets/icons/visa-icon.svg"
                   alt="Visa"
@@ -264,11 +256,22 @@ export default function Footer() {
                   height={25}
                   className="h-5 w-auto"
                 />
+                <Image
+                  src="/assets/icons/paypal-icon.svg"
+                  alt="PayPal"
+                  width={71}
+                  height={20}
+                  className="h-5 w-auto"
+                />
                 <span className="flex h-6 items-center justify-center rounded bg-gray-300 px-2 text-[10px] font-bold text-gray-800 dark:bg-gray-700 dark:text-white">
-                  COD
+                  CRBT
                 </span>
-                <div className="flex h-6 w-8 items-center justify-center rounded bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-white">
-                  <Wallet className="h-4 w-4" />
+                <div
+                  className="flex h-6 w-8 items-center justify-center rounded bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-white"
+                  role="img"
+                  aria-label="Bank transfer"
+                >
+                  <Landmark className="h-4 w-4" />
                 </div>
               </div>
             </div>

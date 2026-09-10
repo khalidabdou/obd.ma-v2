@@ -25,7 +25,7 @@ export default function HomePage() {
   return (
     <>
       <HomeCarousel />
-      <HomeProducts compact />
+      {/* <HomeProducts compact /> */}
       <HomeBrands />
       <HomeCategories />
       <HomeProducts />

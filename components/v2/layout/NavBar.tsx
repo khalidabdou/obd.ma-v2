@@ -9,7 +9,7 @@ import SearchBox from "./SearchBox";
 import { useCart } from "@/Context/CartContext";
 import { useAuth } from "@/Context/AuthContext";
 import ThemeToggle from "@components/v2/ui/ThemeToggle";
-import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles, Sun, Moon, Monitor, PlayCircle } from "lucide-react";
+import { Menu, ShoppingCart, User, Heart, ShoppingBag, LogIn, UserPlus, LogOut, Globe, Download, Sparkles, Sun, Moon, Monitor, PlayCircle, LayoutGrid } from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "@/Context/LanguageContext";
 import { useTheme } from "@/hooks/v2/useTheme";
-import { openVideoTutorial } from "@components/v2/home/VideoTutorialDialog";
 
 const languages = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -73,6 +72,12 @@ export default function NavBar() {
               onClick={() => {}}
             >
               <Sparkles className="h-5 w-5" />
+            </Button>
+
+            <Button variant="ghost" size="icon" asChild className="hidden rounded-full lg:inline-flex">
+              <Link href="/catalog" aria-label={t("nav.catalog")} title={t("nav.catalog")}>
+                <LayoutGrid className="h-5 w-5" />
+              </Link>
             </Button>
 
             <Button variant="ghost" size="icon" asChild className="hidden rounded-full lg:inline-flex">
@@ -181,12 +186,12 @@ export default function NavBar() {
             <Button
               variant="ghost"
               size="icon"
+              asChild
               className="hidden rounded-full xl:inline-flex"
-              aria-label={t("nav.video_tutorial")}
-              title={t("nav.video_tutorial")}
-              onClick={openVideoTutorial}
             >
-              <PlayCircle className="h-5 w-5" />
+              <Link href="/videos" aria-label={t("nav.videos")} title={t("nav.videos")}>
+                <PlayCircle className="h-5 w-5" />
+              </Link>
             </Button>
 
             <div className="hidden md:block">
@@ -210,7 +215,8 @@ export default function NavBar() {
                     {t("nav.ai_search")}
                   </button>
                   <SheetClose asChild>
-                    <Link href="/catalog" className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                    <Link href="/catalog" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+                      <LayoutGrid className="h-5 w-5" />
                       {t("nav.catalog")}
                     </Link>
                   </SheetClose>
@@ -263,14 +269,15 @@ export default function NavBar() {
 
                   <hr className="my-2 border-border" />
 
-                  <button
-                    type="button"
-                    onClick={openVideoTutorial}
-                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                  >
-                    <PlayCircle className="h-5 w-5" />
-                    {t("nav.video_tutorial")}
-                  </button>
+                  <SheetClose asChild>
+                    <Link
+                      href="/videos"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                    >
+                      <PlayCircle className="h-5 w-5" />
+                      {t("nav.videos")}
+                    </Link>
+                  </SheetClose>
 
                   {/* Theme Selector Section */}
                   <div className="rounded-2xl border border-border/70 bg-muted/30 p-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Container from "@components/v2/layout/Container";
 import { useCart } from "@/Context/CartContext";
@@ -61,6 +61,12 @@ export default function CheckoutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingCustomer, setLoadingCustomer] = useState(true);
   const [orderError, setOrderError] = useState("");
+  const stepRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (step === "success" || step === "failure") return;
+    requestAnimationFrame(() => stepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, [step]);
 
   // Customer info state
   const [customerData, setCustomerData] = useState<CustomerFormData>({
@@ -215,7 +221,12 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!selectedDelivery || !checkoutOptions) return;
-    const current = checkoutOptions.deliveryOptions.find((option) => option.id === selectedDelivery.id);
+    // International Pickup has its own UI selection id so it can share the
+    // radio group with Store Pickup, while still submitting the configured
+    // pickup company id. Reconcile against that source id on quote refresh.
+    const current = checkoutOptions.deliveryOptions.find(
+      (option) => option.id === (selectedDelivery.sourceId ?? selectedDelivery.id),
+    );
     if (!current?.available) setSelectedDelivery(null);
   }, [checkoutOptions, selectedDelivery]);
 
@@ -254,7 +265,7 @@ export default function CheckoutPage() {
       )}
 
       {/* Steps */}
-      <div className="mt-8">
+      <div ref={stepRef} tabIndex={-1} className="mt-8 scroll-mt-24 outline-none">
         {step === "delivery" && (
           <DeliveryStep
             selected={selectedDelivery}
@@ -279,6 +290,10 @@ export default function CheckoutPage() {
                 localStorage.setItem("obd_checkout_info", JSON.stringify(customerData));
               }
               setStep("payment");
+            }}
+            onLoggedIn={async () => {
+              setIsLoggedIn(true);
+              await refreshCart();
             }}
           />
         )}

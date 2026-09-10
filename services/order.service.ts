@@ -122,6 +122,8 @@ export interface CheckoutDeliveryOption {
   available: boolean;
   unavailableReason: string | null;
   paymentMethods: CheckoutPaymentMethod[];
+  /** UI-only variants (such as International Pickup) submit this real company id. */
+  sourceId?: string;
 }
 
 export interface CheckoutOptions {

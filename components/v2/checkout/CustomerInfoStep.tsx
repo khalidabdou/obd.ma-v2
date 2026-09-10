@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -14,9 +22,12 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/Context/LanguageContext";
 import type { CustomerFormData } from "@/app/(Costumer-Interface-v2)/checkout/page";
-import { ArrowLeft, ArrowRight, Mail, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, MessageCircle, Phone, User, ChevronDown, Search, ShieldCheck, X, MapPin, Loader2, CheckCircle2, Globe } from "lucide-react";
 import citiesData from "@/locales/cities.json";
 import { COUNTRIES, getCountryByName, type Country } from "@/locales/countries";
+import { customerAuthService } from "@/services/customer-auth.service";
+import { useAuth } from "@/Context/AuthContext";
+import { getErrorMessage } from "@/lib/apiError";
 
 interface CustomerInfoStepProps {
   data: CustomerFormData;
@@ -25,6 +36,7 @@ interface CustomerInfoStepProps {
   deliveryName?: string;
   onBack?: () => void;
   onNext: () => void;
+  onLoggedIn: () => Promise<void> | void;
 }
 
 const cities = Object.entries(citiesData.CITIES).map(([key, city]) => ({
@@ -41,8 +53,10 @@ export default function CustomerInfoStep({
   deliveryName,
   onBack,
   onNext,
+  onLoggedIn,
 }: CustomerInfoStepProps) {
   const { t, language } = useTranslation();
+  const { login: setAuthenticated } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [cityOpen, setCityOpen] = useState(false);
   const [citySearch, setCitySearch] = useState("");
@@ -54,6 +68,17 @@ export default function CustomerInfoStep({
   const cityInputRef = useRef<HTMLInputElement>(null);
   const countryRef = useRef<HTMLDivElement>(null);
   const countryInputRef = useRef<HTMLInputElement>(null);
+  const errorRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [existingAccountType, setExistingAccountType] = useState<"email" | "phone" | null>(null);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"login" | "reset">("login");
+  const [checkingAccount, setCheckingAccount] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [dialogError, setDialogError] = useState("");
+  const [resetStatus, setResetStatus] = useState("");
+  const [submittingDialog, setSubmittingDialog] = useState(false);
 
   const requestGpsLocation = () => {
     if (typeof window === "undefined" || !navigator.geolocation) {
@@ -96,7 +121,7 @@ export default function CustomerInfoStep({
 
   const selectedCity = cities.find((c) => c.id === data.cityId);
   const selectedCountry: Country | undefined = getCountryByName(data.country);
-  const isPickup = deliveryName === "PICKUP";
+  const isPickup = deliveryName === "PICKUP" || deliveryName === "INTERNATIONAL_PICKUP";
   const usesOzoneCityList = deliveryName === "OZONE_EXPRESS" && selectedCountry?.code === "MA";
 
   // Auto-fill cityId when an Ozone city name is provided but its id is missing
@@ -175,17 +200,119 @@ export default function CustomerInfoStep({
     setLocationError("");
 
     setErrors(errs);
+    const firstError = Object.keys(errs)[0];
+    if (firstError) requestAnimationFrame(() => errorRefs.current[firstError]?.scrollIntoView({ behavior: "smooth", block: "center" }));
     return Object.keys(errs).length === 0;
   };
 
-  const handleNext = () => {
-    if (validate()) onNext();
+  const handleNext = async () => {
+    if (!validate()) return;
+    if (isLoggedIn) {
+      onNext();
+      return;
+    }
+
+    setCheckingAccount(true);
+    setDialogError("");
+    setResetStatus("");
+    try {
+      const emailResult = await customerAuthService.lookupExistingAccount({ email: data.email.trim() });
+      let accountType = emailResult.success && emailResult.data.exists ? emailResult.data.identifierType : null;
+      if (!accountType) {
+        const phoneResult = await customerAuthService.lookupExistingAccount({
+          countryCode: data.countryCode,
+          phoneNumber: data.phoneNumber.trim(),
+        });
+        accountType = phoneResult.success && phoneResult.data.exists ? phoneResult.data.identifierType : null;
+      }
+
+      if (!accountType) {
+        onNext();
+        return;
+      }
+
+      setExistingAccountType(accountType);
+      setDialogMode("login");
+      setLoginPassword("");
+      setOtp("");
+      setNewPassword("");
+      setAccountDialogOpen(true);
+    } catch {
+      onNext();
+    } finally {
+      setCheckingAccount(false);
+    }
   };
 
   const update = (field: keyof CustomerFormData, value: any) => {
     onChange({ ...data, [field]: value });
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
+
+  const accountIdentifier = existingAccountType === "phone"
+    ? `${data.countryCode}${data.phoneNumber}`
+    : data.email.trim();
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmittingDialog(true);
+    setDialogError("");
+    try {
+      await customerAuthService.customerLogin({ email: accountIdentifier, password: loginPassword });
+      setAuthenticated();
+      await onLoggedIn();
+      setAccountDialogOpen(false);
+      onNext();
+    } catch (error) {
+      setDialogError(getErrorMessage(error, t));
+    } finally {
+      setSubmittingDialog(false);
+    }
+  };
+
+  const beginPasswordReset = async () => {
+    if (!existingAccountType) return;
+    setSubmittingDialog(true);
+    setDialogError("");
+    setResetStatus("");
+    try {
+      if (existingAccountType === "phone") {
+        await customerAuthService.sendPhonePasswordResetOtp({ countryCode: data.countryCode, phoneNumber: data.phoneNumber });
+      } else {
+        await customerAuthService.sendEmailOtp({ email: data.email, lang: language });
+      }
+      setDialogMode("reset");
+      setResetStatus(existingAccountType === "phone" ? t("checkout.reset_whatsapp_sent") : t("checkout.reset_email_sent"));
+    } catch (error) {
+      setDialogError(getErrorMessage(error, t));
+    } finally {
+      setSubmittingDialog(false);
+    }
+  };
+
+  const handlePasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmittingDialog(true);
+    setDialogError("");
+    try {
+      await customerAuthService.resetPassword({
+        ...(existingAccountType === "phone"
+          ? { countryCode: data.countryCode, phoneNumber: data.phoneNumber }
+          : { email: data.email }),
+        otp: otp.trim(),
+        password: newPassword,
+      });
+      setLoginPassword(newPassword);
+      setDialogMode("login");
+      setResetStatus(t("checkout.password_reset_success"));
+    } catch (error) {
+      setDialogError(getErrorMessage(error, t));
+    } finally {
+      setSubmittingDialog(false);
+    }
+  };
+
+  const supportWhatsAppHref = `https://wa.me/212650369921?text=${encodeURIComponent(`Checkout support request${data.email ? ` — ${data.email}` : ""}`)}`;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -200,7 +327,7 @@ export default function CustomerInfoStep({
         <div className="space-y-5">
         {/* First name + Last name */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="space-y-2" ref={(node) => { errorRefs.current.firstName = node; }}>
             <Label htmlFor="firstName" className="text-muted-foreground">{t("checkout.first_name")}</Label>
             <div className="relative mt-1">
               <User className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -214,7 +341,7 @@ export default function CustomerInfoStep({
             </div>
             {errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2" ref={(node) => { errorRefs.current.lastName = node; }}>
             <Label htmlFor="lastName" className="text-muted-foreground">{t("checkout.last_name")}</Label>
             <Input
               id="lastName"
@@ -228,7 +355,7 @@ export default function CustomerInfoStep({
         </div>
 
         {/* Email */}
-        <div className="space-y-2">
+        <div className="space-y-2" ref={(node) => { errorRefs.current.email = node; }}>
           <Label htmlFor="email" className="text-muted-foreground">{t("checkout.email")}</Label>
           <div className="relative mt-1">
             <Mail className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -245,7 +372,7 @@ export default function CustomerInfoStep({
         </div>
 
         {/* Phone */}
-        <div className="space-y-2">
+        <div className="space-y-2" ref={(node) => { errorRefs.current.phoneNumber = node; }}>
           <Label htmlFor="phone" className="text-muted-foreground">{t("checkout.phone")}</Label>
           <div className="mt-1 flex gap-2">
             <Select
@@ -287,7 +414,7 @@ export default function CustomerInfoStep({
         </div>
 
         {/* Address */}
-        <div className="space-y-2">
+        <div className="space-y-2" ref={(node) => { errorRefs.current.address = node; }}>
           <div className="flex items-center justify-between">
             <Label htmlFor="address" className="text-muted-foreground">{t("checkout.address")}</Label>
             <Button
@@ -424,7 +551,7 @@ export default function CustomerInfoStep({
         {/* City */}
         {/* City — Ozone list selection or free text for other delivery methods */}
         {usesOzoneCityList ? (
-          <div className="space-y-2" ref={cityRef}>
+          <div className="space-y-2" ref={(node) => { cityRef.current = node; errorRefs.current.city = node; }}>
             <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
             <button
               type="button"
@@ -495,7 +622,7 @@ export default function CustomerInfoStep({
             {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2" ref={(node) => { errorRefs.current.city = node; }}>
             <Label htmlFor="city" className="text-muted-foreground">{t("checkout.city")}</Label>
             <div className="relative mt-1">
               <MapPin className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -528,7 +655,7 @@ export default function CustomerInfoStep({
               {t("checkout.create_account_checkbox")}
             </label>
             {data.createAccount && (
-              <div className="space-y-2">
+              <div className="space-y-2" ref={(node) => { errorRefs.current.password = node; }}>
                 <Label htmlFor="password" className="text-muted-foreground">{t("checkout.password")}</Label>
                 <Input
                   id="password"
@@ -544,31 +671,101 @@ export default function CustomerInfoStep({
           </div>
         )}
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
-            <ShieldCheck className="h-5 w-5 text-brand-blue" />
-          </div>
-          <div className="text-start">
-            <p className="font-medium text-foreground">{t("checkout.secure_info")}</p>
-            <p className="text-muted-foreground">{t("checkout.secure_payment")}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
+        <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-6">
           {onBack && (
             <Button variant="outline" type="button" onClick={onBack} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               {t("checkout.back")}
             </Button>
           )}
-          <Button onClick={handleNext} size="lg" className="gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90">
+          <Button onClick={handleNext} size="lg" disabled={checkingAccount} className="ms-auto gap-2 bg-brand-blue px-8 hover:bg-brand-blue/90">
+            {checkingAccount && <Loader2 className="h-4 w-4 animate-spin" />}
             {t("checkout.continue")}
-            <ArrowRight className="h-4 w-4" />
+            {!checkingAccount && <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
       </div>
+
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
+            <ShieldCheck className="h-4 w-4 text-brand-blue" />
+          </div>
+          <div className="text-start text-xs">
+            <p className="font-medium text-foreground">{t("checkout.secure_info")}</p>
+            <p className="text-muted-foreground">{t("checkout.secure_payment")}</p>
+          </div>
+        </div>
+        <a href={supportWhatsAppHref} target="_blank" rel="noopener noreferrer" aria-label={t("checkout.contact_whatsapp")} className="flex items-center gap-1.5 text-sm font-medium text-[#25D366] hover:underline">
+          <MessageCircle className="h-4 w-4" />{t("checkout.contact_whatsapp")}
+        </a>
+      </div>
+
+      <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen}>
+        <DialogContent className="border-border bg-card text-foreground sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{dialogMode === "login" ? t("checkout.account_detected_title") : t("checkout.reset_password_title")}</DialogTitle>
+            <DialogDescription>
+              {dialogMode === "login" ? t("checkout.account_detected_desc") : t("checkout.reset_password_desc")}
+            </DialogDescription>
+          </DialogHeader>
+
+          {dialogMode === "login" ? (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="checkout-account-identifier">{existingAccountType === "phone" ? t("checkout.phone") : t("checkout.email")}</Label>
+                <Input id="checkout-account-identifier" value={accountIdentifier} disabled className="bg-muted text-foreground" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="checkout-login-password">{t("checkout.password")}</Label>
+                <Input id="checkout-login-password" type="password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} required autoFocus />
+              </div>
+              {resetStatus && <p className="rounded-md bg-success/10 p-2 text-sm text-success">{resetStatus}</p>}
+              {dialogError && <p role="alert" className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{dialogError}</p>}
+              <button type="button" onClick={beginPasswordReset} disabled={submittingDialog} className="text-sm font-medium text-brand-blue hover:underline disabled:opacity-50">
+                {t("checkout.forgot_password")}
+              </button>
+              <DialogFooter className="flex-col items-stretch gap-2 sm:flex-row sm:space-x-0">
+                <Button asChild type="button" variant="outline" size="lg" className="h-11 min-h-11 flex-1 items-center justify-center border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]">
+                  <a href={supportWhatsAppHref} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-4 w-4" />
+                    {t("checkout.contact_support")}
+                  </a>
+                </Button>
+                <Button type="submit" size="lg" disabled={submittingDialog || !loginPassword} className="h-11 min-h-11 flex-1 items-center justify-center bg-brand-blue text-white hover:bg-brand-blue/90">
+                  {submittingDialog && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                  {t("checkout.login_and_continue")}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <form onSubmit={handlePasswordReset} className="space-y-4">
+              {resetStatus && <p className="rounded-md bg-brand-blue/10 p-2 text-sm text-brand-blue">{resetStatus}</p>}
+              <div className="space-y-2">
+                <Label htmlFor="checkout-reset-otp">{t("checkout.otp_code")}</Label>
+                <Input id="checkout-reset-otp" inputMode="numeric" value={otp} onChange={(event) => setOtp(event.target.value)} required autoFocus />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="checkout-new-password">{t("checkout.new_password")}</Label>
+                <Input id="checkout-new-password" type="password" minLength={6} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required />
+              </div>
+              {dialogError && <p role="alert" className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{dialogError}</p>}
+              <button type="button" onClick={beginPasswordReset} disabled={submittingDialog} className="text-sm font-medium text-brand-blue hover:underline disabled:opacity-50">
+                {t("checkout.resend_code")}
+              </button>
+              <DialogFooter className="gap-2 sm:space-x-0">
+                <Button type="button" variant="outline" onClick={() => { setDialogMode("login"); setDialogError(""); }} disabled={submittingDialog}>
+                  {t("checkout.back_to_login")}
+                </Button>
+                <Button type="submit" disabled={submittingDialog || !otp.trim() || newPassword.length < 6} className="bg-brand-blue text-white hover:bg-brand-blue/90">
+                  {submittingDialog && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                  {t("checkout.reset_password")}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

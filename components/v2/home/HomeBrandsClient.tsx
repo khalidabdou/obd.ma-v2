@@ -4,7 +4,6 @@ import Image from "next/image";
 import Container from "@components/v2/layout/Container";
 import type { BrandInfo } from "@/services/brand.service";
 import {
-  Activity,
   Gauge,
   RefreshCw,
   ShieldCheck,
@@ -40,32 +39,31 @@ export default function HomeBrandsClient({ brands }: { brands: BrandInfo[] }) {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-background py-14 text-foreground dark:bg-[#0B0D10] dark:text-white">
-      <div className="pointer-events-none absolute -right-10 top-0 hidden opacity-60 md:block lg:-right-6 rtl:-left-10 rtl:right-auto rtl:lg:-left-6 rtl:lg:right-auto dark:opacity-90">
-        <Image
-          src="/assets/images/car.png"
-          alt="Diagnostic auto"
-          width={560}
-          height={380}
-          className="object-contain rtl:-scale-x-100"
-          priority={false}
-        />
+    <section className="relative isolate overflow-hidden bg-background py-14 text-foreground dark:bg-[#0B0D10] dark:text-white">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand-red/[0.04] to-transparent dark:from-brand-red/[0.07]" />
+        <div className="absolute -right-12 top-0 hidden h-52 w-[30rem] opacity-35 [mask-image:linear-gradient(to_left,black_45%,transparent)] md:block lg:h-64 lg:w-[38rem] rtl:-left-12 rtl:right-auto rtl:[mask-image:linear-gradient(to_right,black_45%,transparent)] dark:opacity-50">
+          <Image
+            src="/assets/images/car.png"
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 608px, 480px"
+            className="object-contain object-right-top rtl:-scale-x-100 rtl:object-left-top"
+          />
+        </div>
       </div>
 
       <Container className="relative">
-        <div className="mb-8 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
-              <Activity className="h-3.5 w-3.5" />
-              <span>{t("home.auto_diagnostic")}</span>
-            </div>
-            <h2 className="mb-2 text-xl font-bold tracking-tight md:text-2xl lg:text-3xl">
-              {t("home.compatible_brands")}
-            </h2>
-            <p className="text-base text-muted-foreground dark:text-neutral-400">
-              {t("home.brand_subtitle")}
-            </p>
+        <div className="mb-9 flex flex-col items-center text-center">
+          <div className="mb-4 flex w-full max-w-xl items-center gap-4" aria-hidden="true">
+            <span className="h-px flex-1 border-t border-dashed border-brand-red/40" />
+            <span className="h-2 w-2 rotate-45 rounded-[2px] bg-brand-red shadow-[0_0_14px_rgba(217,44,39,0.55)]" />
+            <span className="h-px flex-1 border-t border-dashed border-brand-red/40" />
           </div>
+          <h2 className="text-xl font-extrabold tracking-tight md:text-2xl lg:text-3xl">
+            {t("home.compatible_brands")}
+          </h2>
+          <div className="mt-4 h-1 w-16 rounded-full bg-brand-red shadow-[0_4px_14px_rgba(217,44,39,0.3)]" aria-hidden="true" />
         </div>
 
         {brands.length === 0 ? (
