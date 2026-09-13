@@ -6,12 +6,14 @@ import type { CategoryInfo, CategoriesData } from "@/services/category.service";
 
 export default async function HomeCarousel() {
   let carouselSlides: Awaited<
-    ReturnType<typeof carouselService.getAllCarouselsServer>
+    ReturnType<typeof carouselService.getCarouselServer>
   >["carousel"] = [];
   let categories: CategoryInfo[] = [];
 
   try {
-    const carouselData = await carouselService.getAllCarouselsServer();
+    // OBD.ma has one homepage carousel. Fetching it by name prevents stale
+    // legacy records such as `carousel2` from being merged into the hero.
+    const carouselData = await carouselService.getCarouselServer("carousel1");
     carouselSlides = (carouselData.carousel || []).map((s) => ({
       ...s,
       carouselImage: s.carouselImage

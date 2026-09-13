@@ -69,6 +69,16 @@ export default function HeroCarousel({ slides, categories }: HeroCarouselProps) 
     return category.categoryTitle;
   }
 
+  function getLocalizedSlideText(
+    french?: string | null,
+    arabic?: string | null,
+    english?: string | null,
+  ): string {
+    if (language === "ar" && arabic) return arabic;
+    if (language === "en" && english) return english;
+    return french || english || arabic || "";
+  }
+
   const categoryPath = [4, 2, 0, 1, 3, 5];
   const visibleCategories = Array.from(
     { length: Math.min(VISIBLE_CATEGORY_COUNT, categoryCount) },
@@ -116,6 +126,22 @@ export default function HeroCarousel({ slides, categories }: HeroCarouselProps) 
       <div className="relative isolate min-w-0 overflow-hidden rounded-2xl bg-muted">
         {validSlides.map((slide, index) => {
           const isActive = index === current;
+          const title = getLocalizedSlideText(
+            slide.title,
+            slide.title_ar,
+            slide.title_en,
+          );
+          const subtitle = getLocalizedSlideText(
+            slide.subtitle,
+            slide.subtitle_ar,
+            slide.subtitle_en,
+          );
+          const buttonText = getLocalizedSlideText(
+            slide.buttonText,
+            slide.buttonText_ar,
+            slide.buttonText_en,
+          );
+          const hasContent = Boolean(title || subtitle || buttonText);
           const visibilityClass = isActive
             ? "relative opacity-100 scale-100"
             : "pointer-events-none absolute inset-0 opacity-0 scale-[1.015]";
@@ -134,12 +160,37 @@ export default function HeroCarousel({ slides, categories }: HeroCarouselProps) 
                 <div className="relative aspect-[16/9] min-h-[260px] w-full overflow-hidden sm:min-h-0">
                   <Image
                     src={slide.carouselImage!}
-                    alt={slide.title || `Promotion ${index + 1}`}
+                    alt={title || `Promotion ${index + 1}`}
                     fill
                     priority={index === 0}
                     sizes="(max-width: 767px) 100vw, (max-width: 1279px) 75vw, 1180px"
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015] motion-reduce:transition-none"
                   />
+                  {hasContent && (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
+                      <div
+                        className="absolute inset-0 flex w-[62%] flex-col items-start justify-center gap-2.5 px-5 py-6 text-start text-white sm:w-[58%] sm:gap-3 sm:px-8 md:px-10 lg:px-14"
+                        dir={language === "ar" ? "rtl" : "ltr"}
+                      >
+                        {title && (
+                          <h2 className="line-clamp-2 text-xl font-bold leading-tight tracking-tight drop-shadow-sm sm:text-2xl lg:text-4xl">
+                            {title}
+                          </h2>
+                        )}
+                        {subtitle && (
+                          <p className="line-clamp-2 max-w-xl text-xs leading-relaxed text-white/85 sm:text-sm lg:text-base">
+                            {subtitle}
+                          </p>
+                        )}
+                        {buttonText && (
+                          <span className="mt-1 inline-flex min-h-9 items-center rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-lg transition-colors group-hover:bg-brand-red/90 sm:px-5 sm:text-sm">
+                            {buttonText}
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </Link>
             </div>
