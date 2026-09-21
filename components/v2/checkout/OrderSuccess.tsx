@@ -37,7 +37,7 @@ export default function OrderSuccess({ orderId, paymentMethod, delivery, checkou
           {paymentMethod === "bank_transfer" ? t("checkout.bank_order_pending") : t("checkout.order_success_desc")}
         </p>
         <p className="mb-6 inline-block rounded-xl bg-muted/50 px-4 py-2 font-mono text-lg font-semibold text-brand-blue dark:bg-white/5">
-          {t("product.product_code")}: {orderId}
+          {t("checkout.order_reference")}: {orderId}
         </p>
 
         {bankDetails && (

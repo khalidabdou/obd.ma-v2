@@ -731,6 +731,7 @@
     "loading_card_form": "جاري تحميل نموذج البطاقة الآمن...",
     "card_load_failed": "فشل تحميل نموذج البطاقة. يرجى المحاولة مرة أخرى.",
     "order_success": "تم تأكيد الطلب!",
+    "order_reference": "مرجع الطلب",
     "order_success_desc": "تم تسجيل طلبك بنجاح.",
     "secure_info": "معلوماتك آمنة",
     "secure_payment": "دفع 100% آمن",

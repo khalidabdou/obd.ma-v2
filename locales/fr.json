@@ -729,6 +729,7 @@
     "loading_card_form": "Chargement du formulaire de carte sécurisé...",
     "card_load_failed": "Échec du chargement du formulaire de carte. Veuillez réessayer.",
     "order_success": "Commande confirmée !",
+    "order_reference": "Référence de commande",
     "order_success_desc": "Votre commande a été enregistrée avec succès.",
     "secure_info": "Vos informations sont sécurisées",
     "secure_payment": "Paiement 100% sécurisé",

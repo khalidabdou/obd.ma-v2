@@ -130,7 +130,7 @@ export default function PaymentStep({
               longitude
             );
             if (capRes.success) {
-              onSuccess(String(capRes.data.orderId ?? ppOrderId), "paypal");
+              onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? ppOrderId), "paypal");
             } else {
               const msg = t("checkout.payment_failed");
               if (onFailure) {
@@ -228,11 +228,11 @@ export default function PaymentStep({
         const finalOrderId = String(res.data.orderId ?? orderId);
         // Update order status to waiting (non-critical, don't fail if this fails)
         try {
-          await orderService.updateOrderStatus(finalOrderId, "waiting");
+          await orderService.updateOrderStatus(res.data.publicReference ?? finalOrderId, "waiting");
         } catch (statusErr) {
           console.error("Failed to update order status to waiting:", statusErr);
         }
-        onSuccess(finalOrderId, "CRBT");
+        onSuccess(res.data.publicReference ?? finalOrderId, "CRBT");
       } else {
         setError(t("checkout.order_failed"));
       }
@@ -291,7 +291,7 @@ export default function PaymentStep({
           customerData.longitude
         );
         if (capRes.success) {
-          onSuccess(String(capRes.data.orderId ?? orderId), "paypal");
+        onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? orderId), "paypal");
         } else {
           const msg = t("checkout.payment_failed");
           if (onFailure) {
@@ -370,7 +370,7 @@ export default function PaymentStep({
         customerData.longitude
       );
       if (capRes.success) {
-        onSuccess(String(capRes.data.orderId ?? orderId), "card");
+        onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? orderId), "card");
       } else {
         const msg = t("checkout.payment_failed");
         if (onFailure) {
@@ -408,7 +408,7 @@ export default function PaymentStep({
         customerData.longitude
       );
       if (!response.success) throw new Error(t("checkout.order_failed"));
-      onSuccess(String(response.data.orderId ?? orderId), "bank_transfer");
+      onSuccess(response.data.publicReference ?? String(response.data.orderId ?? orderId), "bank_transfer");
     } catch (err) {
       const message = parseErrorMessage(err, "checkout.order_failed");
       if (onFailure) onFailure(message);

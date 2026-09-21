@@ -74,7 +74,7 @@ export default async function OrdersPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">Order #{order.orderId}</span>
+                  <span className="font-medium">Order reference: {order.orderId}</span>
                   <span
                     className={`rounded px-2 py-1 text-xs font-medium uppercase ${
                       order.cancelStatus

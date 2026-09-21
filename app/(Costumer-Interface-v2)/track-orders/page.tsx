@@ -43,7 +43,7 @@ export default async function TrackOrdersPage() {
               className="rounded-lg border border-border bg-card p-4 shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium">Order #{order.orderId}</span>
+                <span className="font-medium">Order reference: {order.orderId}</span>
                 <span className="rounded bg-muted px-2 py-1 text-xs font-medium uppercase">
                   {order.status}
                 </span>

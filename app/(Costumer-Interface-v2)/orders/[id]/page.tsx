@@ -56,7 +56,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             Back
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">Order #{order.orderId}</h1>
+        <h1 className="text-2xl font-bold">Order reference: {order.orderId}</h1>
         <span
           className={`ml-auto rounded px-3 py-1 text-sm font-medium uppercase ${
             order.cancelStatus

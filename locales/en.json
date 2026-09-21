@@ -730,6 +730,7 @@
     "loading_card_form": "Loading secure card form...",
     "card_load_failed": "Failed to load card form. Please try again.",
     "order_success": "Order Confirmed!",
+    "order_reference": "Order reference",
     "order_success_desc": "Your order has been successfully placed.",
     "secure_info": "Your information is secure",
     "secure_payment": "100% secure payment",

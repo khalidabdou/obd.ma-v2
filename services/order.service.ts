@@ -167,6 +167,7 @@ export interface CreateOrderRequest {
  */
 export interface CreateOrderResponse {
   orderId?: number;
+  publicReference?: string | null;
   paypal_order_id?: string;
   approval_url?: string;
   card_order_id?: string;

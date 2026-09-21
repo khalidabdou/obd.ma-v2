@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/Context/AuthContext";
@@ -25,6 +26,35 @@ interface HomeProductCardProps {
   compact?: boolean;
 }
 
+const PLACEHOLDER_IMAGE = "/product-placeholder.png";
+
+function HomeProductImage({
+  src,
+  title,
+  sizes,
+  className,
+}: {
+  src: string | null | undefined;
+  title: string;
+  sizes: string;
+  className: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const image = !failed && src?.trim() ? src.trim() : PLACEHOLDER_IMAGE;
+
+  return (
+    <Image
+      src={image}
+      alt={image === PLACEHOLDER_IMAGE ? "" : title}
+      fill
+      sizes={sizes}
+      className={className}
+      unoptimized={image.startsWith("http://localhost:")}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function HomeProductCard({ product, compact = false }: HomeProductCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
@@ -34,6 +64,7 @@ export default function HomeProductCard({ product, compact = false }: HomeProduc
   const removeFavorite = useRemoveFavorite();
 
   const price = product.discountedPrice || product.price;
+  const description = product.description?.trim();
   const hasDiscount =
     product.discountedPrice !== null &&
     product.discountedPrice !== undefined &&
@@ -106,20 +137,14 @@ export default function HomeProductCard({ product, compact = false }: HomeProduc
             </span>
           </div>
         </div>
-        <div className="relative h-24 w-24 shrink-0">
-          {product.images?.mainImage ? (
-            <Image
-              src={product.images.mainImage}
-              alt={product.title}
-              fill
-              sizes="96px"
-              className="object-contain transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
-            />
-          ) : (
-            <span className="grid h-full place-items-center text-lg font-bold text-brand-blue">
-              {product.title.slice(0, 2).toUpperCase()}
-            </span>
-          )}
+        <div className="relative h-24 w-24 shrink-0 rounded-lg bg-slate-50 dark:bg-[#0B0D10]">
+          <HomeProductImage
+            key={product.images?.mainImage || product.productCode}
+            src={product.images?.mainImage}
+            title={product.title}
+            sizes="96px"
+            className="object-contain p-2 transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
+          />
         </div>
       </Link>
     );
@@ -150,28 +175,24 @@ export default function HomeProductCard({ product, compact = false }: HomeProduc
       </button>
 
       <Link href={`/product/${product.productCode}`} className="block">
-        <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-muted dark:bg-[#0B0D10]">
-          {product.images?.mainImage ? (
-            <Image
-              src={product.images.mainImage}
-              alt={product.title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain p-4"
-            />
-          ) : (
-            <span className="text-lg font-bold text-brand-blue">
-              {product.title.slice(0, 2).toUpperCase()}
-            </span>
-          )}
+        <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-slate-50 dark:bg-[#0B0D10]">
+          <HomeProductImage
+            key={product.images?.mainImage || product.productCode}
+            src={product.images?.mainImage}
+            title={product.title}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain p-4"
+          />
         </div>
 
         <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-foreground dark:text-white">
           {product.title}
         </h3>
-        <p className="mb-3 line-clamp-2 text-xs text-muted-foreground dark:text-neutral-400">
-          {product.description}
-        </p>
+        {description && (
+          <p className="mb-3 line-clamp-2 text-xs text-muted-foreground dark:text-neutral-400">
+            {description}
+          </p>
+        )}
 
         <div className="mb-4 flex items-center gap-2">
           {price !== null && price !== undefined && (
