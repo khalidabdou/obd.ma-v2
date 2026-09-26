@@ -628,6 +628,10 @@
     "quantity_decrease_failed": "Échec de la suppression de la quantité"
   },
   "checkout": {
+    "wallet_credits_to_use": "Crédit du portefeuille à utiliser",
+    "wallet_available": "Crédit disponible",
+    "crbt_to_collect": "Montant CRBT à encaisser",
+    "paypal_amount": "Montant PayPal",
     "title": "Commander",
     "order_title": "Commande:",
     "address_title": "Adresse:",

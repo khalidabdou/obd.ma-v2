@@ -69,6 +69,8 @@ export interface CustomerOrder {
  * Customer order detail structure
  */
 export interface CustomerOrderDetail extends CustomerOrder {
+  walletCreditsUsed: number;
+  crbtAmount: number | null;
   items: {
     productCode: string;
     productName: string;
@@ -160,6 +162,7 @@ export interface CreateOrderRequest {
   longitude?: number;
   checkoutVersion?: number;
   shippingInfo: ShippingInfo;
+  walletCreditsUsed?: number;
 }
 
 /**
@@ -224,7 +227,8 @@ export const orderService = {
     shippingInfo: ShippingInfo,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    walletCreditsUsed: number = 0,
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -235,6 +239,7 @@ export const orderService = {
       longitude,
       checkoutVersion: 2,
       shippingInfo,
+      walletCreditsUsed,
     });
   },
 
@@ -246,7 +251,8 @@ export const orderService = {
   createPayPalOrder: async (
     orderId: string,
     deliveryCompanyId: string,
-    shippingInfo: ShippingInfo
+    shippingInfo: ShippingInfo,
+    walletCreditsUsed: number = 0,
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -254,6 +260,7 @@ export const orderService = {
       deliveryCompanyId,
       checkoutVersion: 2,
       shippingInfo,
+      walletCreditsUsed,
     });
   },
 
@@ -274,7 +281,8 @@ export const orderService = {
     shippingInfo: ShippingInfo,
     deliveryCompanyId?: string,
     latitude?: number,
-    longitude?: number
+    longitude?: number,
+    walletCreditsUsed: number = 0,
   ): Promise<ApiSuccess<CreateOrderResponse>> => {
     return await apiClient.post('/order', {
       orderId,
@@ -286,6 +294,7 @@ export const orderService = {
       longitude,
       checkoutVersion: 2,
       shippingInfo,
+      walletCreditsUsed,
     });
   },
 

@@ -630,6 +630,10 @@
     "quantity_decrease_failed": "فشل في حذف الكمية"
   },
   "checkout": {
+    "wallet_credits_to_use": "رصيد المحفظة المستخدم",
+    "wallet_available": "الرصيد المتاح",
+    "crbt_to_collect": "المبلغ المطلوب تحصيله عند التسليم",
+    "paypal_amount": "مبلغ باي بال",
     "title": "إتمام الطلب",
     "order_title": "الطلب:",
     "address_title": "العنوان:",

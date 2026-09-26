@@ -629,6 +629,10 @@
     "quantity_decrease_failed": "Failed to remove quantity"
   },
   "checkout": {
+    "wallet_credits_to_use": "Wallet credits to use",
+    "wallet_available": "Available wallet credit",
+    "crbt_to_collect": "CRBT to collect",
+    "paypal_amount": "PayPal amount",
     "title": "Checkout",
     "order_title": "Order:",
     "address_title": "Address:",

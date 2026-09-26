@@ -64,6 +64,9 @@ export default function PaymentStep({
   const errorRef = useRef<HTMLDivElement>(null);
   const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const [cardAmount, setCardAmount] = useState<string>("");
+  const [walletAvailable, setWalletAvailable] = useState(0);
+  const [walletCreditsUsed, setWalletCreditsUsed] = useState(0);
+  const [paypalRetryAvailable, setPaypalRetryAvailable] = useState(false);
   const [shippingInfo] = useState<ShippingInfo>(() => ({
     firstName: customerData.firstName,
     lastName: customerData.lastName,
@@ -77,6 +80,22 @@ export default function PaymentStep({
 
   const deliveryPrice = selectedDelivery?.fee ?? 0;
   const total = subtotal + deliveryPrice;
+  const maxWalletCredits = Math.min(Math.max(0, walletAvailable), total);
+  const maxSelectableCredits = method === "paypal"
+    ? Math.min(maxWalletCredits, Math.max(0, Math.round((total - 1) * 100) / 100))
+    : maxWalletCredits;
+  const payableAmount = Math.max(0, total - walletCreditsUsed);
+
+  useEffect(() => {
+    if (!isLoggedIn) { setWalletAvailable(0); setWalletCreditsUsed(0); return; }
+    customerInfoService.getCustomerInfo().then((response) => {
+      setWalletAvailable(Math.max(0, Number(response.data.customer_info.wallet ?? 0)));
+    }).catch(() => setWalletAvailable(0));
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    setWalletCreditsUsed((value) => Math.min(value, maxSelectableCredits));
+  }, [maxSelectableCredits]);
   const deliveryCompanyId = selectedDelivery?.sourceId ?? selectedDelivery?.id;
   const currentDeliveryOption = checkoutOptions?.deliveryOptions.find(
     (option) => option.id === deliveryCompanyId,
@@ -106,6 +125,7 @@ export default function PaymentStep({
           latitude,
           longitude,
           shippingInfo: pendingShippingInfo,
+          walletCreditsUsed: pendingCredits,
         } = JSON.parse(pendingPayPal) as {
           orderId: string;
           paypalOrderId: string;
@@ -113,8 +133,14 @@ export default function PaymentStep({
           latitude?: number;
           longitude?: number;
           shippingInfo: ShippingInfo;
+          walletCreditsUsed?: number;
         };
-        sessionStorage.removeItem("obd_paypal_pending");
+        const returnedToken = new URLSearchParams(window.location.search).get("token");
+        if (returnedToken !== paypalOrderId) {
+          setPaypalRetryAvailable(Boolean(returnedToken));
+          return;
+        }
+        setPaypalRetryAvailable(true);
         // Auto-capture after user returns from PayPal approval
         (async () => {
           setLoading(true);
@@ -127,9 +153,12 @@ export default function PaymentStep({
               pendingShippingInfo,
               deliveryCompanyId,
               latitude,
-              longitude
+              longitude,
+              pendingCredits ?? 0,
             );
             if (capRes.success) {
+              sessionStorage.removeItem("obd_paypal_pending");
+              setPaypalRetryAvailable(false);
               onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? ppOrderId), "paypal");
             } else {
               const msg = t("checkout.payment_failed");
@@ -222,7 +251,8 @@ export default function PaymentStep({
         shippingInfo,
         deliveryCompanyId,
         customerData.latitude,
-        customerData.longitude
+        customerData.longitude,
+        walletCreditsUsed,
       );
       if (res.success) {
         const finalOrderId = String(res.data.orderId ?? orderId);
@@ -257,7 +287,7 @@ export default function PaymentStep({
       await createAccountIfRequested();
 
       if (!selectedDelivery) throw new Error("Delivery method is required");
-      const res = await orderService.createPayPalOrder(orderId, deliveryCompanyId!, shippingInfo);
+      const res = await orderService.createPayPalOrder(orderId, deliveryCompanyId!, shippingInfo, walletCreditsUsed);
       if (res.success && res.data.paypal_order_id) {
         const paypalOrderId = res.data.paypal_order_id;
         const approvalUrl = res.data.approval_url;
@@ -273,6 +303,7 @@ export default function PaymentStep({
               latitude: customerData.latitude,
               longitude: customerData.longitude,
               shippingInfo,
+              walletCreditsUsed,
             })
           );
           // Redirect to PayPal for buyer approval
@@ -280,26 +311,7 @@ export default function PaymentStep({
           return;
         }
 
-        // Fallback: no approval URL (shouldn't happen), try capture directly
-        const capRes = await orderService.capturePayPalPayment(
-          orderId,
-          new Date().toISOString(),
-          paypalOrderId,
-          shippingInfo,
-          deliveryCompanyId!,
-          customerData.latitude,
-          customerData.longitude
-        );
-        if (capRes.success) {
-        onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? orderId), "paypal");
-        } else {
-          const msg = t("checkout.payment_failed");
-          if (onFailure) {
-            onFailure(msg);
-          } else {
-            setError(msg);
-          }
-        }
+        throw new Error("PayPal did not provide an approval link");
       } else {
         const msg = t("checkout.payment_failed");
         if (onFailure) {
@@ -442,6 +454,22 @@ export default function PaymentStep({
             {/* Left: Payment Methods */}
             <div className="rounded-2xl border border-brand-blue/50 bg-card p-6 shadow-xl dark:border-brand-blue/40 sm:p-8">
               <h3 className="mb-4 text-lg font-semibold">{t("checkout.payment_method")}</h3>
+
+              {maxWalletCredits > 0 && (method === "CRBT" || method === "paypal") && (
+                <div className="mb-5 rounded-xl border border-brand-blue/30 p-4">
+                  <label htmlFor="wallet-credits" className="block text-sm font-semibold">
+                    {t("checkout.wallet_credits_to_use")} (MAD)
+                  </label>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("checkout.wallet_available")}: {maxWalletCredits.toFixed(2)} MAD</p>
+                  <input id="wallet-credits" type="number" min="0" max={maxSelectableCredits}
+                    step="0.01" value={walletCreditsUsed}
+                    onChange={(event) => setWalletCreditsUsed(Math.min(maxSelectableCredits, Math.max(0, Number(event.target.value) || 0)))}
+                    className="mt-2 w-full rounded-lg border bg-background px-3 py-2" />
+                  <p className="mt-2 text-sm font-medium">
+                    {method === "CRBT" ? t("checkout.crbt_to_collect") : t("checkout.paypal_amount")}: {payableAmount.toFixed(2)} MAD
+                  </p>
+                </div>
+              )}
 
               <div className="grid gap-3">
                 {/* COD */}
@@ -617,6 +645,12 @@ export default function PaymentStep({
                   <span>{error}</span>
                 </div>
               )}
+              {paypalRetryAvailable && (
+                <Button type="button" variant="outline" disabled={loading} className="mt-3"
+                  onClick={() => window.location.reload()}>
+                  Retry PayPal confirmation
+                </Button>
+              )}
 
               {cardOrderId && NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
                 <div className="mt-6">
@@ -693,6 +727,13 @@ export default function PaymentStep({
                       <span className="text-brand-blue">{total.toFixed(2)} MAD</span>
                     </div>
                   </div>
+
+                  {walletCreditsUsed > 0 && (method === "CRBT" || method === "paypal") && (
+                    <div className="space-y-1 border-t border-border pt-3 text-sm">
+                      <div className="flex justify-between"><span>{t("checkout.wallet_credits_to_use")}</span><span>-{walletCreditsUsed.toFixed(2)} MAD</span></div>
+                      <div className="flex justify-between font-semibold"><span>{method === "CRBT" ? t("checkout.crbt_to_collect") : t("checkout.paypal_amount")}</span><span>{payableAmount.toFixed(2)} MAD</span></div>
+                    </div>
+                  )}
 
                   {selectedDelivery && (
                     <div className="rounded-xl border border-brand-blue/30 bg-muted/50 p-3 text-sm dark:border-brand-blue/30">

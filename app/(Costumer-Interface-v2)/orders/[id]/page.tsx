@@ -154,6 +154,18 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                   <span>{order.payment.method}</span>
                 </div>
               )}
+              {order.walletCreditsUsed > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Wallet credit used</span>
+                  <span>{order.walletCreditsUsed.toFixed(2)} MAD</span>
+                </div>
+              )}
+              {order.crbtAmount !== null && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Amount due on delivery</span>
+                  <span>{order.crbtAmount.toFixed(2)} MAD</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-border pt-2">
                 <span className="font-medium">Total</span>
                 <span className="font-semibold">{order.totalPrice} MAD</span>
