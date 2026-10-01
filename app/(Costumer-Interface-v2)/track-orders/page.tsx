@@ -51,7 +51,7 @@ export default async function TrackOrdersPage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 Total: {order.totalPrice} MAD · {order.date}
               </p>
-              {order.shipment?.trackingNumber && (
+              {order.shipment?.trackingNumber && !["thanks", "accepted"].includes(order.status.toLowerCase()) && (
                 <p className="mt-1 text-sm">
                   Tracking: {order.shipment.trackingNumber} (
                   {order.shipment.company.displayName})

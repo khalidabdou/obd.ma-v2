@@ -119,15 +119,24 @@ export function getServerApiUrl(): string {
  */
 export function rewriteImageUrlForServer(url: string | null | undefined): string {
   if (!url) return '';
-  if (!config.serverApiBaseUrl || !config.apiBaseUrl) return url;
 
-  const publicBase = config.apiBaseUrl.replace(/\/api$/, '');
-  const serverBase = config.serverApiBaseUrl.replace(/\/api$/, '');
+  const publicBase = config.apiBaseUrl?.replace(/\/api$/, '') ?? '';
+  const serverBase = (config.serverApiBaseUrl ?? config.apiBaseUrl ?? '').replace(/\/api$/, '');
 
-  if (publicBase && serverBase && publicBase !== serverBase) {
-    return url.replace(publicBase, serverBase);
+  // Normalise bare filenames / relative paths into an absolute URL so
+  // Next.js Image can accept them (it requires http(s):// or a leading /).
+  let absolute = url;
+  if (publicBase && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+    // e.g. "ced388864013cb9c5057bf29.png"  →  "http://localhost:4001/ced388864013cb9c5057bf29.png"
+    absolute = `${publicBase}/${url}`;
   }
-  return url;
+
+  // Rewrite the public-facing host to the Docker-internal host so the
+  // Next.js Image optimizer can reach the backend server-side.
+  if (publicBase && serverBase && publicBase !== serverBase) {
+    return absolute.replace(publicBase, serverBase);
+  }
+  return absolute;
 }
 
 /**

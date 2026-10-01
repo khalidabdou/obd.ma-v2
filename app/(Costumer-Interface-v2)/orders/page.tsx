@@ -88,7 +88,7 @@ export default async function OrdersPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Total: {order.totalPrice} MAD · {new Date(order.date).toLocaleDateString()}
                 </p>
-                {order.shipment?.trackingNumber && (
+                {order.shipment?.trackingNumber && !["thanks", "accepted"].includes(order.status.toLowerCase()) && (
                   <p className="mt-1 text-sm">
                     Tracking: {order.shipment.trackingNumber} ({order.shipment.company.displayName})
                   </p>

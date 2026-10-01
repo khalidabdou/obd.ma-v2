@@ -12,38 +12,38 @@ const nextConfig: NextConfig = {
           protocol : (process.env.IMAGES_CONFIG_PROTOCOL || "http") as "http" | "https",
           hostname : process.env.IMAGES_CONFIG_HOSTNAME,
           port : process.env.IMAGES_CONFIG_PORT || '',
-          pathname :'/api/images/**'
+          pathname : '/**',
         }] : []),
         // Production domains (explicit fallback)
         {
           protocol: 'https',
           hostname: 'api-dev.obd.ma',
-          pathname: '/api/images/**',
+          pathname: '/**',
         },
         {
           protocol: 'https',
           hostname: 'api.obd.ma',
-          pathname: '/api/images/**',
+          pathname: '/**',
         },
         // Local development
         {
           protocol: 'http',
           hostname: 'localhost',
           port: '4001',
-          pathname: '/api/images/**',
+          pathname: '/**',
         },
         {
           protocol: 'http',
           hostname: 'localhost',
           port: '4000',
-          pathname: '/api/images/**',
+          pathname: '/**',
         },
         // Docker internal network
         {
           protocol: 'http',
           hostname: 'backend',
           port: '4001',
-          pathname: '/api/images/**',
+          pathname: '/**',
         }
       ],
     },

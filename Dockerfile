@@ -6,8 +6,6 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /app
 
-RUN apk add curl
-
 # Install dependencies first (better caching)
 COPY package*.json .
 RUN npm install

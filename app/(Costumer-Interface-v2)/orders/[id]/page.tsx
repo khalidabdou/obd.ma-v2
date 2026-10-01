@@ -5,6 +5,7 @@ import { serverFetch, rewriteImageUrlForServer } from "@/lib/serverFetch";
 import type { CustomerOrderDetail } from "@/services/order.service";
 import { ArrowLeft, Package, Truck, User, Receipt } from "lucide-react";
 import Image from "next/image";
+import CancelOrderButton from "@/components/v2/orders/CancelOrderButton";
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -66,6 +67,9 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         >
           {order.cancelStatus ? "Cancelled" : order.status}
         </span>
+        {!order.cancelStatus && ["THANKS"].includes(order.status.toUpperCase()) && (
+          <CancelOrderButton orderId={order.orderId} />
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -124,9 +128,9 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 </p>
                 <p>
                   <span className="text-muted-foreground">Status:</span>{" "}
-                  {order.shipment.status}
+                  {order.status.toLowerCase() === "accepted" && ["WAITING", "PENDING"].includes(order.shipment.status.toUpperCase()) ? "ACCEPTED" : order.shipment.status}
                 </p>
-                {order.shipment.trackingNumber && (
+                {order.shipment.trackingNumber && !["thanks", "accepted"].includes(order.status.toLowerCase()) && (
                   <p>
                     <span className="text-muted-foreground">Tracking:</span>{" "}
                     {order.shipment.trackingNumber}

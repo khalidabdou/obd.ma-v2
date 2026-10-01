@@ -53,7 +53,8 @@ export interface CustomerOrder {
   firstProductImage: string;
   totalPrice: string;
   date: string;
-  status: 'thanks' | 'waiting' | 'processed' | 'shipping' | 'delivered' | 'cancelled';
+  status: string;
+  canCancel?: boolean;
   cancelStatus: boolean;
   shipment?: {
     trackingNumber?: string | null;
@@ -464,7 +465,7 @@ export const orderService = {
 
   /**
    * Cancel an order (customer)
-   * Customers can only cancel orders with status: THANKS, WAITING, PROCESSED
+   * Customers can cancel only their own THANKS draft before acceptance
    * @param orderId - The order ID
    * @returns Promise with success message
    */

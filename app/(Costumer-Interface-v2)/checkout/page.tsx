@@ -61,6 +61,7 @@ export default function CheckoutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingCustomer, setLoadingCustomer] = useState(true);
   const [orderError, setOrderError] = useState("");
+  const [isPayPalReturn, setIsPayPalReturn] = useState(false);
   const stepRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,19 +94,17 @@ export default function CheckoutPage() {
       // Card payments now use Hosted Fields (no redirect), so only check PayPal
       const pendingPayPal = sessionStorage.getItem("obd_paypal_pending");
       if (pendingPayPal) {
-        // Check if PayPal actually approved (token + PayerID in URL)
+        // PayPal returns its order token after approval.
         const urlParams = new URLSearchParams(window.location.search);
-        const hasToken = urlParams.has("token") || urlParams.has("PayerID");
-        // Clean up URL query params so refresh doesn't re-trigger
-        if (urlParams.toString()) {
-          window.history.replaceState({}, "", window.location.pathname);
-        }
+        const hasToken = urlParams.has("token");
         if (hasToken) {
-          // User approved payment — proceed to capture
+          // Leave the token in the URL until PaymentStep has verified and captured it.
+          setIsPayPalReturn(true);
           setStep("payment");
         } else {
           // User cancelled on PayPal — clean up and show failure
           sessionStorage.removeItem("obd_paypal_pending");
+          window.history.replaceState({}, "", window.location.pathname);
           setOrderError(t("checkout.payment_cancelled"));
           setStep("failure");
         }
@@ -241,7 +240,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (cartCount === 0 && step !== "success" && step !== "failure") {
+  if (cartCount === 0 && !isPayPalReturn && step !== "success" && step !== "failure") {
     return (
       <Container className="flex min-h-[60vh] flex-col items-center justify-center gap-4 py-16 text-center">
         <h1 className="text-2xl font-bold">{t("cart.empty")}</h1>

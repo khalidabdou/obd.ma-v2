@@ -66,7 +66,7 @@ export default function PaymentStep({
   const [cardAmount, setCardAmount] = useState<string>("");
   const [walletAvailable, setWalletAvailable] = useState(0);
   const [walletCreditsUsed, setWalletCreditsUsed] = useState(0);
-  const [paypalRetryAvailable, setPaypalRetryAvailable] = useState(false);
+  const paypalCaptureStarted = useRef(false);
   const [shippingInfo] = useState<ShippingInfo>(() => ({
     firstName: customerData.firstName,
     lastName: customerData.lastName,
@@ -116,7 +116,8 @@ export default function PaymentStep({
   useEffect(() => {
     const pendingPayPal = sessionStorage.getItem("obd_paypal_pending");
     // Card payments now use Hosted Fields (no redirect), so only handle PayPal
-    if (pendingPayPal) {
+    if (pendingPayPal && !paypalCaptureStarted.current) {
+      paypalCaptureStarted.current = true;
       try {
         const {
           orderId: ppOrderId,
@@ -137,10 +138,12 @@ export default function PaymentStep({
         };
         const returnedToken = new URLSearchParams(window.location.search).get("token");
         if (returnedToken !== paypalOrderId) {
-          setPaypalRetryAvailable(Boolean(returnedToken));
+          sessionStorage.removeItem("obd_paypal_pending");
+          window.history.replaceState({}, "", window.location.pathname);
+          if (onFailure) onFailure(t("checkout.payment_failed"));
+          else setError(t("checkout.payment_failed"));
           return;
         }
-        setPaypalRetryAvailable(true);
         // Auto-capture after user returns from PayPal approval
         (async () => {
           setLoading(true);
@@ -158,7 +161,7 @@ export default function PaymentStep({
             );
             if (capRes.success) {
               sessionStorage.removeItem("obd_paypal_pending");
-              setPaypalRetryAvailable(false);
+              window.history.replaceState({}, "", window.location.pathname);
               onSuccess(capRes.data.publicReference ?? String(capRes.data.orderId ?? ppOrderId), "paypal");
             } else {
               const msg = t("checkout.payment_failed");
@@ -182,6 +185,9 @@ export default function PaymentStep({
         })();
       } catch {
         sessionStorage.removeItem("obd_paypal_pending");
+        window.history.replaceState({}, "", window.location.pathname);
+        if (onFailure) onFailure(t("checkout.payment_failed"));
+        else setError(t("checkout.payment_failed"));
       }
     }
   }, []);
@@ -256,12 +262,6 @@ export default function PaymentStep({
       );
       if (res.success) {
         const finalOrderId = String(res.data.orderId ?? orderId);
-        // Update order status to waiting (non-critical, don't fail if this fails)
-        try {
-          await orderService.updateOrderStatus(res.data.publicReference ?? finalOrderId, "waiting");
-        } catch (statusErr) {
-          console.error("Failed to update order status to waiting:", statusErr);
-        }
         onSuccess(res.data.publicReference ?? finalOrderId, "CRBT");
       } else {
         setError(t("checkout.order_failed"));
@@ -645,13 +645,6 @@ export default function PaymentStep({
                   <span>{error}</span>
                 </div>
               )}
-              {paypalRetryAvailable && (
-                <Button type="button" variant="outline" disabled={loading} className="mt-3"
-                  onClick={() => window.location.reload()}>
-                  Retry PayPal confirmation
-                </Button>
-              )}
-
               {cardOrderId && NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
                 <div className="mt-6">
                   <PayPalHostedFields
