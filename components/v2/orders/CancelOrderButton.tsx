@@ -34,16 +34,16 @@ export default function CancelOrderButton({ orderId }: CancelOrderButtonProps) {
       toast({ title: "Order cancelled" });
       router.refresh();
     } catch (error: unknown) {
-      const message =
-        typeof error === "object" && error !== null && "response" in error
-          ? (error as { response?: { data?: { message?: string; error?: string } } }).response?.data?.message ??
-            (error as { response?: { data?: { error?: string } } }).response?.data?.error
-          : undefined;
+      const response = typeof error === "object" && error !== null && "response" in error
+        ? (error as { response?: { data?: { data?: { error?: string; message?: string }; message?: string } } }).response?.data
+        : undefined;
+      const message = response?.data?.error ?? response?.data?.message ?? response?.message;
       toast({
         title: "Could not cancel order",
         description: message || "Please try again. The order may no longer be eligible for cancellation.",
         variant: "destructive",
       });
+      router.refresh();
     } finally {
       setIsCancelling(false);
     }

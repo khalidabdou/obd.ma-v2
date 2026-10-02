@@ -67,7 +67,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         >
           {order.cancelStatus ? "Cancelled" : order.status}
         </span>
-        {!order.cancelStatus && ["THANKS"].includes(order.status.toUpperCase()) && (
+        {order.canCancel === true && (
           <CancelOrderButton orderId={order.orderId} />
         )}
       </div>
